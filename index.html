@@ -569,22 +569,7 @@
       const tbody = document.getElementById("logTableBody");
 
       if (!saved) {
-        tbody.innerHTML = `
-          <tr>
-            <td>30 Apr 2026</td>
-            <td>M&G</td>
-            <td>£766.59</td>
-            <td>Legal & General</td>
-            <td>+£61.33/yr</td>
-          </tr>
-          <tr>
-            <td>04 Jun 2026</td>
-            <td>Legal & General</td>
-            <td>£1,216.31</td>
-            <td>M&G</td>
-            <td>+£97.30/yr</td>
-          </tr>
-        `;
+        tbody.innerHTML = "";
         saveLogs();
         return;
       }
