@@ -117,7 +117,7 @@
 
     .pillar-stats {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
+      grid-template-columns: repeat(4, minmax(0,1fr));
       gap: 8px;
       margin-bottom: 12px;
     }
@@ -185,7 +185,7 @@
 
     .log-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
+      grid-template-columns: repeat(5, minmax(0,1fr));
       gap: 8px;
       margin-bottom: 12px;
     }
@@ -213,7 +213,6 @@
 <body>
   <div class="wrap">
 
-    <!-- HEADER / HERO -->
     <section class="hero">
       <h1>Pillar Tracker v1</h1>
       <div class="sub">Dark neon tracker for payday decisions, pillar milestones, and dividend compounding.</div>
@@ -230,7 +229,6 @@
       </div>
     </section>
 
-    <!-- PAYDAY DECISION BOX -->
     <section class="card decision">
       <h2>Payday Decision Box</h2>
       <div class="decision-plan">
@@ -252,25 +250,16 @@
       </div>
     </section>
 
-    <!-- TARGET SETTINGS -->
     <section class="section card">
-      <h2>Stage Target</h2>
-      <div class="inputs">
-        <div class="input-box">
-          <label for="stageTarget">Current Target Per Pillar (£)</label>
-          <select id="stageTarget">
-            <option value="2000" selected>£2,000</option>
-            <option value="4000">£4,000</option>
-            <option value="6000">£6,000</option>
-            <option value="8000">£8,000</option>
-            <option value="10000">£10,000</option>
-            <option value="16000">£16,000</option>
-          </select>
-        </div>
+      <h2>Stage Tracker</h2>
+      <div class="pillar-stats">
+        <div class="mini"><div class="k">Current Stage</div><div class="v" id="stageLabel">1 / 8</div></div>
+        <div class="mini"><div class="k">Stage Target</div><div class="v" id="stageTargetLabel">£2,000</div></div>
+        <div class="mini"><div class="k">Next Stage</div><div class="v" id="nextStageLabel">£4,000</div></div>
+        <div class="mini"><div class="k">System Mode</div><div class="v">Balance</div></div>
       </div>
     </section>
 
-    <!-- PILLARS -->
     <section class="section card">
       <h2>Pillar Progress to £<span id="targetHeading">2,000</span> / year</h2>
       <div class="pillars">
@@ -294,7 +283,8 @@
 
           <div class="pillar-stats">
             <div class="mini"><div class="k">Current Income</div><div class="v" id="lngIncome">£0</div></div>
-            <div class="mini"><div class="k">Gap to £2k</div><div class="v" id="lngGap">£0</div></div>
+            <div class="mini"><div class="k">Gap to Target</div><div class="v" id="lngGap">£0</div></div>
+            <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="lngRemaining">£0</div></div>
             <div class="mini"><div class="k">Weight Role</div><div class="v">Anchor</div></div>
           </div>
           <div class="progress-wrap">
@@ -322,7 +312,8 @@
 
           <div class="pillar-stats">
             <div class="mini"><div class="k">Current Income</div><div class="v" id="mngIncome">£0</div></div>
-            <div class="mini"><div class="k">Gap to £2k</div><div class="v" id="mngGap">£0</div></div>
+            <div class="mini"><div class="k">Gap to Target</div><div class="v" id="mngGap">£0</div></div>
+            <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="mngRemaining">£0</div></div>
             <div class="mini"><div class="k">Weight Role</div><div class="v">Accelerator</div></div>
           </div>
           <div class="progress-wrap">
@@ -350,7 +341,8 @@
 
           <div class="pillar-stats">
             <div class="mini"><div class="k">Current Income</div><div class="v" id="phnxIncome">£0</div></div>
-            <div class="mini"><div class="k">Gap to £2k</div><div class="v" id="phnxGap">£0</div></div>
+            <div class="mini"><div class="k">Gap to Target</div><div class="v" id="phnxGap">£0</div></div>
+            <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="phnxRemaining">£0</div></div>
             <div class="mini"><div class="k">Weight Role</div><div class="v">Later Balance</div></div>
           </div>
           <div class="progress-wrap">
@@ -378,7 +370,8 @@
 
           <div class="pillar-stats">
             <div class="mini"><div class="k">Current Income</div><div class="v" id="suprIncome">£0</div></div>
-            <div class="mini"><div class="k">Gap to £2k</div><div class="v" id="suprGap">£0</div></div>
+            <div class="mini"><div class="k">Gap to Target</div><div class="v" id="suprGap">£0</div></div>
+            <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="suprRemaining">£0</div></div>
             <div class="mini"><div class="k">Weight Role</div><div class="v">Cashflow Stabiliser</div></div>
           </div>
           <div class="progress-wrap">
@@ -389,7 +382,6 @@
       </div>
     </section>
 
-    <!-- RULES -->
     <section class="section card notes">
       <h2>Buy Signal Rules</h2>
       <div>🟢 Buy = underweight or far from next income milestone.</div>
@@ -397,10 +389,9 @@
       <div>🔴 Pause = stop feeding once a pillar dominates or clears its current stage target.</div>
       <br />
       <div><strong>Current rule:</strong> Buy GREEN first, feed AMBER second, ignore RED.</div>
-      <div><strong>Stage target:</strong> Get every pillar to £2,000 annual income, then rebalance toward £4,000 each.</div>
+      <div><strong>Stage target:</strong> Auto-tracks from £2,000 to £16,000 across 8 stages.</div>
     </section>
 
-    <!-- DIVIDEND LOG -->
     <section class="section card log">
       <h2>Dividend Reinvestment Log</h2>
 
@@ -431,9 +422,13 @@
             <option value="SUPR">SUPR</option>
           </select>
         </div>
+        <div class="input-box">
+          <label for="logYield">Yield Used (%)</label>
+          <input id="logYield" type="number" step="0.01" placeholder="e.g. 8.00" />
+        </div>
       </div>
 
-      <button class="log-btn" id="addLogBtn">Add Dividend Log</button>
+      <button class="log-btn" id="addLogBtn" type="button">Add Dividend Log</button>
 
       <table style="margin-top:12px;">
         <thead>
@@ -442,6 +437,7 @@
             <th>Dividend From</th>
             <th>Amount</th>
             <th>Reinvest Into</th>
+            <th>Income Added</th>
           </tr>
         </thead>
         <tbody id="logTableBody"></tbody>
@@ -452,15 +448,15 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "pillarTrackerMasterV2";
-    const LOG_STORAGE_KEY = "pillarTrackerDividendLogsV2";
+    const STORAGE_KEY = "pillarTrackerMasterPatched";
+    const LOG_STORAGE_KEY = "pillarTrackerDividendLogsPatched";
+    const STAGES = [2000, 4000, 6000, 8000, 10000, 12000, 14000, 16000];
 
     const ids = [
       "lngShares", "lngDps",
       "mngShares", "mngDps",
       "phnxShares", "phnxDps",
-      "suprShares", "suprDps",
-      "stageTarget"
+      "suprShares", "suprDps"
     ];
 
     const names = {
@@ -496,7 +492,7 @@
           }
         });
       } catch (e) {
-        console.error("Could not load saved pillar tracker values.", e);
+        console.error("Could not load saved values.", e);
       }
     }
 
@@ -515,13 +511,34 @@
       return shares * dps;
     }
 
-    function updatePillar(key, income, target) {
+    function getCurrentStage(incomes) {
+      for (let i = 0; i < STAGES.length; i++) {
+        const stage = STAGES[i];
+        const allReached = Object.values(incomes).every(v => v >= stage);
+        if (!allReached) {
+          return {
+            stageIndex: i + 1,
+            target: stage,
+            nextTarget: STAGES[i + 1] || stage
+          };
+        }
+      }
+      return {
+        stageIndex: STAGES.length,
+        target: STAGES[STAGES.length - 1],
+        nextTarget: STAGES[STAGES.length - 1]
+      };
+    }
+
+    function updatePillar(key, income, target, nextTarget) {
       const percentRaw = target > 0 ? (income / target) * 100 : 0;
       const percent = Math.min(percentRaw, 100);
       const gap = Math.max(target - income, 0);
+      const nextStageGap = Math.max(nextTarget - income, 0);
 
       document.getElementById(`${key}Income`).innerText = `£${formatMoney(income)}`;
       document.getElementById(`${key}Gap`).innerText = `£${formatMoney(gap)}`;
+      document.getElementById(`${key}Remaining`).innerText = `£${formatMoney(nextStageGap)}`;
       document.getElementById(`${key}ProgressText`).innerText = `${Math.round(percentRaw)}%`;
       document.getElementById(`${key}Bar`).style.width = `${percent}%`;
 
@@ -558,12 +575,14 @@
             <td>M&G</td>
             <td>£766.59</td>
             <td>Legal & General</td>
+            <td>+£61.33/yr</td>
           </tr>
           <tr>
             <td>04 Jun 2026</td>
             <td>Legal & General</td>
             <td>£1,216.31</td>
             <td>M&G</td>
+            <td>+£97.30/yr</td>
           </tr>
         `;
         saveLogs();
@@ -580,6 +599,7 @@
             <td>${log.from}</td>
             <td>£${formatMoney(log.amount)}</td>
             <td>${log.into}</td>
+            <td>+£${formatMoney(log.incomeAdded)}/yr</td>
           `;
           tbody.appendChild(row);
         });
@@ -594,12 +614,13 @@
 
       rows.forEach(row => {
         const cells = row.querySelectorAll("td");
-        if (cells.length === 4) {
+        if (cells.length === 5) {
           logs.push({
             date: cells[0].innerText,
             from: cells[1].innerText,
             amount: parseFloat(cells[2].innerText.replace("£", "").replace(/,/g, "")),
-            into: cells[3].innerText
+            into: cells[3].innerText,
+            incomeAdded: parseFloat(cells[4].innerText.replace("+£", "").replace("/yr", "").replace(/,/g, ""))
           });
         }
       });
@@ -617,8 +638,11 @@
       const from = document.getElementById("logFrom").value;
       const amount = parseFloat(document.getElementById("logAmount").value);
       const into = document.getElementById("logInto").value;
+      const yieldPct = parseFloat(document.getElementById("logYield").value);
 
-      if (!date || !from || !amount || !into) return;
+      if (!date || !from || !amount || !into || !yieldPct) return;
+
+      const incomeAdded = amount * (yieldPct / 100);
 
       const tbody = document.getElementById("logTableBody");
       const row = document.createElement("tr");
@@ -628,6 +652,7 @@
         <td>${from}</td>
         <td>£${formatMoney(amount)}</td>
         <td>${into}</td>
+        <td>+£${formatMoney(incomeAdded)}/yr</td>
       `;
 
       tbody.prepend(row);
@@ -635,12 +660,10 @@
 
       document.getElementById("logDate").value = "";
       document.getElementById("logAmount").value = "";
+      document.getElementById("logYield").value = "";
     }
 
     function updateAll() {
-      const target = parseFloat(document.getElementById("stageTarget").value) || 2000;
-      document.getElementById("targetHeading").innerText = formatWhole(target);
-
       const incomes = {
         lng: getIncome("lngShares", "lngDps"),
         mng: getIncome("mngShares", "mngDps"),
@@ -648,10 +671,17 @@
         supr: getIncome("suprShares", "suprDps")
       };
 
-      updatePillar("lng", incomes.lng, target);
-      updatePillar("mng", incomes.mng, target);
-      updatePillar("phnx", incomes.phnx, target);
-      updatePillar("supr", incomes.supr, target);
+      const stage = getCurrentStage(incomes);
+
+      document.getElementById("stageLabel").innerText = `${stage.stageIndex} / 8`;
+      document.getElementById("stageTargetLabel").innerText = `£${formatWhole(stage.target)}`;
+      document.getElementById("nextStageLabel").innerText = `£${formatWhole(stage.nextTarget)}`;
+      document.getElementById("targetHeading").innerText = formatWhole(stage.target);
+
+      updatePillar("lng", incomes.lng, stage.target, stage.nextTarget);
+      updatePillar("mng", incomes.mng, stage.target, stage.nextTarget);
+      updatePillar("phnx", incomes.phnx, stage.target, stage.nextTarget);
+      updatePillar("supr", incomes.supr, stage.target, stage.nextTarget);
 
       const totalAnnual = incomes.lng + incomes.mng + incomes.phnx + incomes.supr;
       document.getElementById("totalAnnual").innerText = formatMoney(totalAnnual);
