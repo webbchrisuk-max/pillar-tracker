@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Pillar Tracker v1</title>
 
 <style>
@@ -38,27 +38,35 @@ body{
 
 h1{text-align:center;color:var(--cyan)}
 
-.pillar{margin-top:12px}
 .bar{
-  height:12px;
+  height:14px;
   background:#222;
   border-radius:10px;
-  overflow:hidden
+  overflow:hidden;
 }
+
 .fill{
   height:100%;
-  background:var(--cyan);
+  background:linear-gradient(90deg,#1ad1ff,#62f3ff);
   width:0;
 }
 
-.signal{font-weight:bold;margin-top:6px}
+.signal{
+  font-weight:bold;
+  margin-top:6px;
+}
+
 .green{color:var(--green)}
 .amber{color:var(--amber)}
 .red{color:var(--red)}
 
-.footer{
+.pillar{
   margin-top:14px;
+}
+
+.footer{
   text-align:center;
+  margin-top:14px;
   color:var(--muted);
   font-size:12px;
 }
@@ -66,6 +74,7 @@ h1{text-align:center;color:var(--cyan)}
 </head>
 
 <body>
+
 <div class="wrap">
 
 <h1>⚡ Pillar Tracker</h1>
@@ -78,34 +87,34 @@ h1{text-align:center;color:var(--cyan)}
 <!-- ===================== PILLARS ===================== -->
 
 <div class="card pillar">
-<div>Legal & General</div>
-<div class="bar"><div class="fill"></div></div>
-<div class="signal"></div>
+<div><strong>Legal & General</strong></div>
+<div class="bar"><div class="fill" id="lgenBar"></div></div>
+<div class="signal" id="lgenSig"></div>
 </div>
 
 <div class="card pillar">
-<div>M&G</div>
-<div class="bar"><div class="fill"></div></div>
-<div class="signal"></div>
+<div><strong>M&G</strong></div>
+<div class="bar"><div class="fill" id="mngBar"></div></div>
+<div class="signal" id="mngSig"></div>
 </div>
 
 <div class="card pillar">
-<div>Phoenix</div>
-<div class="bar"><div class="fill"></div></div>
-<div class="signal"></div>
+<div><strong>Phoenix</strong></div>
+<div class="bar"><div class="fill" id="phnxBar"></div></div>
+<div class="signal" id="phnxSig"></div>
 </div>
 
 <div class="card pillar">
-<div>SUPR</div>
-<div class="bar"><div class="fill"></div></div>
-<div class="signal"></div>
+<div><strong>SUPR</strong></div>
+<div class="bar"><div class="fill" id="suprBar"></div></div>
+<div class="signal" id="suprSig"></div>
 </div>
 
 <div class="footer">Update once per payday. Keep it simple.</div>
 
 </div>
 
-<!-- ===================== LOGIC (DO NOT TOUCH ABOVE) ===================== -->
+<!-- ===================== LOGIC ===================== -->
 <script>
 
 let stageLevels = [2000,4000,6000,8000,10000,12000,14000,16000];
@@ -116,10 +125,6 @@ let data = JSON.parse(localStorage.getItem("pillarData")) || {
   phnx:910,
   supr:784
 };
-
-function save(){
-  localStorage.setItem("pillarData", JSON.stringify(data));
-}
 
 function getStage(val){
   for(let i=0;i<stageLevels.length;i++){
@@ -134,32 +139,28 @@ function update(){
   document.getElementById("total").innerText = "£"+Math.round(total);
 
   let keys = ["lgen","mng","phnx","supr"];
-  let pillars = document.querySelectorAll(".pillar");
 
-  pillars.forEach((p,i)=>{
+  keys.forEach(key => {
 
-    let key = keys[i];
     let value = data[key];
     let stage = getStage(value);
     let percent = (value / stage) * 100;
 
-    // progress bar
-    p.querySelector(".fill").style.width = percent+"%";
+    document.getElementById(key+"Bar").style.width = percent+"%";
 
-    // signal
-    let signal = p.querySelector(".signal");
+    let el = document.getElementById(key+"Sig");
 
     if(percent < 60){
-      signal.innerText = "🟢 BUY";
-      signal.className = "signal green";
+      el.innerText = "🟢 BUY";
+      el.className = "signal green";
     }
     else if(percent < 90){
-      signal.innerText = "🟡 BUILD";
-      signal.className = "signal amber";
+      el.innerText = "🟡 BUILD";
+      el.className = "signal amber";
     }
     else{
-      signal.innerText = "🔴 PAUSE";
-      signal.className = "signal red";
+      el.innerText = "🔴 PAUSE";
+      el.className = "signal red";
     }
 
   });
