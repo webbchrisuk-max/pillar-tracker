@@ -449,7 +449,7 @@
 
   <script>
     const STORAGE_KEY = "pillarTrackerMasterPatched";
-    const LOG_STORAGE_KEY = "pillarTrackerDividendLogsPatched";
+    const LOG_STORAGE_KEY = "pillarTrackerDividendLogsPatchedV2";
     const STAGES = [2000, 4000, 6000, 8000, 10000, 12000, 14000, 16000];
 
     const ids = [
@@ -570,7 +570,6 @@
 
       if (!saved) {
         tbody.innerHTML = "";
-        saveLogs();
         return;
       }
 
