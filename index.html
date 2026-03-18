@@ -61,6 +61,8 @@
 
     .grid { display: grid; gap: 14px; margin-top: 14px; }
     .top-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .triple-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+
     .card {
       background: var(--panel);
       border: 1px solid var(--line);
@@ -69,6 +71,7 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.18);
       backdrop-filter: blur(8px);
     }
+
     .stat-label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
     .stat { margin-top: 6px; font-size: 28px; font-weight: 700; }
     .stat small { font-size: 14px; color: var(--muted); font-weight: 500; }
@@ -93,6 +96,7 @@
     }
     .buy-box .amt { font-size: 24px; font-weight: 800; margin-top: 4px; }
     .buy-box .name { color: var(--cyan); font-size: 13px; }
+    .buy-box .mini-note { margin-top: 6px; color: var(--muted); font-size: 11px; }
 
     .section { margin-top: 14px; }
     .pillars { display: grid; gap: 12px; }
@@ -192,7 +196,7 @@
 
     .log-preview {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
+      grid-template-columns: repeat(4, minmax(0,1fr));
       gap: 8px;
       margin-bottom: 12px;
     }
@@ -209,12 +213,23 @@
       margin-top: 4px;
     }
 
+    .delete-btn {
+      background: rgba(255, 107, 138, 0.12);
+      color: var(--red);
+      border: 1px solid rgba(255, 107, 138, 0.25);
+      border-radius: 8px;
+      padding: 6px 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
     .table-wrap {
       overflow-x: auto;
     }
 
     @media (max-width: 720px) {
-      .top-grid, .decision-plan, .pillar-stats, .inputs, .log-grid, .log-preview { grid-template-columns: 1fr; }
+      .top-grid, .triple-grid, .decision-plan, .pillar-stats, .inputs, .log-grid, .log-preview { grid-template-columns: 1fr; }
       h1 { font-size: 24px; }
       .stat { font-size: 24px; }
       .pillar-name { font-size: 16px; }
@@ -247,16 +262,19 @@
           <div class="stat-label">Primary Buy</div>
           <div class="amt">£300</div>
           <div class="name" id="primaryBuy">M&amp;G</div>
+          <div class="mini-note" id="primaryReason">Weakest pillar</div>
         </div>
         <div class="buy-box">
           <div class="stat-label">Secondary Buy</div>
           <div class="amt">£200</div>
           <div class="name" id="secondaryBuy">Legal &amp; General</div>
+          <div class="mini-note" id="secondaryReason">Stage support</div>
         </div>
         <div class="buy-box">
           <div class="stat-label">Support Buy</div>
           <div class="amt">£100</div>
           <div class="name" id="supportBuy">SUPR</div>
+          <div class="mini-note" id="supportReason">Balance move</div>
         </div>
       </div>
     </section>
@@ -403,6 +421,24 @@
       <div><strong>Stage target:</strong> Auto-tracks from £2,000 to £16,000 across 8 stages.</div>
     </section>
 
+    <section class="section card">
+      <h2>Income Snowball</h2>
+      <div class="grid triple-grid">
+        <div class="mini">
+          <div class="k">Best Reinvest Target</div>
+          <div class="v" id="bestReinvestTarget">M&amp;G</div>
+        </div>
+        <div class="mini">
+          <div class="k">This Year Income Added</div>
+          <div class="v" id="reinvestYearTotal">£0.00</div>
+        </div>
+        <div class="mini">
+          <div class="k">All-Time Income Added</div>
+          <div class="v" id="reinvestTotal">£0.00</div>
+        </div>
+      </div>
+    </section>
+
     <section class="section card log">
       <h2>Dividend Reinvestment Log</h2>
 
@@ -449,8 +485,16 @@
           <div class="v" id="logIncomePreview">£0.00</div>
         </div>
         <div class="mini">
-          <div class="k">Reinvestment Income Added</div>
-          <div class="v" id="reinvestTotal">£0.00</div>
+          <div class="k">Smart Reinvest Suggestion</div>
+          <div class="v" id="smartTarget">M&amp;G</div>
+        </div>
+        <div class="mini">
+          <div class="k">Target Yield</div>
+          <div class="v" id="smartTargetYield">0.00%</div>
+        </div>
+        <div class="mini">
+          <div class="k">Target Gap</div>
+          <div class="v" id="smartTargetGap">£0.00</div>
         </div>
       </div>
 
@@ -466,6 +510,7 @@
               <th>Reinvest Into</th>
               <th>Yield Used</th>
               <th>Income Added</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody id="logTableBody"></tbody>
@@ -477,8 +522,10 @@
   </div>
     <script>
     const STORAGE_KEY = "pillarTrackerMasterPatched";
-    const LOG_STORAGE_KEY = "pillarTrackerDividendLogsPatchedV4";
-    const LEGACY_LOG_STORAGE_KEY = "pillarTrackerDividendLogsPatchedV2";
+    const LOG_STORAGE_KEY = "pillarTrackerDividendLogsPatchedV5";
+    const LEGACY_LOG_STORAGE_KEY_V4 = "pillarTrackerDividendLogsPatchedV4";
+    const LEGACY_LOG_STORAGE_KEY_V3 = "pillarTrackerDividendLogsPatchedV3";
+    const LEGACY_LOG_STORAGE_KEY_V2 = "pillarTrackerDividendLogsPatchedV2";
     const STAGES = [2000, 4000, 6000, 8000, 10000, 12000, 14000, 16000];
 
     const ids = [
@@ -493,6 +540,13 @@
       mng: "M&G",
       phnx: "Phoenix",
       supr: "SUPR"
+    };
+
+    const reverseNames = {
+      "Legal & General": "lng",
+      "M&G": "mng",
+      "Phoenix": "phnx",
+      "SUPR": "supr"
     };
 
     const dpsFieldMap = {
@@ -593,11 +647,54 @@
       }
     }
 
-    function updateDecision(incomes) {
-      const ordered = Object.entries(incomes).sort((a, b) => a[1] - b[1]);
-      document.getElementById("primaryBuy").innerText = names[ordered[0][0]];
-      document.getElementById("secondaryBuy").innerText = names[ordered[1][0]];
-      document.getElementById("supportBuy").innerText = names[ordered[2][0]];
+    function getPillarData() {
+      const incomes = {
+        lng: getIncome("lngShares", "lngDps"),
+        mng: getIncome("mngShares", "mngDps"),
+        phnx: getIncome("phnxShares", "phnxDps"),
+        supr: getIncome("suprShares", "suprDps")
+      };
+
+      const stage = getCurrentStage(incomes);
+
+      return {
+        incomes,
+        stage
+      };
+    }
+
+    function getSmartRanking() {
+      const { incomes, stage } = getPillarData();
+
+      return Object.keys(incomes).map(key => {
+        const income = incomes[key];
+        const gap = Math.max(stage.target - income, 0);
+        const dps = parseFloat(document.getElementById(`${key}Dps`).value) || 0;
+        return {
+          key,
+          name: names[key],
+          income,
+          gap,
+          dps
+        };
+      }).sort((a, b) => {
+        if (b.gap !== a.gap) return b.gap - a.gap;
+        return b.dps - a.dps;
+      });
+    }
+
+    function updateDecision() {
+      const ranked = getSmartRanking();
+
+      document.getElementById("primaryBuy").innerText = ranked[0].name;
+      document.getElementById("secondaryBuy").innerText = ranked[1].name;
+      document.getElementById("supportBuy").innerText = ranked[2].name;
+
+      document.getElementById("primaryReason").innerText = `Gap £${formatMoney(ranked[0].gap)}`;
+      document.getElementById("secondaryReason").innerText = `Gap £${formatMoney(ranked[1].gap)}`;
+      document.getElementById("supportReason").innerText = `Gap £${formatMoney(ranked[2].gap)}`;
+
+      document.getElementById("bestReinvestTarget").innerText = ranked[0].name;
     }
 
     function getTargetDps(stockName) {
@@ -626,27 +723,61 @@
       document.getElementById("logIncomePreview").innerText = `£${formatMoney(incomeAdded)}`;
     }
 
-    function updateReinvestTotal(logs = null) {
-      const records = logs || JSON.parse(localStorage.getItem(LOG_STORAGE_KEY) || "[]");
+    function updateSmartReinvestPanel() {
+      const ranked = getSmartRanking();
+      const best = ranked[0];
+
+      document.getElementById("smartTarget").innerText = best.name;
+      document.getElementById("smartTargetYield").innerText = `${best.dps > 0 ? ((best.dps / (best.income > 0 ? best.income / ((parseFloat(document.getElementById(best.key + "Shares").value) || 1)) : 1)) * 100).toFixed(2) : "0.00"}%`;
+      document.getElementById("smartTargetGap").innerText = `£${formatMoney(best.gap)}`;
+
+      const currentInto = document.getElementById("logInto");
+      if (currentInto && document.activeElement !== currentInto) {
+        currentInto.value = best.name;
+      }
+    }
+
+    function getStoredLogs() {
+      return JSON.parse(localStorage.getItem(LOG_STORAGE_KEY) || "[]");
+    }
+
+    function updateReinvestTotals(logs = null) {
+      const records = logs || getStoredLogs();
       const total = records.reduce((sum, log) => sum + (Number(log.incomeAdded) || 0), 0);
+
+      const currentYear = new Date().getFullYear();
+      const yearTotal = records.reduce((sum, log) => {
+        const logYear = String(log.date || "").slice(0, 4);
+        if (Number(logYear) === currentYear) {
+          return sum + (Number(log.incomeAdded) || 0);
+        }
+        return sum;
+      }, 0);
+
       document.getElementById("reinvestTotal").innerText = `£${formatMoney(total)}`;
+      document.getElementById("reinvestYearTotal").innerText = `£${formatMoney(yearTotal)}`;
     }
 
     function migrateLegacyLogsIfNeeded() {
       const existing = localStorage.getItem(LOG_STORAGE_KEY);
       if (existing) return;
 
-      const legacy = localStorage.getItem(LEGACY_LOG_STORAGE_KEY);
+      const legacy =
+        localStorage.getItem(LEGACY_LOG_STORAGE_KEY_V4) ||
+        localStorage.getItem(LEGACY_LOG_STORAGE_KEY_V3) ||
+        localStorage.getItem(LEGACY_LOG_STORAGE_KEY_V2);
+
       if (!legacy) return;
 
       try {
         const legacyLogs = JSON.parse(legacy);
         const upgraded = legacyLogs.map(log => ({
+          id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
           date: log.date,
           from: log.from,
           amount: Number(log.amount) || 0,
           into: log.into,
-          yieldUsed: null,
+          yieldUsed: log.yieldUsed == null ? null : Number(log.yieldUsed),
           incomeAdded: Number(log.incomeAdded) || 0
         }));
         localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(upgraded));
@@ -655,66 +786,39 @@
       }
     }
 
+    function deleteLog(id) {
+      const logs = getStoredLogs().filter(log => log.id !== id);
+      localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(logs));
+      loadLogs();
+    }
+
     function loadLogs() {
-      const saved = localStorage.getItem(LOG_STORAGE_KEY);
+      const logs = getStoredLogs();
       const tbody = document.getElementById("logTableBody");
 
-      if (!saved) {
-        tbody.innerHTML = "";
-        updateReinvestTotal([]);
-        return;
-      }
+      tbody.innerHTML = "";
 
-      try {
-        const logs = JSON.parse(saved);
-        tbody.innerHTML = "";
-        logs.forEach(log => {
-          const row = document.createElement("tr");
-          const yieldDisplay = log.yieldUsed == null ? "—" : `${Number(log.yieldUsed).toFixed(2)}%`;
+      logs.forEach(log => {
+        const row = document.createElement("tr");
+        const yieldDisplay = log.yieldUsed == null ? "—" : `${Number(log.yieldUsed).toFixed(2)}%`;
 
-          row.innerHTML = `
-            <td>${log.date}</td>
-            <td>${log.from}</td>
-            <td>£${formatMoney(log.amount)}</td>
-            <td>${log.into}</td>
-            <td>${yieldDisplay}</td>
-            <td>+£${formatMoney(log.incomeAdded)}/yr</td>
-          `;
-          tbody.appendChild(row);
-        });
-        updateReinvestTotal(logs);
-      } catch (e) {
-        console.error("Could not load logs.", e);
-        updateReinvestTotal([]);
-      }
-    }
-
-    function getCurrentLogs() {
-      const rows = document.querySelectorAll("#logTableBody tr");
-      const logs = [];
-
-      rows.forEach(row => {
-        const cells = row.querySelectorAll("td");
-        if (cells.length === 6) {
-          const yieldText = cells[4].innerText.replace("%", "").trim();
-          logs.push({
-            date: cells[0].innerText,
-            from: cells[1].innerText,
-            amount: parseFloat(cells[2].innerText.replace("£", "").replace(/,/g, "")),
-            into: cells[3].innerText,
-            yieldUsed: yieldText === "—" ? null : parseFloat(yieldText),
-            incomeAdded: parseFloat(cells[5].innerText.replace("+£", "").replace("/yr", "").replace(/,/g, ""))
-          });
-        }
+        row.innerHTML = `
+          <td>${log.date}</td>
+          <td>${log.from}</td>
+          <td>£${formatMoney(log.amount)}</td>
+          <td>${log.into}</td>
+          <td>${yieldDisplay}</td>
+          <td>+£${formatMoney(log.incomeAdded)}/yr</td>
+          <td><button class="delete-btn" data-id="${log.id}">Delete</button></td>
+        `;
+        tbody.appendChild(row);
       });
 
-      return logs;
-    }
+      tbody.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click", () => deleteLog(btn.dataset.id));
+      });
 
-    function saveLogs() {
-      const logs = getCurrentLogs();
-      localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(logs));
-      updateReinvestTotal(logs);
+      updateReinvestTotals(logs);
     }
 
     function addLog() {
@@ -733,37 +837,30 @@
       const yieldUsed = (targetDps / buyPrice) * 100;
       const incomeAdded = amount * (yieldUsed / 100);
 
-      const tbody = document.getElementById("logTableBody");
-      const row = document.createElement("tr");
+      const logs = getStoredLogs();
+      logs.unshift({
+        id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+        date,
+        from,
+        amount,
+        into,
+        yieldUsed,
+        incomeAdded
+      });
 
-      row.innerHTML = `
-        <td>${date}</td>
-        <td>${from}</td>
-        <td>£${formatMoney(amount)}</td>
-        <td>${into}</td>
-        <td>${yieldUsed.toFixed(2)}%</td>
-        <td>+£${formatMoney(incomeAdded)}/yr</td>
-      `;
-
-      tbody.prepend(row);
-      saveLogs();
+      localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(logs));
+      loadLogs();
 
       document.getElementById("logDate").value = "";
       document.getElementById("logAmount").value = "";
       document.getElementById("logPrice").value = "";
       document.getElementById("logYieldAuto").value = "";
       document.getElementById("logIncomePreview").innerText = `£${formatMoney(0)}`;
+      updateSmartReinvestPanel();
     }
 
     function updateAll() {
-      const incomes = {
-        lng: getIncome("lngShares", "lngDps"),
-        mng: getIncome("mngShares", "mngDps"),
-        phnx: getIncome("phnxShares", "phnxDps"),
-        supr: getIncome("suprShares", "suprDps")
-      };
-
-      const stage = getCurrentStage(incomes);
+      const { incomes, stage } = getPillarData();
 
       document.getElementById("stageLabel").innerText = `${stage.stageIndex} / 8`;
       document.getElementById("stageTargetLabel").innerText = `£${formatWhole(stage.target)}`;
@@ -779,8 +876,9 @@
       document.getElementById("totalAnnual").innerText = formatMoney(totalAnnual);
       document.getElementById("totalMonthly").innerText = formatMoney(totalAnnual / 12);
 
-      updateDecision(incomes);
+      updateDecision();
       updateLogPreview();
+      updateSmartReinvestPanel();
       saveValues();
     }
 
