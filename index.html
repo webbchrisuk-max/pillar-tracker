@@ -1024,10 +1024,10 @@
 
       updatePillar("lng", incomes.lng, stage.target, stage.nextTarget);
       updatePillar("mng", incomes.mng, stage.target, stage.nextTarget);
-      updatePillar("phnx", incomes.phnx, stage.target, stage.nextTarget);
+      updatePillar("sdlf", incomes.sdlf, stage.target, stage.nextTarget);
       updatePillar("supr", incomes.supr, stage.target, stage.nextTarget);
 
-      const totalAnnual = incomes.lng + incomes.mng + incomes.phnx + incomes.supr;
+      const totalAnnual = incomes.lng + incomes.mng + incomes.sdlf + incomes.supr;
       document.getElementById("totalAnnual").innerText = formatMoney(totalAnnual);
       document.getElementById("totalMonthly").innerText = formatMoney(totalAnnual / 12);
 
