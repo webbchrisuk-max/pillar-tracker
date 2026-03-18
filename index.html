@@ -651,39 +651,38 @@
         let totalGain = 0;
 
         data.forEach(row => {
-          const ticker = (row["Ticker"] || "").trim();
+  const ticker = String(row.ticker || "").trim().toUpperCase();
+  const price = parseFloat(row.live_price || 0);
+  const shares = parseFloat(row.shares || 0);
+  const gain = parseFloat(row["profit/loss"] || 0);
 
-          const price = parseFloat(row["Live Price"] || 0);
-          const shares = parseFloat(row["Shares"] || 0);
-          const gain = parseFloat(row["Gain"] || 0);
+  if (!ticker || isNaN(price)) return;
 
-          if (!ticker || !price) return;
+  const value = shares * price;
 
-          const value = shares * price;
+  totalValue += value;
+  totalGain += gain;
 
-          totalValue += value;
-          totalGain += gain;
+  if (ticker.includes("MNG")) {
+    document.getElementById("mngLivePrice").innerText = `£${price.toFixed(3)}`;
+    document.getElementById("mngLiveValue").innerText = `£${value.toFixed(2)}`;
+  }
 
-          if (ticker.includes("MNG")) {
-            document.getElementById("mngLivePrice").innerText = `£${price.toFixed(3)}`;
-            document.getElementById("mngLiveValue").innerText = `£${value.toFixed(2)}`;
-          }
+  if (ticker.includes("LGEN")) {
+    document.getElementById("lngLivePrice").innerText = `£${price.toFixed(3)}`;
+    document.getElementById("lngLiveValue").innerText = `£${value.toFixed(2)}`;
+  }
 
-          if (ticker.includes("LGEN")) {
-            document.getElementById("lngLivePrice").innerText = `£${price.toFixed(3)}`;
-            document.getElementById("lngLiveValue").innerText = `£${value.toFixed(2)}`;
-          }
+  if (ticker.includes("SDLF")) {
+    document.getElementById("sdlfLivePrice").innerText = `£${price.toFixed(3)}`;
+    document.getElementById("sdlfLiveValue").innerText = `£${value.toFixed(2)}`;
+  }
 
-          if (ticker.includes("SDLF")) {
-            document.getElementById("phnxLivePrice").innerText = `£${price.toFixed(3)}`;
-            document.getElementById("phnxLiveValue").innerText = `£${value.toFixed(2)}`;
-          }
-
-          if (ticker.includes("SUPR")) {
-            document.getElementById("suprLivePrice").innerText = `£${price.toFixed(3)}`;
-            document.getElementById("suprLiveValue").innerText = `£${value.toFixed(2)}`;
-          }
-        });
+  if (ticker.includes("SUPR")) {
+    document.getElementById("suprLivePrice").innerText = `£${price.toFixed(3)}`;
+    document.getElementById("suprLiveValue").innerText = `£${value.toFixed(2)}`;
+  }
+});
 
         const gainPct = totalValue > 0 ? (totalGain / totalValue) * 100 : 0;
 
