@@ -62,6 +62,7 @@
     .grid { display: grid; gap: 14px; margin-top: 14px; }
     .top-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
     .triple-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .quad-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
 
     .card {
       background: var(--panel);
@@ -133,6 +134,7 @@
     }
     .mini .k { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; }
     .mini .v { margin-top: 4px; font-size: 18px; font-weight: 700; }
+    .mini .subv { margin-top: 6px; color: var(--muted); font-size: 12px; }
 
     .progress-wrap { margin-top: 8px; }
     .progress-top { display:flex; justify-content:space-between; align-items:center; font-size: 13px; color: var(--muted); }
@@ -228,8 +230,48 @@
       overflow-x: auto;
     }
 
+    .sync-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sync-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 12px rgba(80,255,143,0.65);
+      flex: 0 0 auto;
+    }
+
+    .sync-dot.sync-warn {
+      background: var(--amber);
+      box-shadow: 0 0 12px rgba(255,200,87,0.65);
+    }
+
+    .sync-dot.sync-bad {
+      background: var(--red);
+      box-shadow: 0 0 12px rgba(255,107,138,0.65);
+    }
+
+    .live-up {
+      color: var(--green);
+      text-shadow: 0 0 10px rgba(80,255,143,0.25);
+    }
+
+    .live-down {
+      color: var(--red);
+      text-shadow: 0 0 10px rgba(255,107,138,0.25);
+    }
+
+    .live-neutral {
+      color: var(--text);
+    }
+
     @media (max-width: 720px) {
-      .top-grid, .triple-grid, .decision-plan, .pillar-stats, .inputs, .log-grid, .log-preview { grid-template-columns: 1fr; }
+      .top-grid, .triple-grid, .quad-grid, .decision-plan, .pillar-stats, .inputs, .log-grid, .log-preview { grid-template-columns: 1fr; }
       h1 { font-size: 24px; }
       .stat { font-size: 24px; }
       .pillar-name { font-size: 16px; }
@@ -241,7 +283,7 @@
 
     <section class="hero">
       <h1>Pillar Tracker v1</h1>
-      <div class="sub">Dark neon tracker for payday decisions, pillar milestones, and dividend compounding.</div>
+      <div class="sub">Dark neon tracker for payday decisions, pillar milestones, dividend compounding, and live Aurora command data.</div>
 
       <div class="grid top-grid">
         <div class="card">
@@ -255,7 +297,35 @@
       </div>
     </section>
 
-    <section class="card decision">
+    <section class="section card">
+      <h2>Aurora Command Layer</h2>
+      <div class="grid quad-grid">
+        <div class="mini">
+          <div class="k">Live Portfolio Value</div>
+          <div class="v" id="livePortfolioValue">£0.00</div>
+          <div class="subv" id="livePortfolioValueSub">Using Holdings tab live prices</div>
+        </div>
+        <div class="mini">
+          <div class="k">Live Gain / Loss</div>
+          <div class="v" id="livePortfolioGain">£0.00</div>
+          <div class="subv" id="livePortfolioGainPct">0.00%</div>
+        </div>
+        <div class="mini">
+          <div class="k">Best Value Buy</div>
+          <div class="v" id="bestValueBuy">M&amp;G</div>
+          <div class="subv" id="bestValueBuyMeta">Yield + target gap</div>
+        </div>
+        <div class="mini">
+          <div class="k">Live Sync Status</div>
+          <div class="v sync-row">
+            <span class="sync-dot" id="syncDot"></span>
+            <span id="syncStatusText">Waiting…</span>
+          </div>
+          <div class="subv" id="syncStatusSub">No refresh yet</div>
+        </div>
+      </div>
+    </section>
+        <section class="card decision">
       <h2>Payday Decision Box</h2>
       <div class="decision-plan">
         <div class="buy-box">
@@ -320,6 +390,16 @@
             <div class="progress-top"><span>Progress</span><span id="lngProgressText">0%</span></div>
             <div class="bar"><div class="fill" id="lngBar"></div></div>
           </div>
+          <div class="grid top-grid">
+            <div class="mini">
+              <div class="k">Live Price</div>
+              <div class="v" id="lngLivePrice">--</div>
+            </div>
+            <div class="mini">
+              <div class="k">Live Value</div>
+              <div class="v" id="lngLiveValue">£0.00</div>
+            </div>
+          </div>
         </div>
 
         <div class="pillar" data-key="mng">
@@ -349,11 +429,21 @@
             <div class="progress-top"><span>Progress</span><span id="mngProgressText">0%</span></div>
             <div class="bar"><div class="fill" id="mngBar"></div></div>
           </div>
+          <div class="grid top-grid">
+            <div class="mini">
+              <div class="k">Live Price</div>
+              <div class="v" id="mngLivePrice">--</div>
+            </div>
+            <div class="mini">
+              <div class="k">Live Value</div>
+              <div class="v" id="mngLiveValue">£0.00</div>
+            </div>
+          </div>
         </div>
 
         <div class="pillar" data-key="phnx">
           <div class="pillar-top">
-            <div class="pillar-name">Phoenix</div>
+            <div class="pillar-name">Standard Life</div>
             <div class="signal amber" id="phnxSignal">AMBER</div>
           </div>
 
@@ -377,6 +467,16 @@
           <div class="progress-wrap">
             <div class="progress-top"><span>Progress</span><span id="phnxProgressText">0%</span></div>
             <div class="bar"><div class="fill" id="phnxBar"></div></div>
+          </div>
+          <div class="grid top-grid">
+            <div class="mini">
+              <div class="k">Live Price</div>
+              <div class="v" id="phnxLivePrice">--</div>
+            </div>
+            <div class="mini">
+              <div class="k">Live Value</div>
+              <div class="v" id="phnxLiveValue">£0.00</div>
+            </div>
           </div>
         </div>
 
@@ -407,40 +507,21 @@
             <div class="progress-top"><span>Progress</span><span id="suprProgressText">0%</span></div>
             <div class="bar"><div class="fill" id="suprBar"></div></div>
           </div>
+          <div class="grid top-grid">
+            <div class="mini">
+              <div class="k">Live Price</div>
+              <div class="v" id="suprLivePrice">--</div>
+            </div>
+            <div class="mini">
+              <div class="k">Live Value</div>
+              <div class="v" id="suprLiveValue">£0.00</div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
-
-    <section class="section card notes">
-      <h2>Buy Signal Rules</h2>
-      <div>🟢 Buy = underweight or far from next income milestone.</div>
-      <div>🟡 Caution = still buyable, but size is already strong.</div>
-      <div>🔴 Pause = stop feeding once a pillar dominates or clears its current stage target.</div>
-      <br />
-      <div><strong>Current rule:</strong> Buy GREEN first, feed AMBER second, ignore RED.</div>
-      <div><strong>Stage target:</strong> Auto-tracks from £2,000 to £16,000 across 8 stages.</div>
-    </section>
-
-    <section class="section card">
-      <h2>Income Snowball</h2>
-      <div class="grid triple-grid">
-        <div class="mini">
-          <div class="k">Best Reinvest Target</div>
-          <div class="v" id="bestReinvestTarget">M&amp;G</div>
-        </div>
-        <div class="mini">
-          <div class="k">This Year Income Added</div>
-          <div class="v" id="reinvestYearTotal">£0.00</div>
-        </div>
-        <div class="mini">
-          <div class="k">All-Time Income Added</div>
-          <div class="v" id="reinvestTotal">£0.00</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section card log">
-      <h2>Dividend Reinvestment Log</h2>
+        <section class="section card">
+      <h2>Dividend Reinvest Log</h2>
 
       <div class="log-grid">
         <div class="input-box">
@@ -448,69 +529,69 @@
           <input id="logDate" type="date" />
         </div>
         <div class="input-box">
-          <label for="logFrom">Dividend From</label>
+          <label for="logFrom">From</label>
           <select id="logFrom">
-            <option value="M&G">M&G</option>
-            <option value="Legal & General">Legal & General</option>
-            <option value="Phoenix">Phoenix</option>
-            <option value="SUPR">SUPR</option>
+            <option>M&amp;G</option>
+            <option>Legal &amp; General</option>
+            <option>Standard Life</option>
+            <option>SUPR</option>
           </select>
         </div>
         <div class="input-box">
           <label for="logAmount">Amount (£)</label>
-          <input id="logAmount" type="number" step="0.01" placeholder="0.00" />
+          <input id="logAmount" type="number" step="0.01" />
         </div>
         <div class="input-box">
-          <label for="logInto">Reinvest Into</label>
+          <label for="logInto">Into</label>
           <select id="logInto">
-            <option value="M&G">M&G</option>
-            <option value="Legal & General">Legal & General</option>
-            <option value="Phoenix">Phoenix</option>
-            <option value="SUPR">SUPR</option>
+            <option>M&amp;G</option>
+            <option>Legal &amp; General</option>
+            <option>Standard Life</option>
+            <option>SUPR</option>
           </select>
         </div>
         <div class="input-box">
           <label for="logPrice">Buy Price (£)</label>
-          <input id="logPrice" type="number" step="0.0001" placeholder="e.g. 2.05" />
+          <input id="logPrice" type="number" step="0.0001" />
         </div>
         <div class="input-box">
-          <label for="logYieldAuto">Auto Yield (%)</label>
-          <input id="logYieldAuto" type="text" placeholder="Auto" readonly />
+          <label for="logYieldAuto">Yield %</label>
+          <input id="logYieldAuto" type="text" disabled />
         </div>
       </div>
 
       <div class="log-preview">
         <div class="mini">
-          <div class="k">Estimated Income Added</div>
+          <div class="k">Income Added</div>
           <div class="v" id="logIncomePreview">£0.00</div>
         </div>
         <div class="mini">
-          <div class="k">Smart Reinvest Suggestion</div>
-          <div class="v" id="smartTarget">M&amp;G</div>
+          <div class="k">Total Reinvested</div>
+          <div class="v" id="reinvestTotal">£0.00</div>
         </div>
         <div class="mini">
-          <div class="k">Target Yield</div>
-          <div class="v" id="smartTargetYield">0.00%</div>
+          <div class="k">This Year</div>
+          <div class="v" id="reinvestYearTotal">£0.00</div>
         </div>
         <div class="mini">
-          <div class="k">Target Gap</div>
-          <div class="v" id="smartTargetGap">£0.00</div>
+          <div class="k">Best Target</div>
+          <div class="v" id="bestReinvestTarget">M&amp;G</div>
         </div>
       </div>
 
-      <button class="log-btn" id="addLogBtn" type="button">Add Dividend Log</button>
+      <button class="log-btn" id="addLogBtn">Add Reinvestment</button>
 
       <div class="table-wrap">
-        <table style="margin-top:12px;">
+        <table>
           <thead>
             <tr>
               <th>Date</th>
-              <th>Dividend From</th>
+              <th>From</th>
               <th>Amount</th>
-              <th>Reinvest Into</th>
-              <th>Yield Used</th>
+              <th>Into</th>
+              <th>Yield</th>
               <th>Income Added</th>
-              <th>Action</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="logTableBody"></tbody>
@@ -518,53 +599,126 @@
       </div>
     </section>
 
-    <div class="footer">Update once per payday. Keep it simple. Keep it consistent.</div>
+    <div class="footer">
+      Aurora Mode Active • Live Sheet + Smart Allocation + Dividend Engine
+    </div>
+
   </div>
-    <script>
-    const STORAGE_KEY = "pillarTrackerMasterPatched";
-    const LOG_STORAGE_KEY = "pillarTrackerDividendLogsPatchedV5";
-    const LEGACY_LOG_STORAGE_KEY_V4 = "pillarTrackerDividendLogsPatchedV4";
-    const LEGACY_LOG_STORAGE_KEY_V3 = "pillarTrackerDividendLogsPatchedV3";
-    const LEGACY_LOG_STORAGE_KEY_V2 = "pillarTrackerDividendLogsPatchedV2";
-    const STAGES = [2000, 4000, 6000, 8000, 10000, 12000, 14000, 16000];
+
+  <script>
+    const STORAGE_KEY = "pillarTrackerInputs_v1";
+    const LOG_STORAGE_KEY = "pillarTrackerLogs_v1";
+    const LEGACY_LOG_STORAGE_KEY_V4 = "pillarTrackerLogs_v4";
+    const LEGACY_LOG_STORAGE_KEY_V3 = "pillarTrackerLogs_v3";
+    const LEGACY_LOG_STORAGE_KEY_V2 = "pillarTrackerLogs_v2";
+
+    const STAGES = [2000, 4000, 6000, 8000, 10000, 12000, 15000, 20000];
 
     const ids = [
-      "lngShares", "lngDps",
-      "mngShares", "mngDps",
-      "phnxShares", "phnxDps",
-      "suprShares", "suprDps"
+      "lngShares","lngDps",
+      "mngShares","mngDps",
+      "phnxShares","phnxDps",
+      "suprShares","suprDps"
     ];
 
     const names = {
       lng: "Legal & General",
       mng: "M&G",
-      phnx: "Phoenix",
+      phnx: "Standard Life",
       supr: "SUPR"
-    };
-
-    const reverseNames = {
-      "Legal & General": "lng",
-      "M&G": "mng",
-      "Phoenix": "phnx",
-      "SUPR": "supr"
     };
 
     const dpsFieldMap = {
       "Legal & General": "lngDps",
       "M&G": "mngDps",
-      "Phoenix": "phnxDps",
+      "Standard Life": "phnxDps",
       "SUPR": "suprDps"
     };
 
-    function formatMoney(value) {
-      return Number(value).toLocaleString("en-GB", {
+    // ===================== LIVE GOOGLE SHEET LOADER =====================
+
+    const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
+    const SHEET_NAME = "Holdings";
+
+    async function loadLivePrices() {
+      const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        let totalValue = 0;
+        let totalGain = 0;
+
+        data.forEach(row => {
+          const ticker = (row["Ticker"] || "").trim();
+
+          const price = parseFloat(row["Live Price"] || 0);
+          const shares = parseFloat(row["Shares"] || 0);
+          const gain = parseFloat(row["Gain"] || 0);
+
+          if (!ticker || !price) return;
+
+          const value = shares * price;
+
+          totalValue += value;
+          totalGain += gain;
+
+          if (ticker.includes("MNG")) {
+            document.getElementById("mngLivePrice").innerText = `£${price.toFixed(3)}`;
+            document.getElementById("mngLiveValue").innerText = `£${value.toFixed(2)}`;
+          }
+
+          if (ticker.includes("LGEN")) {
+            document.getElementById("lngLivePrice").innerText = `£${price.toFixed(3)}`;
+            document.getElementById("lngLiveValue").innerText = `£${value.toFixed(2)}`;
+          }
+
+          if (ticker.includes("SDLF")) {
+            document.getElementById("phnxLivePrice").innerText = `£${price.toFixed(3)}`;
+            document.getElementById("phnxLiveValue").innerText = `£${value.toFixed(2)}`;
+          }
+
+          if (ticker.includes("SUPR")) {
+            document.getElementById("suprLivePrice").innerText = `£${price.toFixed(3)}`;
+            document.getElementById("suprLiveValue").innerText = `£${value.toFixed(2)}`;
+          }
+        });
+
+        const gainPct = totalValue > 0 ? (totalGain / totalValue) * 100 : 0;
+
+        document.getElementById("livePortfolioValue").innerText = `£${totalValue.toFixed(2)}`;
+        document.getElementById("livePortfolioGain").innerText = `£${totalGain.toFixed(2)}`;
+        document.getElementById("livePortfolioGainPct").innerText = `${gainPct.toFixed(2)}%`;
+
+        const gainEl = document.getElementById("livePortfolioGain");
+        gainEl.classList.remove("live-up","live-down");
+
+        if (totalGain > 0) gainEl.classList.add("live-up");
+        else if (totalGain < 0) gainEl.classList.add("live-down");
+
+        document.getElementById("syncStatusText").innerText = "Live Connected";
+        document.getElementById("syncStatusSub").innerText = new Date().toLocaleTimeString();
+        document.getElementById("syncDot").className = "sync-dot";
+
+      } catch (err) {
+        console.error("Sheet load failed", err);
+        document.getElementById("syncStatusText").innerText = "Sync Failed";
+        document.getElementById("syncDot").className = "sync-dot sync-bad";
+      }
+    }
+
+    setInterval(loadLivePrices, 30000);
+    loadLivePrices();
+        function formatMoney(value) {
+      return Number(value || 0).toLocaleString("en-GB", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       });
     }
 
     function formatWhole(value) {
-      return Number(value).toLocaleString("en-GB", {
+      return Number(value || 0).toLocaleString("en-GB", {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
       });
@@ -695,6 +849,8 @@
       document.getElementById("supportReason").innerText = `Gap £${formatMoney(ranked[2].gap)}`;
 
       document.getElementById("bestReinvestTarget").innerText = ranked[0].name;
+      document.getElementById("bestValueBuy").innerText = ranked[0].name;
+      document.getElementById("bestValueBuyMeta").innerText = `Gap £${formatMoney(ranked[0].gap)}`;
     }
 
     function getTargetDps(stockName) {
@@ -774,9 +930,9 @@
         const upgraded = legacyLogs.map(log => ({
           id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
           date: log.date,
-          from: log.from,
+          from: log.from === "Phoenix" ? "Standard Life" : log.from,
           amount: Number(log.amount) || 0,
-          into: log.into,
+          into: log.into === "Phoenix" ? "Standard Life" : log.into,
           yieldUsed: log.yieldUsed == null ? null : Number(log.yieldUsed),
           incomeAdded: Number(log.incomeAdded) || 0
         }));
