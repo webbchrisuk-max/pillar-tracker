@@ -641,49 +641,85 @@
     const SHEET_NAME = "Holdings";
 
     async function loadLivePrices() {
-      const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+  const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
 
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
 
-        let totalValue = 0;
-        let totalGain = 0;
+    let totalValue = 0;
+    let totalGain = 0;
 
-        data.forEach(row => {
-  const ticker = String(row.ticker || "").trim().toUpperCase();
-  const price = parseFloat(row.live_price || 0);
-  const shares = parseFloat(row.shares || 0);
-  const gain = parseFloat(row["profit/loss"] || 0);
+    data.forEach(row => {
+      const ticker = String(row.ticker || "").trim().toUpperCase();
+      const price = parseFloat(row.live_price || 0);
+      const shares = parseFloat(row.shares || 0);
+      const gain = parseFloat(row["profit/loss"] || 0);
+      const annualDps = parseFloat(row.annual_dividend_per_share || 0);
 
-  if (!ticker || isNaN(price)) return;
+      if (!ticker || isNaN(price)) return;
 
-  const value = shares * price;
+      const value = shares * price;
 
-  totalValue += value;
-  totalGain += gain;
+      totalValue += value;
+      totalGain += gain;
 
-  if (ticker.includes("MNG")) {
-    document.getElementById("mngLivePrice").innerText = `£${price.toFixed(3)}`;
-    document.getElementById("mngLiveValue").innerText = `£${value.toFixed(2)}`;
+      if (ticker.includes("MNG")) {
+        document.getElementById("mngLivePrice").innerText = `£${price.toFixed(3)}`;
+        document.getElementById("mngLiveValue").innerText = `£${value.toFixed(2)}`;
+        if (!isNaN(annualDps) && annualDps > 0) {
+          document.getElementById("mngDps").value = annualDps;
+        }
+      }
+
+      if (ticker.includes("LGEN")) {
+        document.getElementById("lngLivePrice").innerText = `£${price.toFixed(3)}`;
+        document.getElementById("lngLiveValue").innerText = `£${value.toFixed(2)}`;
+        if (!isNaN(annualDps) && annualDps > 0) {
+          document.getElementById("lngDps").value = annualDps;
+        }
+      }
+
+      if (ticker.includes("SDLF")) {
+        document.getElementById("sdlfLivePrice").innerText = `£${price.toFixed(3)}`;
+        document.getElementById("sdlfLiveValue").innerText = `£${value.toFixed(2)}`;
+        if (!isNaN(annualDps) && annualDps > 0) {
+          document.getElementById("sdlfDps").value = annualDps;
+        }
+      }
+
+      if (ticker.includes("SUPR")) {
+        document.getElementById("suprLivePrice").innerText = `£${price.toFixed(3)}`;
+        document.getElementById("suprLiveValue").innerText = `£${value.toFixed(2)}`;
+        if (!isNaN(annualDps) && annualDps > 0) {
+          document.getElementById("suprDps").value = annualDps;
+        }
+      }
+    });
+
+    const gainPct = totalValue > 0 ? (totalGain / totalValue) * 100 : 0;
+
+    document.getElementById("livePortfolioValue").innerText = `£${totalValue.toFixed(2)}`;
+    document.getElementById("livePortfolioGain").innerText = `£${totalGain.toFixed(2)}`;
+    document.getElementById("livePortfolioGainPct").innerText = `${gainPct.toFixed(2)}%`;
+
+    const gainEl = document.getElementById("livePortfolioGain");
+    gainEl.classList.remove("live-up", "live-down");
+
+    if (totalGain > 0) gainEl.classList.add("live-up");
+    else if (totalGain < 0) gainEl.classList.add("live-down");
+
+    document.getElementById("syncStatusText").innerText = "Live Connected";
+    document.getElementById("syncStatusSub").innerText = new Date().toLocaleTimeString();
+    document.getElementById("syncDot").className = "sync-dot";
+
+    updateAll();
+  } catch (err) {
+    console.error("Sheet load failed", err);
+    document.getElementById("syncStatusText").innerText = "Sync Failed";
+    document.getElementById("syncDot").className = "sync-dot sync-bad";
   }
-
-  if (ticker.includes("LGEN")) {
-    document.getElementById("lngLivePrice").innerText = `£${price.toFixed(3)}`;
-    document.getElementById("lngLiveValue").innerText = `£${value.toFixed(2)}`;
-  }
-
-  if (ticker.includes("SDLF")) {
-    document.getElementById("sdlfLivePrice").innerText = `£${price.toFixed(3)}`;
-    document.getElementById("sdlfLiveValue").innerText = `£${value.toFixed(2)}`;
-  }
-
-  if (ticker.includes("SUPR")) {
-    document.getElementById("suprLivePrice").innerText = `£${price.toFixed(3)}`;
-    document.getElementById("suprLiveValue").innerText = `£${value.toFixed(2)}`;
-  }
-});
-
+}
         const gainPct = totalValue > 0 ? (totalGain / totalValue) * 100 : 0;
 
         document.getElementById("livePortfolioValue").innerText = `£${totalValue.toFixed(2)}`;
