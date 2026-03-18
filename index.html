@@ -892,18 +892,30 @@
     }
 
     function updateSmartReinvestPanel() {
-      const ranked = getSmartRanking();
-      const best = ranked[0];
+  const smartTargetEl = document.getElementById("smartTarget");
+  const smartTargetYieldEl = document.getElementById("smartTargetYield");
+  const smartTargetGapEl = document.getElementById("smartTargetGap");
 
-      document.getElementById("smartTarget").innerText = best.name;
-      document.getElementById("smartTargetYield").innerText = `${best.dps > 0 ? ((best.dps / (best.income > 0 ? best.income / ((parseFloat(document.getElementById(best.key + "Shares").value) || 1)) : 1)) * 100).toFixed(2) : "0.00"}%`;
-      document.getElementById("smartTargetGap").innerText = `£${formatMoney(best.gap)}`;
+  
+  if (!smartTargetEl || !smartTargetYieldEl || !smartTargetGapEl) return;
 
-      const currentInto = document.getElementById("logInto");
-      if (currentInto && document.activeElement !== currentInto) {
-        currentInto.value = best.name;
-      }
-    }
+  const ranked = getSmartRanking();
+  const best = ranked[0];
+
+  smartTargetEl.innerText = best.name;
+
+  const shares = parseFloat(document.getElementById(best.key + "Shares")?.value) || 0;
+  const price = shares > 0 ? best.income / shares : 0;
+  const yieldPct = price > 0 ? (best.dps / price) * 100 : 0;
+
+  smartTargetYieldEl.innerText = `${yieldPct.toFixed(2)}%`;
+  smartTargetGapEl.innerText = `£${formatMoney(best.gap)}`;
+
+  const currentInto = document.getElementById("logInto");
+  if (currentInto && document.activeElement !== currentInto) {
+    currentInto.value = best.name;
+  }
+}
 
     function getStoredLogs() {
       return JSON.parse(localStorage.getItem(LOG_STORAGE_KEY) || "[]");
