@@ -622,11 +622,14 @@
       const from = document.getElementById("logFrom").value;
       const amount = parseFloat(document.getElementById("logAmount").value);
       const into = document.getElementById("logInto").value;
-      const yieldPct = parseFloat(document.getElementById("logYield").value);
+      let yieldPct = parseFloat(document.getElementById("logYield").value);
 
-      if (!date || !from || !amount || !into || !yieldPct) return;
+      if (!date || !from || !into) return;
+      if (isNaN(amount) || amount <= 0) return;
+      if (isNaN(yieldPct) || yieldPct <= 0) return;
 
-      const incomeAdded = amount * (yieldPct / 100);
+      yieldPct = yieldPct / 100;
+      const incomeAdded = amount * yieldPct;
 
       const tbody = document.getElementById("logTableBody");
       const row = document.createElement("tr");
