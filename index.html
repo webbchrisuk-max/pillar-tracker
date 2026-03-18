@@ -720,29 +720,6 @@
     document.getElementById("syncDot").className = "sync-dot sync-bad";
   }
 }
-        const gainPct = totalValue > 0 ? (totalGain / totalValue) * 100 : 0;
-
-        document.getElementById("livePortfolioValue").innerText = `£${totalValue.toFixed(2)}`;
-        document.getElementById("livePortfolioGain").innerText = `£${totalGain.toFixed(2)}`;
-        document.getElementById("livePortfolioGainPct").innerText = `${gainPct.toFixed(2)}%`;
-
-        const gainEl = document.getElementById("livePortfolioGain");
-        gainEl.classList.remove("live-up","live-down");
-
-        if (totalGain > 0) gainEl.classList.add("live-up");
-        else if (totalGain < 0) gainEl.classList.add("live-down");
-
-        document.getElementById("syncStatusText").innerText = "Live Connected";
-        document.getElementById("syncStatusSub").innerText = new Date().toLocaleTimeString();
-        document.getElementById("syncDot").className = "sync-dot";
-
-      } catch (err) {
-        console.error("Sheet load failed", err);
-        document.getElementById("syncStatusText").innerText = "Sync Failed";
-        document.getElementById("syncDot").className = "sync-dot sync-bad";
-      }
-    }
-
     setInterval(loadLivePrices, 30000);
     loadLivePrices();
         function formatMoney(value) {
