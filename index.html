@@ -328,6 +328,10 @@
 
     <section class="card decision">
       <h2>Payday Decision Box</h2>
+      <div class="input-box" style="margin-bottom:12px;">
+  <label>Total Investment (£)</label>
+  <input id="paydayAmount" type="number" value="600" />
+</div>
       <div class="decision-plan">
         <div class="buy-box">
           <div class="stat-label">Primary Buy</div>
@@ -543,7 +547,6 @@
             <option>M&amp;G</option>
             <option>Legal &amp; General</option>
             <option>Standard Life</option>
-            <option>SUPR</option>
             <option>Supermarket REIT</option>
           </select>
         </div>
@@ -839,51 +842,78 @@
     }
 
     function getSmartRanking() {
-      const { incomes, stage } = getPillarData();
+  const { incomes, stage } = getPillarData();
 
-      return Object.keys(incomes).map(key => {
-        const income = incomes[key];
-        const gap = Math.max(stage.target - income, 0);
-        const dps = parseFloat(document.getElementById(`${key}Dps`).value) || 0;
-        const livePrice = getLivePriceForKey(key);
-        const yieldPct = livePrice > 0 ? (dps / livePrice) * 100 : 0;
+  return Object.keys(incomes).map(key => {
+    const income = incomes[key] || 0;
+    const gap = Math.max(stage.target - income, 0);
+    const dps = parseFloat(document.getElementById(`${key}Dps`).value) || 0;
+    const livePrice = getLivePriceForKey(key);
+    const yieldPct = livePrice > 0 ? (dps / livePrice) * 100 : 0;
 
-        const gapScore = stage.target > 0 ? gap / stage.target : 0;
-        const yieldScore = yieldPct / 100;
-        const totalScore = (gapScore * 0.7) + (yieldScore * 0.3);
+    const gapScore = stage.target > 0 ? gap / stage.target : 0;
+    const yieldScore = yieldPct / 100;
 
-        return {
-          key,
-          name: names[key],
-          income,
-          gap,
-          dps,
-          livePrice,
-          yieldPct,
-          totalScore
-        };
-      }).sort((a, b) => {
-        if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
-        if (b.gap !== a.gap) return b.gap - a.gap;
-        return b.yieldPct - a.yieldPct;
-      });
-    }
+    let opportunityBoost = 0;
 
+    if (yieldPct >= 7.0 && gap > 0) opportunityBoost += 0.10;
+    if (yieldPct >= 7.2) opportunityBoost += 0.10;
+    if (yieldPct >= 8.0) opportunityBoost += 0.05;
+
+    if (key === "mng") opportunityBoost += 0.20;
+    if (key === "lng") opportunityBoost += 0.06;
+
+    if (key === "supr") opportunityBoost -= 0.10;
+
+    const totalScore = (gapScore * 0.55) + (yieldScore * 0.20) + opportunityBoost;
+
+    return {
+      key,
+      name: names[key],
+      income,
+      gap,
+      dps,
+      livePrice,
+      yieldPct,
+      totalScore
+    };
+  }).sort((a, b) => {
+    if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
+    if (b.gap !== a.gap) return b.gap - a.gap;
+    return b.yieldPct - a.yieldPct;
+  });
+}
     function updateDecision() {
-      const ranked = getSmartRanking();
+  const ranked = getSmartRanking();
 
-      document.getElementById("primaryBuy").innerText = ranked[0].name;
-      document.getElementById("secondaryBuy").innerText = ranked[1].name;
-      document.getElementById("supportBuy").innerText = ranked[2].name;
+  const total = parseFloat(document.getElementById("paydayAmount")?.value) || 600;
 
-      document.getElementById("primaryReason").innerText = `Gap £${formatMoney(ranked[0].gap)} • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
-      document.getElementById("secondaryReason").innerText = `Gap £${formatMoney(ranked[1].gap)} • Yield ${ranked[1].yieldPct.toFixed(2)}%`;
-      document.getElementById("supportReason").innerText = `Gap £${formatMoney(ranked[2].gap)} • Yield ${ranked[2].yieldPct.toFixed(2)}%`;
+  const primaryAmt = Math.round(total * 0.5);
+  const secondaryAmt = Math.round(total * 0.33);
+  const supportAmt = total - primaryAmt - secondaryAmt;
 
-      document.getElementById("bestReinvestTarget").innerText = ranked[0].name;
-      document.getElementById("bestValueBuy").innerText = ranked[0].name;
-      document.getElementById("bestValueBuyMeta").innerText = `Yield ${ranked[0].yieldPct.toFixed(2)}% • Gap £${formatMoney(ranked[0].gap)}`;
-    }
+  document.getElementById("primaryBuy").innerText = ranked[0].name;
+  document.getElementById("secondaryBuy").innerText = ranked[1].name;
+  document.getElementById("supportBuy").innerText = ranked[2].name;
+
+  document.querySelectorAll(".buy-box .amt")[0].innerText = `£${primaryAmt}`;
+  document.querySelectorAll(".buy-box .amt")[1].innerText = `£${secondaryAmt}`;
+  document.querySelectorAll(".buy-box .amt")[2].innerText = `£${supportAmt}`;
+
+  document.getElementById("primaryReason").innerText =
+    `Gap £${formatMoney(ranked[0].gap)} • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
+
+  document.getElementById("secondaryReason").innerText =
+    `Gap £${formatMoney(ranked[1].gap)} • Yield ${ranked[1].yieldPct.toFixed(2)}%`;
+
+  document.getElementById("supportReason").innerText =
+    `Gap £${formatMoney(ranked[2].gap)} • Yield ${ranked[2].yieldPct.toFixed(2)}%`;
+
+  document.getElementById("bestReinvestTarget").innerText = ranked[0].name;
+  document.getElementById("bestValueBuy").innerText = ranked[0].name;
+  document.getElementById("bestValueBuyMeta").innerText =
+    `Yield ${ranked[0].yieldPct.toFixed(2)}% • Gap £${formatMoney(ranked[0].gap)}`;
+}
 
     function getTargetDps(stockName) {
       const fieldId = dpsFieldMap[stockName];
@@ -1081,6 +1111,7 @@
     });
 
     document.getElementById("addLogBtn").addEventListener("click", addLog);
+    document.getElementById("paydayAmount").addEventListener("input", updateAll);
 
     updateAll();
   </script>
