@@ -842,23 +842,26 @@
     }
 
     function getLivePriceForKey(key) {
-      return Number(livePrices[key] || 0);
-    }
+  const raw = Number(livePrices[key] || 0);
 
-    function getCurrentYieldPct(key) {
-      const dps = parseFloat(document.getElementById(`${key}Dps`)?.value) || 0;
-      const livePrice = getLivePriceForKey(key);
-      if (!livePrice || !dps) return 0;
-      return (dps / livePrice) * 100;
-    }
-    function calculateIncomeFromAmount(key, amount) {
+  // If price looks like pence (e.g. 280 instead of 2.80), convert to pounds
+  return raw > 20 ? raw / 100 : raw;
+}
+
+function getCurrentYieldPct(key) {
+  const dps = parseFloat(document.getElementById(`${key}Dps`)?.value) || 0;
+  const livePrice = getLivePriceForKey(key);
+  if (!livePrice || !dps) return 0;
+  return (dps / livePrice) * 100;
+}
+
+function calculateIncomeFromAmount(key, amount) {
   const dps = parseFloat(document.getElementById(`${key}Dps`)?.value) || 0;
   const price = getLivePriceForKey(key);
 
   if (!price || !dps || !amount) return 0;
 
-  const yieldPct = dps / price;
-  return amount * yieldPct;
+  return amount * (dps / price);
 }
 function updateMasterIncomeGoal(totalIncomeImpact = 0) {
   const { incomes } = getPillarData();
@@ -918,7 +921,6 @@ function updateMasterIncomeGoal(totalIncomeImpact = 0) {
     return b.yieldPct - a.yieldPct;
   });
 }
-
 function updateDecision() {
   const ranked = getSmartRanking();
 
@@ -932,8 +934,10 @@ function updateDecision() {
   let supportAmt = 0;
   let fourthAmt = 0;
 
+  let totalIncomeImpact = 0;
+
   // =============================
-  // 🚀 ATTACK MODE (Top 3)
+  // ATTACK MODE (Top 3)
   // =============================
   if (total < REINVEST_THRESHOLD) {
     primaryAmt = Math.round(total * 0.5);
@@ -964,12 +968,8 @@ function updateDecision() {
     const incomePrimary = calculateIncomeFromAmount(ranked[0].key, primaryAmt);
     const incomeSecondary = calculateIncomeFromAmount(ranked[1].key, secondaryAmt);
     const incomeSupport = calculateIncomeFromAmount(ranked[2].key, supportAmt);
-    const totalIncomeImpact = incomePrimary + incomeSecondary + incomeSupport;
 
-document.getElementById("decisionIncomeAnnual").innerText = `+£${formatMoney(totalIncomeImpact)}/yr`;
-document.getElementById("decisionIncomeMonthly").innerText = `+£${formatMoney(totalIncomeImpact / 12)}/month`;
-
-updateMasterIncomeGoal(totalIncomeImpact);
+    totalIncomeImpact = incomePrimary + incomeSecondary + incomeSupport;
 
     document.getElementById("primaryReason").innerText =
       `Attack Mode • +£${formatMoney(incomePrimary)}/yr • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
@@ -982,7 +982,7 @@ updateMasterIncomeGoal(totalIncomeImpact);
   }
 
   // =============================
-  // 🧠 REINVESTMENT MODE (ALL 4)
+  // REINVEST MODE (All 4)
   // =============================
   else {
     primaryAmt = Math.round(total * 0.35);
@@ -1002,10 +1002,8 @@ updateMasterIncomeGoal(totalIncomeImpact);
     const incomeSecondary = calculateIncomeFromAmount(ranked[1].key, secondaryAmt);
     const incomeSupport = calculateIncomeFromAmount(ranked[2].key, supportAmt);
     const incomeFourth = calculateIncomeFromAmount(ranked[3].key, fourthAmt);
-    const totalIncomeImpact = incomePrimary + incomeSecondary + incomeSupport + incomeFourth;
 
-document.getElementById("decisionIncomeAnnual").innerText = `+£${formatMoney(totalIncomeImpact)}/yr`;
-document.getElementById("decisionIncomeMonthly").innerText = `+£${formatMoney(totalIncomeImpact / 12)}/month`;
+    totalIncomeImpact = incomePrimary + incomeSecondary + incomeSupport + incomeFourth;
 
     document.getElementById("primaryReason").innerText =
       `Reinvest Mode • +£${formatMoney(incomePrimary)}/yr • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
@@ -1017,11 +1015,17 @@ document.getElementById("decisionIncomeMonthly").innerText = `+£${formatMoney(t
       `3rd: +£${formatMoney(incomeSupport)}/yr • 4th: ${ranked[3].name} +£${formatMoney(incomeFourth)}/yr`;
   }
 
+  document.getElementById("decisionIncomeAnnual").innerText =
+    `+£${formatMoney(totalIncomeImpact)}/yr`;
+  document.getElementById("decisionIncomeMonthly").innerText =
+    `+£${formatMoney(totalIncomeImpact / 12)}/month`;
+
+  updateMasterIncomeGoal(totalIncomeImpact);
+
   document.getElementById("bestReinvestTarget").innerText = ranked[0].name;
   document.getElementById("bestValueBuy").innerText = ranked[0].name;
   document.getElementById("bestValueBuyMeta").innerText =
     `Yield ${ranked[0].yieldPct.toFixed(2)}% • Gap £${formatMoney(ranked[0].gap)}`;
-
 }
 
 function getTargetDps(stockName) {
@@ -1058,172 +1062,190 @@ function getStoredLogs() {
   return JSON.parse(localStorage.getItem(LOG_STORAGE_KEY) || "[]");
 }
 
-    function updateReinvestTotals(logs = null) {
-      const records = logs || getStoredLogs();
-      const total = records.reduce((sum, log) => sum + (Number(log.incomeAdded) || 0), 0);
+function updateReinvestTotals(logs = null) {
+  const records = logs || getStoredLogs();
+  const total = records.reduce((sum, log) => sum + (Number(log.incomeAdded) || 0), 0);
 
-      const currentYear = new Date().getFullYear();
-      const yearTotal = records.reduce((sum, log) => {
-        const logYear = String(log.date || "").slice(0, 4);
-        if (Number(logYear) === currentYear) {
-          return sum + (Number(log.incomeAdded) || 0);
-        }
-        return sum;
-      }, 0);
-
-      document.getElementById("reinvestTotal").innerText = `£${formatMoney(total)}`;
-      document.getElementById("reinvestYearTotal").innerText = `£${formatMoney(yearTotal)}`;
+  const currentYear = new Date().getFullYear();
+  const yearTotal = records.reduce((sum, log) => {
+    const logYear = String(log.date || "").slice(0, 4);
+    if (Number(logYear) === currentYear) {
+      return sum + (Number(log.incomeAdded) || 0);
     }
+    return sum;
+  }, 0);
 
-    function migrateLegacyLogsIfNeeded() {
-      const existing = localStorage.getItem(LOG_STORAGE_KEY);
-      if (existing) return;
+  document.getElementById("reinvestTotal").innerText = `£${formatMoney(total)}`;
+  document.getElementById("reinvestYearTotal").innerText = `£${formatMoney(yearTotal)}`;
+}
 
-      const legacy =
-        localStorage.getItem(LEGACY_LOG_STORAGE_KEY_V4) ||
-        localStorage.getItem(LEGACY_LOG_STORAGE_KEY_V3) ||
-        localStorage.getItem(LEGACY_LOG_STORAGE_KEY_V2);
+function updateMasterIncomeGoal(totalIncomeImpact = 0) {
+  const { incomes } = getPillarData();
 
-      if (!legacy) return;
+  const currentAnnual = incomes.lng + incomes.mng + incomes.sdlf + incomes.supr;
+  const projectedAnnual = currentAnnual + totalIncomeImpact;
 
-      try {
-        const legacyLogs = JSON.parse(legacy);
-        const upgraded = legacyLogs.map(log => ({
-          id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
-          date: log.date,
-          source: log.from === "Phoenix" ? "Standard Life" : (log.from || "Dividend"),
-          amount: Number(log.amount) || 0,
-          into: log.into === "Phoenix" ? "Standard Life" : log.into,
-          yieldUsed: log.yieldUsed == null ? null : Number(log.yieldUsed),
-          incomeAdded: Number(log.incomeAdded) || 0
-        }));
-        localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(upgraded));
-      } catch (e) {
-        console.error("Could not migrate legacy logs.", e);
-      }
-    }
+  const projectedMonthly = projectedAnnual / 12;
+  const targetMonthly = 2000;
+  const remainingMonthly = Math.max(targetMonthly - projectedMonthly, 0);
 
-    function deleteLog(id) {
-      const logs = getStoredLogs().filter(log => log.id !== id);
-      localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(logs));
-      loadLogs();
-    }
+  document.getElementById("goalIncomeCurrent").innerText =
+    `£${formatMoney(projectedMonthly)}/month`;
 
-    function loadLogs() {
-      const logs = getStoredLogs();
-      const tbody = document.getElementById("logTableBody");
+  document.getElementById("goalIncomeRemaining").innerText =
+    `£${formatMoney(remainingMonthly)}/month still needed to reach £2,000/month`;
+}
 
-      tbody.innerHTML = "";
+function migrateLegacyLogsIfNeeded() {
+  const existing = localStorage.getItem(LOG_STORAGE_KEY);
+  if (existing) return;
 
-      logs.forEach(log => {
-        const row = document.createElement("tr");
-        const yieldDisplay = log.yieldUsed == null ? "—" : `${Number(log.yieldUsed).toFixed(2)}%`;
+  const legacy =
+    localStorage.getItem(LEGACY_LOG_STORAGE_KEY_V4) ||
+    localStorage.getItem(LEGACY_LOG_STORAGE_KEY_V3) ||
+    localStorage.getItem(LEGACY_LOG_STORAGE_KEY_V2);
 
-        row.innerHTML = `
-          <td>${log.date}</td>
-          <td>${log.source}</td>
-          <td>£${formatMoney(log.amount)}</td>
-          <td>${log.into}</td>
-          <td>${yieldDisplay}</td>
-          <td>+£${formatMoney(log.incomeAdded)}/yr</td>
-          <td><button class="delete-btn" data-id="${log.id}">Delete</button></td>
-        `;
-        tbody.appendChild(row);
-      });
+  if (!legacy) return;
 
-      tbody.querySelectorAll(".delete-btn").forEach(btn => {
-        btn.addEventListener("click", () => deleteLog(btn.dataset.id));
-      });
+  try {
+    const legacyLogs = JSON.parse(legacy);
+    const upgraded = legacyLogs.map(log => ({
+      id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+      date: log.date,
+      source: log.from === "Phoenix" ? "Standard Life" : (log.from || "Dividend"),
+      amount: Number(log.amount) || 0,
+      into: log.into === "Phoenix" ? "Standard Life" : log.into,
+      yieldUsed: log.yieldUsed == null ? null : Number(log.yieldUsed),
+      incomeAdded: Number(log.incomeAdded) || 0
+    }));
+    localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(upgraded));
+  } catch (e) {
+    console.error("Could not migrate legacy logs.", e);
+  }
+}
 
-      updateReinvestTotals(logs);
-    }
-        function addLog() {
-      const date = document.getElementById("logDate").value;
-      const source = document.getElementById("logSource").value.trim();
-      const amount = parseFloat(document.getElementById("logAmount").value);
-      const into = document.getElementById("logInto").value;
-      const buyPrice = parseFloat(document.getElementById("logPrice").value);
-      const targetDps = getTargetDps(into);
+function deleteLog(id) {
+  const logs = getStoredLogs().filter(log => log.id !== id);
+  localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(logs));
+  loadLogs();
+}
 
-      if (!date || !source || !into) return;
-      if (isNaN(amount) || amount <= 0) return;
-      if (isNaN(buyPrice) || buyPrice <= 0) return;
-      if (targetDps <= 0) return;
+function loadLogs() {
+  const logs = getStoredLogs();
+  const tbody = document.getElementById("logTableBody");
 
-      const yieldUsed = (targetDps / buyPrice) * 100;
-      const incomeAdded = amount * (yieldUsed / 100);
+  tbody.innerHTML = "";
 
-      const logs = getStoredLogs();
-      logs.unshift({
-        id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
-        date,
-        source,
-        amount,
-        into,
-        yieldUsed,
-        incomeAdded
-      });
+  logs.forEach(log => {
+    const row = document.createElement("tr");
+    const yieldDisplay = log.yieldUsed == null ? "—" : `${Number(log.yieldUsed).toFixed(2)}%`;
 
-      localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(logs));
-      loadLogs();
+    row.innerHTML = `
+      <td>${log.date}</td>
+      <td>${log.source}</td>
+      <td>£${formatMoney(log.amount)}</td>
+      <td>${log.into}</td>
+      <td>${yieldDisplay}</td>
+      <td>+£${formatMoney(log.incomeAdded)}/yr</td>
+      <td><button class="delete-btn" data-id="${log.id}">Delete</button></td>
+    `;
+    tbody.appendChild(row);
+  });
 
-      document.getElementById("logDate").value = "";
-      document.getElementById("logSource").value = "";
-      document.getElementById("logAmount").value = "";
-      document.getElementById("logPrice").value = "";
-      document.getElementById("logYieldAuto").value = "";
-      document.getElementById("logIncomePreview").innerText = `£${formatMoney(0)}`;
-      updateSmartReinvestPanel();
-    }
+  tbody.querySelectorAll(".delete-btn").forEach(btn => {
+    btn.addEventListener("click", () => deleteLog(btn.dataset.id));
+  });
 
-    function updateAll() {
-      const { incomes, stage } = getPillarData();
+  updateReinvestTotals(logs);
+}
 
-      document.getElementById("stageLabel").innerText = `${stage.stageIndex} / 8`;
-      document.getElementById("stageTargetLabel").innerText = `£${formatWhole(stage.target)}`;
-      document.getElementById("nextStageLabel").innerText = `£${formatWhole(stage.nextTarget)}`;
-      document.getElementById("targetHeading").innerText = formatWhole(stage.target);
+function addLog() {
+  const date = document.getElementById("logDate").value;
+  const source = document.getElementById("logSource").value.trim();
+  const amount = parseFloat(document.getElementById("logAmount").value);
+  const into = document.getElementById("logInto").value;
+  const buyPrice = parseFloat(document.getElementById("logPrice").value);
+  const targetDps = getTargetDps(into);
 
-      updatePillar("lng", incomes.lng, stage.target, stage.nextTarget);
-      updatePillar("mng", incomes.mng, stage.target, stage.nextTarget);
-      updatePillar("sdlf", incomes.sdlf, stage.target, stage.nextTarget);
-      updatePillar("supr", incomes.supr, stage.target, stage.nextTarget);
+  if (!date || !source || !into) return;
+  if (isNaN(amount) || amount <= 0) return;
+  if (isNaN(buyPrice) || buyPrice <= 0) return;
+  if (targetDps <= 0) return;
 
-      const totalAnnual = incomes.lng + incomes.mng + incomes.sdlf + incomes.supr;
-      document.getElementById("totalAnnual").innerText = formatMoney(totalAnnual);
-      document.getElementById("totalMonthly").innerText = formatMoney(totalAnnual / 12);
+  const yieldUsed = (targetDps / buyPrice) * 100;
+  const incomeAdded = amount * (yieldUsed / 100);
 
-      updateDecision();
-      updateLogPreview();
-      updateSmartReinvestPanel();
-      saveValues();
-    }
+  const logs = getStoredLogs();
+  logs.unshift({
+    id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+    date,
+    source,
+    amount,
+    into,
+    yieldUsed,
+    incomeAdded
+  });
 
-    migrateLegacyLogsIfNeeded();
-    loadSavedValues();
-    loadLogs();
+  localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(logs));
+  loadLogs();
 
-    ids.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.addEventListener("input", updateAll);
-        el.addEventListener("change", updateAll);
-      }
-    });
+  document.getElementById("logDate").value = "";
+  document.getElementById("logSource").value = "";
+  document.getElementById("logAmount").value = "";
+  document.getElementById("logPrice").value = "";
+  document.getElementById("logYieldAuto").value = "";
+  document.getElementById("logIncomePreview").innerText = `£${formatMoney(0)}`;
+  updateSmartReinvestPanel();
+}
 
-    ["logInto", "logPrice", "logAmount"].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.addEventListener("input", updateLogPreview);
-        el.addEventListener("change", updateLogPreview);
-      }
-    });
+function updateAll() {
+  const { incomes, stage } = getPillarData();
 
-    document.getElementById("addLogBtn").addEventListener("click", addLog);
-    document.getElementById("paydayAmount").addEventListener("input", updateAll);
+  document.getElementById("stageLabel").innerText = `${stage.stageIndex} / 8`;
+  document.getElementById("stageTargetLabel").innerText = `£${formatWhole(stage.target)}`;
+  document.getElementById("nextStageLabel").innerText = `£${formatWhole(stage.nextTarget)}`;
+  document.getElementById("targetHeading").innerText = formatWhole(stage.target);
 
-    updateAll();
-    updateMasterIncomeGoal(0);
+  updatePillar("lng", incomes.lng, stage.target, stage.nextTarget);
+  updatePillar("mng", incomes.mng, stage.target, stage.nextTarget);
+  updatePillar("sdlf", incomes.sdlf, stage.target, stage.nextTarget);
+  updatePillar("supr", incomes.supr, stage.target, stage.nextTarget);
+
+  const totalAnnual = incomes.lng + incomes.mng + incomes.sdlf + incomes.supr;
+  document.getElementById("totalAnnual").innerText = formatMoney(totalAnnual);
+  document.getElementById("totalMonthly").innerText = formatMoney(totalAnnual / 12);
+
+  updateDecision();
+  updateLogPreview();
+  updateSmartReinvestPanel();
+  saveValues();
+}
+
+migrateLegacyLogsIfNeeded();
+loadSavedValues();
+loadLogs();
+
+ids.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener("input", updateAll);
+    el.addEventListener("change", updateAll);
+  }
+});
+
+["logInto", "logPrice", "logAmount"].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener("input", updateLogPreview);
+    el.addEventListener("change", updateLogPreview);
+  }
+});
+
+document.getElementById("addLogBtn").addEventListener("click", addLog);
+document.getElementById("paydayAmount").addEventListener("input", updateAll);
+
+updateAll();
   </script>
 </body>
 </html>
+
