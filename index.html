@@ -887,43 +887,88 @@
 function updateDecision() {
   const ranked = getSmartRanking();
 
-  if (!ranked || ranked.length < 3) return;
+  if (!ranked || ranked.length < 4) return;
 
   const total = parseFloat(document.getElementById("paydayAmount")?.value) || 600;
 
-  let primaryAmt = Math.round(total * 0.5);
-  let secondaryAmt = Math.round(total * 0.33);
-  let supportAmt = total - primaryAmt - secondaryAmt;
+  // 🔥 MODE SWITCH THRESHOLD
+  const REINVEST_THRESHOLD = 2000;
 
-  const maxPrimaryAmt = Math.round(total * MAX_PRIMARY_SHARE);
+  let primaryAmt = 0;
+  let secondaryAmt = 0;
+  let supportAmt = 0;
+  let fourthAmt = 0;
 
-  if (primaryAmt > maxPrimaryAmt) {
-    const excess = primaryAmt - maxPrimaryAmt;
-    primaryAmt = maxPrimaryAmt;
+  // =============================
+  // 🚀 ATTACK MODE (Top 3)
+  // =============================
+  if (total < REINVEST_THRESHOLD) {
 
-    const secondaryAdd = Math.round(excess * 0.65);
-    const supportAdd = excess - secondaryAdd;
+    primaryAmt = Math.round(total * 0.5);
+    secondaryAmt = Math.round(total * 0.33);
+    supportAmt = total - primaryAmt - secondaryAmt;
 
-    secondaryAmt += secondaryAdd;
-    supportAmt += supportAdd;
+    const maxPrimaryAmt = Math.round(total * MAX_PRIMARY_SHARE);
+
+    if (primaryAmt > maxPrimaryAmt) {
+      const excess = primaryAmt - maxPrimaryAmt;
+      primaryAmt = maxPrimaryAmt;
+
+      const secondaryAdd = Math.round(excess * 0.65);
+      const supportAdd = excess - secondaryAdd;
+
+      secondaryAmt += secondaryAdd;
+      supportAmt += supportAdd;
+    }
+
+    document.getElementById("primaryBuy").innerText = ranked[0].name;
+    document.getElementById("secondaryBuy").innerText = ranked[1].name;
+    document.getElementById("supportBuy").innerText = ranked[2].name;
+
+    document.querySelectorAll(".buy-box .amt")[0].innerText = `£${primaryAmt}`;
+    document.querySelectorAll(".buy-box .amt")[1].innerText = `£${secondaryAmt}`;
+    document.querySelectorAll(".buy-box .amt")[2].innerText = `£${supportAmt}`;
+
+    document.getElementById("primaryReason").innerText =
+      `Attack Mode • Gap £${formatMoney(ranked[0].gap)} • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
+
+    document.getElementById("secondaryReason").innerText =
+      `Gap £${formatMoney(ranked[1].gap)} • Yield ${ranked[1].yieldPct.toFixed(2)}%`;
+
+    document.getElementById("supportReason").innerText =
+      `Gap £${formatMoney(ranked[2].gap)} • Yield ${ranked[2].yieldPct.toFixed(2)}%`;
+
   }
 
-  document.getElementById("primaryBuy").innerText = ranked[0].name;
-  document.getElementById("secondaryBuy").innerText = ranked[1].name;
-  document.getElementById("supportBuy").innerText = ranked[2].name;
+  // =============================
+  // 🧠 REINVESTMENT MODE (ALL 4)
+  // =============================
+  else {
 
-  document.querySelectorAll(".buy-box .amt")[0].innerText = `£${primaryAmt}`;
-  document.querySelectorAll(".buy-box .amt")[1].innerText = `£${secondaryAmt}`;
-  document.querySelectorAll(".buy-box .amt")[2].innerText = `£${supportAmt}`;
+    primaryAmt = Math.round(total * 0.35);
+    secondaryAmt = Math.round(total * 0.30);
+    supportAmt = Math.round(total * 0.20);
+    fourthAmt = total - primaryAmt - secondaryAmt - supportAmt;
 
-  document.getElementById("primaryReason").innerText =
-    `Gap £${formatMoney(ranked[0].gap)} • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
+    document.getElementById("primaryBuy").innerText = ranked[0].name;
+    document.getElementById("secondaryBuy").innerText = ranked[1].name;
+    document.getElementById("supportBuy").innerText = ranked[2].name;
 
-  document.getElementById("secondaryReason").innerText =
-    `Gap £${formatMoney(ranked[1].gap)} • Yield ${ranked[1].yieldPct.toFixed(2)}%`;
+    // 🔥 Show 4th inside support note
+    document.getElementById("supportReason").innerText =
+      `Reinvest Mode • 3rd: ${ranked[2].name} (£${supportAmt}) • 4th: ${ranked[3].name} (£${fourthAmt})`;
 
-  document.getElementById("supportReason").innerText =
-    `Gap £${formatMoney(ranked[2].gap)} • Yield ${ranked[2].yieldPct.toFixed(2)}%`;
+    document.querySelectorAll(".buy-box .amt")[0].innerText = `£${primaryAmt}`;
+    document.querySelectorAll(".buy-box .amt")[1].innerText = `£${secondaryAmt}`;
+    document.querySelectorAll(".buy-box .amt")[2].innerText = `£${supportAmt}`;
+
+    document.getElementById("primaryReason").innerText =
+      `Reinvestment Mode • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
+
+    document.getElementById("secondaryReason").innerText =
+      `Yield ${ranked[1].yieldPct.toFixed(2)}%`;
+
+  }
 
   document.getElementById("bestReinvestTarget").innerText = ranked[0].name;
   document.getElementById("bestValueBuy").innerText = ranked[0].name;
