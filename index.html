@@ -325,7 +325,8 @@
         </div>
       </div>
     </section>
-        <section class="card decision">
+
+    <section class="card decision">
       <h2>Payday Decision Box</h2>
       <div class="decision-plan">
         <div class="buy-box">
@@ -343,7 +344,7 @@
         <div class="buy-box">
           <div class="stat-label">Support Buy</div>
           <div class="amt">£100</div>
-          <div class="name" id="supportBuy">SUPR</div>
+          <div class="name" id="supportBuy">Supermarket REIT</div>
           <div class="mini-note" id="supportReason">Balance move</div>
         </div>
       </div>
@@ -418,8 +419,7 @@
               <input id="mngDps" type="number" step="0.0001" value="0.2048" />
             </div>
           </div>
-
-          <div class="pillar-stats">
+                    <div class="pillar-stats">
             <div class="mini"><div class="k">Current Income</div><div class="v" id="mngIncome">£0</div></div>
             <div class="mini"><div class="k">Gap to Target</div><div class="v" id="mngGap">£0</div></div>
             <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="mngRemaining">£0</div></div>
@@ -520,8 +520,9 @@
         </div>
       </div>
     </section>
-        <section class="section card">
-      <h2>Dividend Reinvest Log</h2>
+
+    <section class="section card">
+      <h2>Income Build Log</h2>
 
       <div class="log-grid">
         <div class="input-box">
@@ -529,13 +530,8 @@
           <input id="logDate" type="date" />
         </div>
         <div class="input-box">
-          <label for="logFrom">From</label>
-          <select id="logFrom">
-            <option>M&amp;G</option>
-            <option>Legal &amp; General</option>
-            <option>Standard Life</option>
-            <option>SUPR</option>
-          </select>
+          <label for="logSource">Funding Source</label>
+          <input id="logSource" type="text" placeholder="Dividend, Tesco, Bonus, Spare Cash" />
         </div>
         <div class="input-box">
           <label for="logAmount">Amount (£)</label>
@@ -548,6 +544,7 @@
             <option>Legal &amp; General</option>
             <option>Standard Life</option>
             <option>SUPR</option>
+            <option>Supermarket REIT</option>
           </select>
         </div>
         <div class="input-box">
@@ -579,14 +576,14 @@
         </div>
       </div>
 
-      <button class="log-btn" id="addLogBtn">Add Reinvestment</button>
+      <button class="log-btn" id="addLogBtn">Add Income Build</button>
 
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
               <th>Date</th>
-              <th>From</th>
+              <th>Source</th>
               <th>Amount</th>
               <th>Into</th>
               <th>Yield</th>
@@ -606,8 +603,8 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "pillarTrackerInputs_v1";
-    const LOG_STORAGE_KEY = "pillarTrackerLogs_v1";
+    const STORAGE_KEY = "pillarTrackerInputs_v2_safe";
+    const LOG_STORAGE_KEY = "pillarTrackerLogs_v2_safe";
     const LEGACY_LOG_STORAGE_KEY_V4 = "pillarTrackerLogs_v4";
     const LEGACY_LOG_STORAGE_KEY_V3 = "pillarTrackerLogs_v3";
     const LEGACY_LOG_STORAGE_KEY_V2 = "pillarTrackerLogs_v2";
@@ -632,104 +629,105 @@
       "Legal & General": "lngDps",
       "M&G": "mngDps",
       "Standard Life": "sdlfDps",
-      "SUPR": "suprDps"
+      "SUPR": "suprDps",
+      "Supermarket REIT": "suprDps"
     };
 
-    // ===================== LIVE GOOGLE SHEET LOADER =====================
+    const livePrices = {
+      lng: 0,
+      mng: 0,
+      sdlf: 0,
+      supr: 0
+    };
 
     const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
     const SHEET_NAME = "Holdings";
 
     async function loadLivePrices() {
-  const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+      const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
 
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
 
-    let totalValue = 0;
-    let totalGain = 0;
+        let totalValue = 0;
+        let totalGain = 0;
 
-    data.forEach(row => {
-      const ticker = String(row.ticker || "").trim().toUpperCase();
-      const price = parseFloat(row.live_price || 0);
-      const shares = parseFloat(row.shares || 0);
-      const gain = parseFloat(row["profit/loss"] || 0);
-      const annualDps = parseFloat(row.annual_dividend_per_share || 0);
+        data.forEach(row => {
+          const ticker = String(row.ticker || "").trim().toUpperCase();
+          const price = parseFloat(row.live_price || 0);
+          const shares = parseFloat(row.shares || 0);
+          const gain = parseFloat(row["profit/loss"] || 0);
+          const annualDps = parseFloat(row.annual_dividend_per_share || 0);
 
-      if (!ticker || isNaN(price)) return;
+          if (!ticker || isNaN(price)) return;
 
-      const value = shares * price;
+          const value = shares * price;
+          totalValue += value;
+          totalGain += gain;
 
-      totalValue += value;
-      totalGain += gain;
+          if (ticker.includes("MNG")) {
+            livePrices.mng = price;
+            document.getElementById("mngLivePrice").innerText = `£${price.toFixed(3)}`;
+            document.getElementById("mngLiveValue").innerText = `£${value.toFixed(2)}`;
+            if (!isNaN(annualDps) && annualDps > 0) document.getElementById("mngDps").value = annualDps;
+          }
 
-      if (ticker.includes("MNG")) {
-        document.getElementById("mngLivePrice").innerText = `£${price.toFixed(3)}`;
-        document.getElementById("mngLiveValue").innerText = `£${value.toFixed(2)}`;
-        if (!isNaN(annualDps) && annualDps > 0) {
-          document.getElementById("mngDps").value = annualDps;
-        }
+          if (ticker.includes("LGEN")) {
+            livePrices.lng = price;
+            document.getElementById("lngLivePrice").innerText = `£${price.toFixed(3)}`;
+            document.getElementById("lngLiveValue").innerText = `£${value.toFixed(2)}`;
+            if (!isNaN(annualDps) && annualDps > 0) document.getElementById("lngDps").value = annualDps;
+          }
+
+          if (ticker.includes("SDLF")) {
+            livePrices.sdlf = price;
+            document.getElementById("sdlfLivePrice").innerText = `£${price.toFixed(3)}`;
+            document.getElementById("sdlfLiveValue").innerText = `£${value.toFixed(2)}`;
+            if (!isNaN(annualDps) && annualDps > 0) document.getElementById("sdlfDps").value = annualDps;
+          }
+
+          if (ticker.includes("SUPR")) {
+            livePrices.supr = price;
+            document.getElementById("suprLivePrice").innerText = `£${price.toFixed(3)}`;
+            document.getElementById("suprLiveValue").innerText = `£${value.toFixed(2)}`;
+            if (!isNaN(annualDps) && annualDps > 0) document.getElementById("suprDps").value = annualDps;
+          }
+        });
+
+        const gainPct = totalValue > 0 ? (totalGain / totalValue) * 100 : 0;
+
+        document.getElementById("livePortfolioValue").innerText = `£${totalValue.toFixed(2)}`;
+        document.getElementById("livePortfolioGain").innerText = `£${totalGain.toFixed(2)}`;
+        document.getElementById("livePortfolioGainPct").innerText = `${gainPct.toFixed(2)}%`;
+
+        const gainEl = document.getElementById("livePortfolioGain");
+        gainEl.classList.remove("live-up", "live-down");
+        if (totalGain > 0) gainEl.classList.add("live-up");
+        else if (totalGain < 0) gainEl.classList.add("live-down");
+
+        document.getElementById("syncStatusText").innerText = "Live Connected";
+        document.getElementById("syncStatusSub").innerText = new Date().toLocaleTimeString();
+        document.getElementById("syncDot").className = "sync-dot";
+
+        updateAll();
+      } catch (err) {
+        console.error("Sheet load failed", err);
+        document.getElementById("syncStatusText").innerText = "Sync Failed";
+        document.getElementById("syncDot").className = "sync-dot sync-bad";
       }
+    }
 
-      if (ticker.includes("LGEN")) {
-        document.getElementById("lngLivePrice").innerText = `£${price.toFixed(3)}`;
-        document.getElementById("lngLiveValue").innerText = `£${value.toFixed(2)}`;
-        if (!isNaN(annualDps) && annualDps > 0) {
-          document.getElementById("lngDps").value = annualDps;
-        }
-      }
-
-      if (ticker.includes("SDLF")) {
-        document.getElementById("sdlfLivePrice").innerText = `£${price.toFixed(3)}`;
-        document.getElementById("sdlfLiveValue").innerText = `£${value.toFixed(2)}`;
-        if (!isNaN(annualDps) && annualDps > 0) {
-          document.getElementById("sdlfDps").value = annualDps;
-        }
-      }
-
-      if (ticker.includes("SUPR")) {
-        document.getElementById("suprLivePrice").innerText = `£${price.toFixed(3)}`;
-        document.getElementById("suprLiveValue").innerText = `£${value.toFixed(2)}`;
-        if (!isNaN(annualDps) && annualDps > 0) {
-          document.getElementById("suprDps").value = annualDps;
-        }
-      }
-    });
-
-    const gainPct = totalValue > 0 ? (totalGain / totalValue) * 100 : 0;
-
-    document.getElementById("livePortfolioValue").innerText = `£${totalValue.toFixed(2)}`;
-    document.getElementById("livePortfolioGain").innerText = `£${totalGain.toFixed(2)}`;
-    document.getElementById("livePortfolioGainPct").innerText = `${gainPct.toFixed(2)}%`;
-
-    const gainEl = document.getElementById("livePortfolioGain");
-    gainEl.classList.remove("live-up", "live-down");
-
-    if (totalGain > 0) gainEl.classList.add("live-up");
-    else if (totalGain < 0) gainEl.classList.add("live-down");
-
-    document.getElementById("syncStatusText").innerText = "Live Connected";
-    document.getElementById("syncStatusSub").innerText = new Date().toLocaleTimeString();
-    document.getElementById("syncDot").className = "sync-dot";
-
-    updateAll();
-  } catch (err) {
-    console.error("Sheet load failed", err);
-    document.getElementById("syncStatusText").innerText = "Sync Failed";
-    document.getElementById("syncDot").className = "sync-dot sync-bad";
-  }
-}
     setInterval(loadLivePrices, 30000);
     loadLivePrices();
-        function formatMoney(value) {
+
+    function formatMoney(value) {
       return Number(value || 0).toLocaleString("en-GB", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       });
     }
-
-    function formatWhole(value) {
+        function formatWhole(value) {
       return Number(value || 0).toLocaleString("en-GB", {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
@@ -829,6 +827,17 @@
       };
     }
 
+    function getLivePriceForKey(key) {
+      return Number(livePrices[key] || 0);
+    }
+
+    function getCurrentYieldPct(key) {
+      const dps = parseFloat(document.getElementById(`${key}Dps`)?.value) || 0;
+      const livePrice = getLivePriceForKey(key);
+      if (!livePrice || !dps) return 0;
+      return (dps / livePrice) * 100;
+    }
+
     function getSmartRanking() {
       const { incomes, stage } = getPillarData();
 
@@ -836,16 +845,27 @@
         const income = incomes[key];
         const gap = Math.max(stage.target - income, 0);
         const dps = parseFloat(document.getElementById(`${key}Dps`).value) || 0;
+        const livePrice = getLivePriceForKey(key);
+        const yieldPct = livePrice > 0 ? (dps / livePrice) * 100 : 0;
+
+        const gapScore = stage.target > 0 ? gap / stage.target : 0;
+        const yieldScore = yieldPct / 100;
+        const totalScore = (gapScore * 0.7) + (yieldScore * 0.3);
+
         return {
           key,
           name: names[key],
           income,
           gap,
-          dps
+          dps,
+          livePrice,
+          yieldPct,
+          totalScore
         };
       }).sort((a, b) => {
+        if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
         if (b.gap !== a.gap) return b.gap - a.gap;
-        return b.dps - a.dps;
+        return b.yieldPct - a.yieldPct;
       });
     }
 
@@ -856,13 +876,13 @@
       document.getElementById("secondaryBuy").innerText = ranked[1].name;
       document.getElementById("supportBuy").innerText = ranked[2].name;
 
-      document.getElementById("primaryReason").innerText = `Gap £${formatMoney(ranked[0].gap)}`;
-      document.getElementById("secondaryReason").innerText = `Gap £${formatMoney(ranked[1].gap)}`;
-      document.getElementById("supportReason").innerText = `Gap £${formatMoney(ranked[2].gap)}`;
+      document.getElementById("primaryReason").innerText = `Gap £${formatMoney(ranked[0].gap)} • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
+      document.getElementById("secondaryReason").innerText = `Gap £${formatMoney(ranked[1].gap)} • Yield ${ranked[1].yieldPct.toFixed(2)}%`;
+      document.getElementById("supportReason").innerText = `Gap £${formatMoney(ranked[2].gap)} • Yield ${ranked[2].yieldPct.toFixed(2)}%`;
 
       document.getElementById("bestReinvestTarget").innerText = ranked[0].name;
       document.getElementById("bestValueBuy").innerText = ranked[0].name;
-      document.getElementById("bestValueBuyMeta").innerText = `Gap £${formatMoney(ranked[0].gap)}`;
+      document.getElementById("bestValueBuyMeta").innerText = `Yield ${ranked[0].yieldPct.toFixed(2)}% • Gap £${formatMoney(ranked[0].gap)}`;
     }
 
     function getTargetDps(stockName) {
@@ -892,30 +912,8 @@
     }
 
     function updateSmartReinvestPanel() {
-  const smartTargetEl = document.getElementById("smartTarget");
-  const smartTargetYieldEl = document.getElementById("smartTargetYield");
-  const smartTargetGapEl = document.getElementById("smartTargetGap");
-
-  
-  if (!smartTargetEl || !smartTargetYieldEl || !smartTargetGapEl) return;
-
-  const ranked = getSmartRanking();
-  const best = ranked[0];
-
-  smartTargetEl.innerText = best.name;
-
-  const shares = parseFloat(document.getElementById(best.key + "Shares")?.value) || 0;
-  const price = shares > 0 ? best.income / shares : 0;
-  const yieldPct = price > 0 ? (best.dps / price) * 100 : 0;
-
-  smartTargetYieldEl.innerText = `${yieldPct.toFixed(2)}%`;
-  smartTargetGapEl.innerText = `£${formatMoney(best.gap)}`;
-
-  const currentInto = document.getElementById("logInto");
-  if (currentInto && document.activeElement !== currentInto) {
-    currentInto.value = best.name;
-  }
-}
+      return;
+    }
 
     function getStoredLogs() {
       return JSON.parse(localStorage.getItem(LOG_STORAGE_KEY) || "[]");
@@ -954,7 +952,7 @@
         const upgraded = legacyLogs.map(log => ({
           id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
           date: log.date,
-          from: log.from === "Phoenix" ? "Standard Life" : log.from,
+          source: log.from === "Phoenix" ? "Standard Life" : (log.from || "Dividend"),
           amount: Number(log.amount) || 0,
           into: log.into === "Phoenix" ? "Standard Life" : log.into,
           yieldUsed: log.yieldUsed == null ? null : Number(log.yieldUsed),
@@ -984,7 +982,7 @@
 
         row.innerHTML = `
           <td>${log.date}</td>
-          <td>${log.from}</td>
+          <td>${log.source}</td>
           <td>£${formatMoney(log.amount)}</td>
           <td>${log.into}</td>
           <td>${yieldDisplay}</td>
@@ -1000,16 +998,15 @@
 
       updateReinvestTotals(logs);
     }
-
-    function addLog() {
+        function addLog() {
       const date = document.getElementById("logDate").value;
-      const from = document.getElementById("logFrom").value;
+      const source = document.getElementById("logSource").value.trim();
       const amount = parseFloat(document.getElementById("logAmount").value);
       const into = document.getElementById("logInto").value;
       const buyPrice = parseFloat(document.getElementById("logPrice").value);
       const targetDps = getTargetDps(into);
 
-      if (!date || !from || !into) return;
+      if (!date || !source || !into) return;
       if (isNaN(amount) || amount <= 0) return;
       if (isNaN(buyPrice) || buyPrice <= 0) return;
       if (targetDps <= 0) return;
@@ -1021,7 +1018,7 @@
       logs.unshift({
         id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
         date,
-        from,
+        source,
         amount,
         into,
         yieldUsed,
@@ -1032,6 +1029,7 @@
       loadLogs();
 
       document.getElementById("logDate").value = "";
+      document.getElementById("logSource").value = "";
       document.getElementById("logAmount").value = "";
       document.getElementById("logPrice").value = "";
       document.getElementById("logYieldAuto").value = "";
