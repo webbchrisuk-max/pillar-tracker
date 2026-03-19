@@ -329,6 +329,11 @@
     <section class="card decision">
       <h2>Payday Decision Box</h2>
       <div class="mini" style="margin-top:12px;">
+  <div class="k">Master Income Goal</div>
+  <div class="v" id="goalIncomeCurrent">£0.00/month</div>
+  <div class="subv" id="goalIncomeRemaining">£0.00/month still needed to reach £2,000/month</div>
+</div>
+      <div class="mini" style="margin-top:12px;">
   <div class="k">Total Income Impact</div>
   <div class="v" id="decisionIncomeAnnual">+£0.00/yr</div>
   <div class="subv" id="decisionIncomeMonthly">+£0.00/month</div>
@@ -855,6 +860,22 @@
   const yieldPct = dps / price;
   return amount * yieldPct;
 }
+function updateMasterIncomeGoal(totalIncomeImpact = 0) {
+  const { incomes } = getPillarData();
+
+  const currentAnnual = incomes.lng + incomes.mng + incomes.sdlf + incomes.supr;
+  const projectedAnnual = currentAnnual + totalIncomeImpact;
+
+  const projectedMonthly = projectedAnnual / 12;
+  const targetMonthly = 2000;
+  const remainingMonthly = Math.max(targetMonthly - projectedMonthly, 0);
+
+  document.getElementById("goalIncomeCurrent").innerText =
+    `£${formatMoney(projectedMonthly)}/month`;
+
+  document.getElementById("goalIncomeRemaining").innerText =
+    `£${formatMoney(remainingMonthly)}/month still needed to reach £2,000/month`;
+}
 
     function getSmartRanking() {
   const { incomes, stage } = getPillarData();
@@ -947,6 +968,8 @@ function updateDecision() {
 
 document.getElementById("decisionIncomeAnnual").innerText = `+£${formatMoney(totalIncomeImpact)}/yr`;
 document.getElementById("decisionIncomeMonthly").innerText = `+£${formatMoney(totalIncomeImpact / 12)}/month`;
+
+updateMasterIncomeGoal(totalIncomeImpact);
 
     document.getElementById("primaryReason").innerText =
       `Attack Mode • +£${formatMoney(incomePrimary)}/yr • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
@@ -1200,6 +1223,7 @@ function getStoredLogs() {
     document.getElementById("paydayAmount").addEventListener("input", updateAll);
 
     updateAll();
+    updateMasterIncomeGoal(0);
   </script>
 </body>
 </html>
