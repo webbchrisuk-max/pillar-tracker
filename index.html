@@ -841,6 +841,15 @@
       if (!livePrice || !dps) return 0;
       return (dps / livePrice) * 100;
     }
+    function calculateIncomeFromAmount(key, amount) {
+  const dps = parseFloat(document.getElementById(`${key}Dps`)?.value) || 0;
+  const price = getLivePriceForKey(key);
+
+  if (!price || !dps || !amount) return 0;
+
+  const yieldPct = dps / price;
+  return amount * yieldPct;
+}
 
     function getSmartRanking() {
   const { incomes, stage } = getPillarData();
@@ -890,8 +899,6 @@ function updateDecision() {
   if (!ranked || ranked.length < 4) return;
 
   const total = parseFloat(document.getElementById("paydayAmount")?.value) || 600;
-
-  // 🔥 MODE SWITCH THRESHOLD
   const REINVEST_THRESHOLD = 2000;
 
   let primaryAmt = 0;
@@ -903,7 +910,6 @@ function updateDecision() {
   // 🚀 ATTACK MODE (Top 3)
   // =============================
   if (total < REINVEST_THRESHOLD) {
-
     primaryAmt = Math.round(total * 0.5);
     secondaryAmt = Math.round(total * 0.33);
     supportAmt = total - primaryAmt - secondaryAmt;
@@ -929,22 +935,24 @@ function updateDecision() {
     document.querySelectorAll(".buy-box .amt")[1].innerText = `£${secondaryAmt}`;
     document.querySelectorAll(".buy-box .amt")[2].innerText = `£${supportAmt}`;
 
+    const incomePrimary = calculateIncomeFromAmount(ranked[0].key, primaryAmt);
+    const incomeSecondary = calculateIncomeFromAmount(ranked[1].key, secondaryAmt);
+    const incomeSupport = calculateIncomeFromAmount(ranked[2].key, supportAmt);
+
     document.getElementById("primaryReason").innerText =
-      `Attack Mode • Gap £${formatMoney(ranked[0].gap)} • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
+      `Attack Mode • +£${formatMoney(incomePrimary)}/yr • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
 
     document.getElementById("secondaryReason").innerText =
-      `Gap £${formatMoney(ranked[1].gap)} • Yield ${ranked[1].yieldPct.toFixed(2)}%`;
+      `+£${formatMoney(incomeSecondary)}/yr • Yield ${ranked[1].yieldPct.toFixed(2)}%`;
 
     document.getElementById("supportReason").innerText =
-      `Gap £${formatMoney(ranked[2].gap)} • Yield ${ranked[2].yieldPct.toFixed(2)}%`;
-
+      `+£${formatMoney(incomeSupport)}/yr • Yield ${ranked[2].yieldPct.toFixed(2)}%`;
   }
 
   // =============================
   // 🧠 REINVESTMENT MODE (ALL 4)
   // =============================
   else {
-
     primaryAmt = Math.round(total * 0.35);
     secondaryAmt = Math.round(total * 0.30);
     supportAmt = Math.round(total * 0.20);
@@ -954,26 +962,30 @@ function updateDecision() {
     document.getElementById("secondaryBuy").innerText = ranked[1].name;
     document.getElementById("supportBuy").innerText = ranked[2].name;
 
-    // 🔥 Show 4th inside support note
-    document.getElementById("supportReason").innerText =
-      `Reinvest Mode • 3rd: ${ranked[2].name} (£${supportAmt}) • 4th: ${ranked[3].name} (£${fourthAmt})`;
-
     document.querySelectorAll(".buy-box .amt")[0].innerText = `£${primaryAmt}`;
     document.querySelectorAll(".buy-box .amt")[1].innerText = `£${secondaryAmt}`;
     document.querySelectorAll(".buy-box .amt")[2].innerText = `£${supportAmt}`;
 
+    const incomePrimary = calculateIncomeFromAmount(ranked[0].key, primaryAmt);
+    const incomeSecondary = calculateIncomeFromAmount(ranked[1].key, secondaryAmt);
+    const incomeSupport = calculateIncomeFromAmount(ranked[2].key, supportAmt);
+    const incomeFourth = calculateIncomeFromAmount(ranked[3].key, fourthAmt);
+
     document.getElementById("primaryReason").innerText =
-      `Reinvestment Mode • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
+      `Reinvest Mode • +£${formatMoney(incomePrimary)}/yr • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
 
     document.getElementById("secondaryReason").innerText =
-      `Yield ${ranked[1].yieldPct.toFixed(2)}%`;
+      `+£${formatMoney(incomeSecondary)}/yr • Yield ${ranked[1].yieldPct.toFixed(2)}%`;
 
+    document.getElementById("supportReason").innerText =
+      `3rd: +£${formatMoney(incomeSupport)}/yr • 4th: ${ranked[3].name} +£${formatMoney(incomeFourth)}/yr`;
   }
 
   document.getElementById("bestReinvestTarget").innerText = ranked[0].name;
   document.getElementById("bestValueBuy").innerText = ranked[0].name;
   document.getElementById("bestValueBuyMeta").innerText =
     `Yield ${ranked[0].yieldPct.toFixed(2)}% • Gap £${formatMoney(ranked[0].gap)}`;
+
 }
 
 function getTargetDps(stockName) {
