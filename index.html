@@ -626,10 +626,10 @@
   const MAX_PRIMARY_SHARE = 0.5;
 
   const ids = [
-    "lngShares","lngDps",
-    "mngShares","mngDps",
-    "sdlfShares","sdlfDps",
-    "suprShares","suprDps"
+    "lngDps",
+    "mngDps",
+    "sdlfDps",
+    "suprDps"
   ];
 
   const names = {
@@ -767,8 +767,39 @@
     }
   }
 
+  async function loadShareCounts() {
+    const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      data.forEach(row => {
+        const ticker = normaliseTicker(row.ticker);
+        const key = getKeyFromTicker(ticker);
+        if (!key) return;
+
+        const shares = parseNumber(row.shares);
+
+        if (Number.isFinite(shares) && shares > 0) {
+          const input = document.getElementById(`${key}Shares`);
+          if (input) {
+            input.value = shares;
+          }
+        }
+      });
+
+      updateAll();
+    } catch (err) {
+      console.error("Share count sync failed", err);
+    }
+  }
+
   setInterval(loadLivePrices, 30000);
+  setInterval(loadShareCounts, 30000);
+
   loadLivePrices();
+  loadShareCounts();
 
   function formatMoney(value) {
     return Number(value || 0).toLocaleString("en-GB", {
@@ -1059,32 +1090,33 @@
   }
 
   async function updateLogPreview() {
-  const into = document.getElementById("logInto").value;
-  const price = parseFloat(document.getElementById("logPrice").value);
-  const amount = parseFloat(document.getElementById("logAmount").value);
-  const dps = getTargetDps(into);
+    const into = document.getElementById("logInto").value;
+    const price = parseFloat(document.getElementById("logPrice").value);
+    const amount = parseFloat(document.getElementById("logAmount").value);
+    const dps = getTargetDps(into);
 
-  let yieldPct = 0;
-  let incomeAdded = 0;
+    let yieldPct = 0;
+    let incomeAdded = 0;
 
-  if (!isNaN(price) && price > 0 && dps > 0) {
-    yieldPct = (dps / price) * 100;
+    if (!isNaN(price) && price > 0 && dps > 0) {
+      yieldPct = (dps / price) * 100;
+    }
+
+    if (!isNaN(amount) && amount > 0 && yieldPct > 0) {
+      incomeAdded = amount * (yieldPct / 100);
+    }
+
+    document.getElementById("logYieldAuto").value = yieldPct > 0 ? yieldPct.toFixed(2) : "";
+
+    if (incomeAdded > 0) {
+      document.getElementById("logIncomePreview").innerText = `£${formatMoney(incomeAdded)}`;
+    } else {
+      const logs = await getStoredLogs();
+      const totalIncome = logs.reduce((sum, log) => sum + (Number(log.incomeAdded) || 0), 0);
+      document.getElementById("logIncomePreview").innerText = `£${formatMoney(totalIncome)}`;
+    }
   }
 
-  if (!isNaN(amount) && amount > 0 && yieldPct > 0) {
-    incomeAdded = amount * (yieldPct / 100);
-  }
-
-  document.getElementById("logYieldAuto").value = yieldPct > 0 ? yieldPct.toFixed(2) : "";
-
-  if (incomeAdded > 0) {
-    document.getElementById("logIncomePreview").innerText = `£${formatMoney(incomeAdded)}`;
-  } else {
-    const logs = await getStoredLogs();
-    const totalIncome = logs.reduce((sum, log) => sum + (Number(log.incomeAdded) || 0), 0);
-    document.getElementById("logIncomePreview").innerText = `£${formatMoney(totalIncome)}`;
-  }
-}
   function updateSmartReinvestPanel() {
     return;
   }
@@ -1205,17 +1237,17 @@
   });
 
   ["logInto", "logPrice", "logAmount"].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) {
-    el.addEventListener("input", () => updateLogPreview());
-    el.addEventListener("change", () => updateLogPreview());
-  }
-});
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", () => updateLogPreview());
+      el.addEventListener("change", () => updateLogPreview());
+    }
+  });
 
   document.getElementById("addLogBtn").addEventListener("click", addLog);
   document.getElementById("paydayAmount").addEventListener("input", updateAll);
 
   updateAll();
-  </script>
+</script>
 </body>
 </html>
