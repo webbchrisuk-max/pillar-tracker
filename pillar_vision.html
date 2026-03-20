@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>Aurora Pillar Vision</title>
-  <style>
+ <style>
     :root {
       --bg: #071018;
       --bg2: #0c1624;
@@ -73,6 +73,16 @@
       font-size: 30px;
       line-height: 1.05;
       letter-spacing: 0.3px;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      letter-spacing: 0.3px;
+    }
+
+    h3 {
+      margin: 0;
     }
 
     .sub {
@@ -159,6 +169,7 @@
       margin-top: 6px;
       color: var(--muted);
       font-size: 12px;
+      line-height: 1.4;
     }
 
     .big-progress {
@@ -171,6 +182,7 @@
       align-items: center;
       font-size: 13px;
       color: var(--muted);
+      gap: 12px;
     }
 
     .bar {
@@ -261,6 +273,7 @@
       font-weight: 800;
       letter-spacing: 0.7px;
       border: 1px solid currentColor;
+      white-space: nowrap;
     }
 
     .green { color: var(--green); }
@@ -284,6 +297,7 @@
       overflow: hidden;
       margin-top: 8px;
       background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.04);
     }
 
     .strength-fill {
@@ -318,12 +332,14 @@
       margin-top: 8px;
       font-size: 18px;
       font-weight: 800;
+      line-height: 1.2;
     }
 
     .leader-meta {
       margin-top: 6px;
       color: var(--muted);
       font-size: 12px;
+      line-height: 1.4;
     }
 
     .phase-grid {
@@ -351,6 +367,17 @@
       line-height: 1.5;
     }
 
+    /* ===================== CHART / FORECAST ===================== */
+    canvas {
+      width: 100%;
+      max-width: 100%;
+      display: block;
+      margin-top: 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
     .footer {
       margin-top: 14px;
       color: var(--muted);
@@ -367,7 +394,8 @@
       }
 
       .pillar-grid,
-      .dual-grid {
+      .dual-grid,
+      .triple-grid {
         grid-template-columns: 1fr;
       }
 
@@ -391,10 +419,21 @@
       }
 
       h1 { font-size: 25px; }
+      h2 { font-size: 17px; }
       .stat { font-size: 24px; }
 
       .timeline-row {
         grid-template-columns: 1fr;
+      }
+
+      .progress-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .pillar-top {
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
   </style>
@@ -465,6 +504,37 @@
         </div>
       </div>
     </section>
+    
+    <!-- ===================== MISSION FORECAST ===================== -->
+<section class="section card">
+  <h2>Mission Forecast</h2>
+
+  <div class="grid triple-grid">
+    <div class="mini">
+      <div class="k">Projected Years to Target</div>
+      <div class="v" id="yearsToTarget">--</div>
+      <div class="subv" id="yearsToTargetSub">Waiting for live projection</div>
+    </div>
+
+    <div class="mini">
+      <div class="k">Projected Target Date</div>
+      <div class="v" id="projectedTargetDate">--</div>
+      <div class="subv" id="projectedTargetDateSub">Based on current pace</div>
+    </div>
+
+    <div class="mini">
+      <div class="k">Next Best Move</div>
+      <div class="v" id="nextBestMove">--</div>
+      <div class="subv" id="nextBestMoveSub">Waiting for live ranking</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== INCOME PROJECTION CHART ===================== -->
+<section class="section card">
+  <h2>Projected Income Curve</h2>
+  <canvas id="incomeProjectionChart" height="120"></canvas>
+</section>
 
     <!-- ===================== TIMELINE ===================== -->
     <section class="section card">
@@ -651,32 +721,28 @@
   const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
   const SHEET_NAME = "Holdings";
   const TARGET_MONTHLY = 2000;
+  const TARGET_ANNUAL = TARGET_MONTHLY * 12;
   const TARGET_ANNUAL_PER_PILLAR = 2000;
+
+  const MONTHLY_CONTRIBUTION = 800;
+  const DEFAULT_YIELD = 0.085;
 
   const pillarMap = {
     lng: {
       tickers: ["LGEN", "LON:LGEN"],
-      name: "Legal & General",
-      role: "Core Builder",
-      badge: "Anchor"
+      name: "Legal & General"
     },
     mng: {
       tickers: ["MNG", "LON:MNG"],
-      name: "M&G",
-      role: "Fastest Builder",
-      badge: "Accelerator"
+      name: "M&G"
     },
     sdlf: {
       tickers: ["SDLF", "LON:SDLF"],
-      name: "Standard Life",
-      role: "Later Support",
-      badge: "Balance"
+      name: "Standard Life"
     },
     supr: {
       tickers: ["SUPR", "LON:SUPR"],
-      name: "Supermarket REIT",
-      role: "Cashflow Smooth",
-      badge: "Stabiliser"
+      name: "Supermarket REIT"
     }
   };
 
@@ -767,9 +833,8 @@
 
   function updateMissionTotals(totalAnnual) {
     const currentMonthly = totalAnnual / 12;
-    const annualTarget = TARGET_MONTHLY * 12;
     const monthlyShortfall = Math.max(TARGET_MONTHLY - currentMonthly, 0);
-    const annualShortfall = Math.max(annualTarget - totalAnnual, 0);
+    const annualShortfall = Math.max(TARGET_ANNUAL - totalAnnual, 0);
     const progressPct = Math.min((currentMonthly / TARGET_MONTHLY) * 100, 100);
 
     setText("annualIncome", formatMoney(totalAnnual, 0));
@@ -829,7 +894,139 @@
     setText("leaderWeakestMeta", `£${formatMoney(weakestGap.gap, 0)} gap`);
 
     setText("topPillar", highestIncome.name);
-    setText("bestRoute", `${fastestBuilder.name} + ${closestTarget.name}`);
+
+    let bestRouteText = `${fastestBuilder.name} + ${closestTarget.name}`;
+    if (fastestBuilder.name === closestTarget.name) {
+    const secondBest = [...list]
+    .filter(item => item.name !== fastestBuilder.name)
+    .sort((a, b) => b.yieldPct - a.yieldPct)[0];
+
+    bestRouteText = secondBest
+    ? `${fastestBuilder.name} + ${secondBest.name}`
+    : fastestBuilder.name;
+}
+
+setText("bestRoute", bestRouteText);
+
+    setText("nextBestMove", fastestBuilder.name);
+    setText("nextBestMoveSub", `Yield ${fastestBuilder.yieldPct.toFixed(2)}% • Gap £${formatMoney(fastestBuilder.gap, 0)}`);
+  }
+
+  function projectIncome(currentAnnual, avgYield = DEFAULT_YIELD, monthlyContribution = MONTHLY_CONTRIBUTION, years = 10) {
+    let annualIncome = currentAnnual;
+    const monthlyYieldIncome = (monthlyContribution * 12) * avgYield;
+    const points = [];
+
+    for (let year = 0; year <= years; year++) {
+      const projectedMonthly = annualIncome / 12;
+      points.push({
+        yearOffset: year,
+        annual: annualIncome,
+        monthly: projectedMonthly
+      });
+
+      annualIncome = annualIncome + (annualIncome * avgYield) + monthlyYieldIncome;
+    }
+
+    return points;
+  }
+
+  function updateForecast(totalAnnual, pillars) {
+    const weightedYieldBase = Object.values(pillars).reduce((sum, p) => sum + p.yieldPct, 0);
+    const weightedYield = weightedYieldBase > 0 ? (weightedYieldBase / Object.keys(pillars).length) / 100 : DEFAULT_YIELD;
+
+    const projection = projectIncome(totalAnnual, weightedYield || DEFAULT_YIELD, MONTHLY_CONTRIBUTION, 12);
+
+    let yearsToTarget = null;
+    projection.forEach(point => {
+      if (yearsToTarget === null && point.monthly >= TARGET_MONTHLY) {
+        yearsToTarget = point.yearOffset;
+      }
+    });
+
+    if (yearsToTarget === null) {
+      setText("yearsToTarget", "12+ yrs");
+      setText("yearsToTargetSub", "At current pace");
+      setText("projectedTargetDate", "Beyond model");
+      setText("projectedTargetDateSub", "Needs longer runway");
+    } else {
+      const currentYear = new Date().getFullYear();
+      const targetYear = currentYear + yearsToTarget;
+
+      setText("yearsToTarget", `${yearsToTarget} yrs`);
+      setText("yearsToTargetSub", "At current pace");
+      setText("projectedTargetDate", `${targetYear}`);
+      setText("projectedTargetDateSub", "Estimated mission hit year");
+    }
+
+    drawProjectionChart(projection);
+  }
+
+  function drawProjectionChart(points) {
+    const canvas = document.getElementById("incomeProjectionChart");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+
+    canvas.width = rect.width * dpr;
+    canvas.height = 120 * dpr;
+    ctx.scale(dpr, dpr);
+
+    const width = rect.width;
+    const height = 120;
+
+    ctx.clearRect(0, 0, width, height);
+
+    const padding = 16;
+    const maxY = Math.max(TARGET_MONTHLY, ...points.map(p => p.monthly));
+    const minY = 0;
+
+    ctx.strokeStyle = "rgba(255,255,255,0.10)";
+    ctx.lineWidth = 1;
+
+    ctx.beginPath();
+    ctx.moveTo(padding, height - padding);
+    ctx.lineTo(width - padding, height - padding);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(padding, padding);
+    ctx.lineTo(padding, height - padding);
+    ctx.stroke();
+
+    const xStep = (width - padding * 2) / Math.max(points.length - 1, 1);
+
+    ctx.strokeStyle = "rgba(98,243,255,0.95)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+
+    points.forEach((point, i) => {
+      const x = padding + i * xStep;
+      const y = height - padding - ((point.monthly - minY) / (maxY - minY)) * (height - padding * 2);
+
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+
+    ctx.stroke();
+
+    const targetY = height - padding - ((TARGET_MONTHLY - minY) / (maxY - minY)) * (height - padding * 2);
+    ctx.strokeStyle = "rgba(255,200,87,0.8)";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath();
+    ctx.moveTo(padding, targetY);
+    ctx.lineTo(width - padding, targetY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = "rgba(150,171,197,0.9)";
+    ctx.font = "12px Inter, sans-serif";
+    ctx.fillText("Now", padding, height - 4);
+    ctx.fillText(`Target £${TARGET_MONTHLY}/m`, padding + 6, Math.max(targetY - 6, 12));
+    ctx.fillText(`+${points.length - 1}y`, width - padding - 30, height - 4);
   }
 
   async function loadVisionData() {
@@ -883,6 +1080,7 @@
       updateMissionTotals(totalAnnual);
       updatePillarVisuals(pillars);
       updateLeaders(pillars);
+      updateForecast(totalAnnual, pillars);
     } catch (err) {
       console.error("Aurora Pillar Vision sync failed", err);
     }
@@ -890,6 +1088,10 @@
 
   loadVisionData();
   setInterval(loadVisionData, 30000);
+
+  window.addEventListener("resize", () => {
+    loadVisionData();
+  });
 </script>
 </body>
 </html>
