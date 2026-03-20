@@ -1058,27 +1058,33 @@
     return parseFloat(document.getElementById(fieldId)?.value) || 0;
   }
 
-  function updateLogPreview() {
-    const into = document.getElementById("logInto").value;
-    const price = parseFloat(document.getElementById("logPrice").value);
-    const amount = parseFloat(document.getElementById("logAmount").value);
-    const dps = getTargetDps(into);
+  async function updateLogPreview() {
+  const into = document.getElementById("logInto").value;
+  const price = parseFloat(document.getElementById("logPrice").value);
+  const amount = parseFloat(document.getElementById("logAmount").value);
+  const dps = getTargetDps(into);
 
-    let yieldPct = 0;
-    let incomeAdded = 0;
+  let yieldPct = 0;
+  let incomeAdded = 0;
 
-    if (!isNaN(price) && price > 0 && dps > 0) {
-      yieldPct = (dps / price) * 100;
-    }
-
-    if (!isNaN(amount) && amount > 0 && yieldPct > 0) {
-      incomeAdded = amount * (yieldPct / 100);
-    }
-
-    document.getElementById("logYieldAuto").value = yieldPct > 0 ? yieldPct.toFixed(2) : "";
-    document.getElementById("logIncomePreview").innerText = `£${formatMoney(incomeAdded)}`;
+  if (!isNaN(price) && price > 0 && dps > 0) {
+    yieldPct = (dps / price) * 100;
   }
 
+  if (!isNaN(amount) && amount > 0 && yieldPct > 0) {
+    incomeAdded = amount * (yieldPct / 100);
+  }
+
+  document.getElementById("logYieldAuto").value = yieldPct > 0 ? yieldPct.toFixed(2) : "";
+
+  if (incomeAdded > 0) {
+    document.getElementById("logIncomePreview").innerText = `£${formatMoney(incomeAdded)}`;
+  } else {
+    const logs = await getStoredLogs();
+    const totalIncome = logs.reduce((sum, log) => sum + (Number(log.incomeAdded) || 0), 0);
+    document.getElementById("logIncomePreview").innerText = `£${formatMoney(totalIncome)}`;
+  }
+}
   function updateSmartReinvestPanel() {
     return;
   }
@@ -1199,12 +1205,12 @@
   });
 
   ["logInto", "logPrice", "logAmount"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener("input", updateLogPreview);
-      el.addEventListener("change", updateLogPreview);
-    }
-  });
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener("input", () => updateLogPreview());
+    el.addEventListener("change", () => updateLogPreview());
+  }
+});
 
   document.getElementById("addLogBtn").addEventListener("click", addLog);
   document.getElementById("paydayAmount").addEventListener("input", updateAll);
