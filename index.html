@@ -329,19 +329,19 @@
     <section class="card decision">
       <h2>Payday Decision Box</h2>
       <div class="mini" style="margin-top:12px;">
-  <div class="k">Master Income Goal</div>
-  <div class="v" id="goalIncomeCurrent">£0.00/month</div>
-  <div class="subv" id="goalIncomeRemaining">£0.00/month still needed to reach £2,000/month</div>
-</div>
+        <div class="k">Master Income Goal</div>
+        <div class="v" id="goalIncomeCurrent">£0.00/month</div>
+        <div class="subv" id="goalIncomeRemaining">£0.00/month still needed to reach £2,000/month</div>
+      </div>
       <div class="mini" style="margin-top:12px;">
-  <div class="k">Total Income Impact</div>
-  <div class="v" id="decisionIncomeAnnual">+£0.00/yr</div>
-  <div class="subv" id="decisionIncomeMonthly">+£0.00/month</div>
-</div>
+        <div class="k">Total Income Impact</div>
+        <div class="v" id="decisionIncomeAnnual">+£0.00/yr</div>
+        <div class="subv" id="decisionIncomeMonthly">+£0.00/month</div>
+      </div>
       <div class="input-box" style="margin-bottom:12px;">
-  <label>Total Investment (£)</label>
-  <input id="paydayAmount" type="number" value="600" />
-</div>
+        <label>Total Investment (£)</label>
+        <input id="paydayAmount" type="number" value="600" />
+      </div>
       <div class="decision-plan">
         <div class="buy-box">
           <div class="stat-label">Primary Buy</div>
@@ -433,7 +433,7 @@
               <input id="mngDps" type="number" step="0.0001" value="0.2048" />
             </div>
           </div>
-                    <div class="pillar-stats">
+          <div class="pillar-stats">
             <div class="mini"><div class="k">Current Income</div><div class="v" id="mngIncome">£0</div></div>
             <div class="mini"><div class="k">Gap to Target</div><div class="v" id="mngGap">£0</div></div>
             <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="mngRemaining">£0</div></div>
@@ -654,8 +654,41 @@
       supr: 0
     };
 
+    const lastGoodLiveData = {
+      lng: { price: 0, value: 0, cost: 0, gain: 0 },
+      mng: { price: 0, value: 0, cost: 0, gain: 0 },
+      sdlf: { price: 0, value: 0, cost: 0, gain: 0 },
+      supr: { price: 0, value: 0, cost: 0, gain: 0 }
+    };
+
     const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
     const SHEET_NAME = "Holdings";
+
+    function parseNumber(value) {
+      const cleaned = String(value ?? "").replace(/[^0-9.-]+/g, "");
+      const parsed = parseFloat(cleaned);
+      return Number.isFinite(parsed) ? parsed : NaN;
+    }
+
+    function normaliseTicker(value) {
+      return String(value || "").trim().toUpperCase();
+    }
+
+    function getKeyFromTicker(ticker) {
+      const t = normaliseTicker(ticker);
+
+      if (["LON:LGEN", "LGEN", "LGEN.L"].includes(t)) return "lng";
+      if (["LON:MNG", "MNG", "MNG.L"].includes(t)) return "mng";
+      if (["LON:SDLF", "SDLF", "SDLF.L", "PHNX", "PHNX.L", "STANDARD LIFE"].includes(t)) return "sdlf";
+      if (["LON:SUPR", "SUPR", "SUPR.L"].includes(t)) return "supr";
+
+      return null;
+    }
+
+    function normalisePrice(rawPrice) {
+      if (!Number.isFinite(rawPrice) || rawPrice <= 0) return NaN;
+      return rawPrice > 20 ? rawPrice / 100 : rawPrice;
+    }
 
     async function loadLivePrices() {
       const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
@@ -665,60 +698,59 @@
         const data = await res.json();
 
         let totalValue = 0;
-        let totalGain = 0;
+        let totalCost = 0;
 
         data.forEach(row => {
-          const ticker = String(row.ticker || "").trim().toUpperCase();
-          const price = parseFloat(row.live_price || 0);
-          const shares = parseFloat(row.shares || 0);
-          const gain = parseFloat(row["profit/loss"] || 0);
-          const annualDps = parseFloat(row.annual_dividend_per_share || 0);
+          const ticker = normaliseTicker(row.ticker);
+          const key = getKeyFromTicker(ticker);
 
-          if (!ticker || isNaN(price)) return;
+          if (!key) return;
 
-          const value = shares * price;
+          const shares = parseNumber(row.shares);
+          const rawPrice = parseNumber(row.live_price);
+          const annualDps = parseNumber(row.annual_dividend_per_share);
+          const cost = parseNumber(row.book_cost);
+
+          if (!Number.isFinite(shares) || shares <= 0) return;
+
+          const price = normalisePrice(rawPrice);
+          const safePrice = Number.isFinite(price) && price > 0 ? price : (lastGoodLiveData[key].price || 0);
+          const safeCost = Number.isFinite(cost) && cost >= 0 ? cost : (lastGoodLiveData[key].cost || 0);
+
+          const value = shares * safePrice;
+          const gain = value - safeCost;
+
+          livePrices[key] = safePrice;
+          lastGoodLiveData[key] = {
+            price: safePrice,
+            value,
+            cost: safeCost,
+            gain
+          };
+
           totalValue += value;
-          totalGain += gain;
+          totalCost += safeCost;
 
-          if (ticker.includes("MNG")) {
-            livePrices.mng = price;
-            document.getElementById("mngLivePrice").innerText = `£${price.toFixed(3)}`;
-            document.getElementById("mngLiveValue").innerText = `£${value.toFixed(2)}`;
-            if (!isNaN(annualDps) && annualDps > 0) document.getElementById("mngDps").value = annualDps;
-          }
+          document.getElementById(`${key}LivePrice`).innerText = safePrice > 0 ? `£${safePrice.toFixed(3)}` : "--";
+          document.getElementById(`${key}LiveValue`).innerText = `£${value.toFixed(2)}`;
 
-          if (ticker.includes("LGEN")) {
-            livePrices.lng = price;
-            document.getElementById("lngLivePrice").innerText = `£${price.toFixed(3)}`;
-            document.getElementById("lngLiveValue").innerText = `£${value.toFixed(2)}`;
-            if (!isNaN(annualDps) && annualDps > 0) document.getElementById("lngDps").value = annualDps;
-          }
-
-          if (ticker.includes("SDLF")) {
-            livePrices.sdlf = price;
-            document.getElementById("sdlfLivePrice").innerText = `£${price.toFixed(3)}`;
-            document.getElementById("sdlfLiveValue").innerText = `£${value.toFixed(2)}`;
-            if (!isNaN(annualDps) && annualDps > 0) document.getElementById("sdlfDps").value = annualDps;
-          }
-
-          if (ticker.includes("SUPR")) {
-            livePrices.supr = price;
-            document.getElementById("suprLivePrice").innerText = `£${price.toFixed(3)}`;
-            document.getElementById("suprLiveValue").innerText = `£${value.toFixed(2)}`;
-            if (!isNaN(annualDps) && annualDps > 0) document.getElementById("suprDps").value = annualDps;
+          if (Number.isFinite(annualDps) && annualDps > 0) {
+            document.getElementById(`${key}Dps`).value = annualDps;
           }
         });
 
-        const gainPct = totalValue > 0 ? (totalGain / totalValue) * 100 : 0;
+        const totalGain = totalValue - totalCost;
+        const gainPct = totalCost > 0 ? (totalGain / totalCost) * 100 : 0;
 
         document.getElementById("livePortfolioValue").innerText = `£${totalValue.toFixed(2)}`;
         document.getElementById("livePortfolioGain").innerText = `£${totalGain.toFixed(2)}`;
         document.getElementById("livePortfolioGainPct").innerText = `${gainPct.toFixed(2)}%`;
 
         const gainEl = document.getElementById("livePortfolioGain");
-        gainEl.classList.remove("live-up", "live-down");
+        gainEl.classList.remove("live-up", "live-down", "live-neutral");
         if (totalGain > 0) gainEl.classList.add("live-up");
         else if (totalGain < 0) gainEl.classList.add("live-down");
+        else gainEl.classList.add("live-neutral");
 
         document.getElementById("syncStatusText").innerText = "Live Connected";
         document.getElementById("syncStatusSub").innerText = new Date().toLocaleTimeString();
@@ -728,6 +760,7 @@
       } catch (err) {
         console.error("Sheet load failed", err);
         document.getElementById("syncStatusText").innerText = "Sync Failed";
+        document.getElementById("syncStatusSub").innerText = "Using last good snapshot";
         document.getElementById("syncDot").className = "sync-dot sync-bad";
       }
     }
@@ -741,7 +774,8 @@
         maximumFractionDigits: 2
       });
     }
-        function formatWhole(value) {
+
+    function formatWhole(value) {
       return Number(value || 0).toLocaleString("en-GB", {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
@@ -842,410 +876,381 @@
     }
 
     function getLivePriceForKey(key) {
-  const raw = Number(livePrices[key] || 0);
+      return Number(livePrices[key] || 0);
+    }
 
-  // If price looks like pence (e.g. 280 instead of 2.80), convert to pounds
-  return raw > 20 ? raw / 100 : raw;
-}
+    function getCurrentYieldPct(key) {
+      const dps = parseFloat(document.getElementById(`${key}Dps`)?.value) || 0;
+      const livePrice = getLivePriceForKey(key);
+      if (!livePrice || !dps) return 0;
+      return (dps / livePrice) * 100;
+    }
 
-function getCurrentYieldPct(key) {
-  const dps = parseFloat(document.getElementById(`${key}Dps`)?.value) || 0;
-  const livePrice = getLivePriceForKey(key);
-  if (!livePrice || !dps) return 0;
-  return (dps / livePrice) * 100;
-}
+    function calculateIncomeFromAmount(key, amount) {
+      const dps = parseFloat(document.getElementById(`${key}Dps`)?.value) || 0;
+      const price = getLivePriceForKey(key);
 
-function calculateIncomeFromAmount(key, amount) {
-  const dps = parseFloat(document.getElementById(`${key}Dps`)?.value) || 0;
-  const price = getLivePriceForKey(key);
+      if (!price || !dps || !amount) return 0;
 
-  if (!price || !dps || !amount) return 0;
+      return amount * (dps / price);
+    }
 
-  return amount * (dps / price);
-}
-function updateMasterIncomeGoal(totalIncomeImpact = 0) {
-  const { incomes } = getPillarData();
+    function updateMasterIncomeGoal(totalIncomeImpact = 0) {
+      const { incomes } = getPillarData();
 
-  const currentAnnual = incomes.lng + incomes.mng + incomes.sdlf + incomes.supr;
-  const projectedAnnual = currentAnnual + totalIncomeImpact;
+      const currentAnnual = incomes.lng + incomes.mng + incomes.sdlf + incomes.supr;
+      const projectedAnnual = currentAnnual + totalIncomeImpact;
 
-  const projectedMonthly = projectedAnnual / 12;
-  const targetMonthly = 2000;
-  const remainingMonthly = Math.max(targetMonthly - projectedMonthly, 0);
+      const projectedMonthly = projectedAnnual / 12;
+      const targetMonthly = 2000;
+      const remainingMonthly = Math.max(targetMonthly - projectedMonthly, 0);
 
-  document.getElementById("goalIncomeCurrent").innerText =
-    `£${formatMoney(projectedMonthly)}/month`;
+      document.getElementById("goalIncomeCurrent").innerText =
+        `£${formatMoney(projectedMonthly)}/month`;
 
-  document.getElementById("goalIncomeRemaining").innerText =
-    `£${formatMoney(remainingMonthly)}/month still needed to reach £2,000/month`;
-}
+      document.getElementById("goalIncomeRemaining").innerText =
+        `£${formatMoney(remainingMonthly)}/month still needed to reach £2,000/month`;
+    }
 
     function getSmartRanking() {
-  const { incomes, stage } = getPillarData();
+      const { incomes, stage } = getPillarData();
 
-  return Object.keys(incomes).map(key => {
-    const income = incomes[key] || 0;
-    const gap = Math.max(stage.target - income, 0);
-    const dps = parseFloat(document.getElementById(`${key}Dps`).value) || 0;
-    const livePrice = getLivePriceForKey(key);
-    const yieldPct = livePrice > 0 ? (dps / livePrice) * 100 : 0;
-    const gapScore = stage.target > 0 ? gap / stage.target : 0;
-    const yieldScore = yieldPct / 100;
+      return Object.keys(incomes).map(key => {
+        const income = incomes[key] || 0;
+        const gap = Math.max(stage.target - income, 0);
+        const dps = parseFloat(document.getElementById(`${key}Dps`).value) || 0;
+        const livePrice = getLivePriceForKey(key);
+        const yieldPct = livePrice > 0 ? (dps / livePrice) * 100 : 0;
+        const gapScore = stage.target > 0 ? gap / stage.target : 0;
+        const yieldScore = yieldPct / 100;
 
-    let opportunityBoost = 0;
+        let opportunityBoost = 0;
 
-    if (yieldPct >= 7.0 && gap > 0) opportunityBoost += 0.10;
-    if (yieldPct >= 7.2) opportunityBoost += 0.10;
-    if (yieldPct >= 8.0) opportunityBoost += 0.05;
+        if (yieldPct >= 7.0 && gap > 0) opportunityBoost += 0.10;
+        if (yieldPct >= 7.2) opportunityBoost += 0.10;
+        if (yieldPct >= 8.0) opportunityBoost += 0.05;
 
-    if (key === "mng") opportunityBoost += 0.20;
-    if (key === "lng") opportunityBoost += 0.06;
+        if (key === "mng") opportunityBoost += 0.20;
+        if (key === "lng") opportunityBoost += 0.06;
+        if (key === "supr") opportunityBoost -= 0.10;
 
-    if (key === "supr") opportunityBoost -= 0.10;
+        const totalScore = (gapScore * 0.55) + (yieldScore * 0.20) + opportunityBoost;
 
-    const totalScore = (gapScore * 0.55) + (yieldScore * 0.20) + opportunityBoost;
-
-    return {
-      key,
-      name: names[key],
-      income,
-      gap,
-      dps,
-      livePrice,
-      yieldPct,
-      totalScore
-    };
-  }).sort((a, b) => {
-    if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
-    if (b.gap !== a.gap) return b.gap - a.gap;
-    return b.yieldPct - a.yieldPct;
-  });
-}
-function updateDecision() {
-  const ranked = getSmartRanking();
-
-  if (!ranked || ranked.length < 4) return;
-
-  const total = parseFloat(document.getElementById("paydayAmount")?.value) || 600;
-  const REINVEST_THRESHOLD = 2000;
-
-  let primaryAmt = 0;
-  let secondaryAmt = 0;
-  let supportAmt = 0;
-  let fourthAmt = 0;
-
-  let totalIncomeImpact = 0;
-
-  // =============================
-  // ATTACK MODE (Top 3)
-  // =============================
-  if (total < REINVEST_THRESHOLD) {
-    primaryAmt = Math.round(total * 0.5);
-    secondaryAmt = Math.round(total * 0.33);
-    supportAmt = total - primaryAmt - secondaryAmt;
-
-    const maxPrimaryAmt = Math.round(total * MAX_PRIMARY_SHARE);
-
-    if (primaryAmt > maxPrimaryAmt) {
-      const excess = primaryAmt - maxPrimaryAmt;
-      primaryAmt = maxPrimaryAmt;
-
-      const secondaryAdd = Math.round(excess * 0.65);
-      const supportAdd = excess - secondaryAdd;
-
-      secondaryAmt += secondaryAdd;
-      supportAmt += supportAdd;
+        return {
+          key,
+          name: names[key],
+          income,
+          gap,
+          dps,
+          livePrice,
+          yieldPct,
+          totalScore
+        };
+      }).sort((a, b) => {
+        if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
+        if (b.gap !== a.gap) return b.gap - a.gap;
+        return b.yieldPct - a.yieldPct;
+      });
     }
 
-    document.getElementById("primaryBuy").innerText = ranked[0].name;
-    document.getElementById("secondaryBuy").innerText = ranked[1].name;
-    document.getElementById("supportBuy").innerText = ranked[2].name;
+    function updateDecision() {
+      const ranked = getSmartRanking();
 
-    document.querySelectorAll(".buy-box .amt")[0].innerText = `£${primaryAmt}`;
-    document.querySelectorAll(".buy-box .amt")[1].innerText = `£${secondaryAmt}`;
-    document.querySelectorAll(".buy-box .amt")[2].innerText = `£${supportAmt}`;
+      if (!ranked || ranked.length < 4) return;
 
-    const incomePrimary = calculateIncomeFromAmount(ranked[0].key, primaryAmt);
-    const incomeSecondary = calculateIncomeFromAmount(ranked[1].key, secondaryAmt);
-    const incomeSupport = calculateIncomeFromAmount(ranked[2].key, supportAmt);
+      const total = parseFloat(document.getElementById("paydayAmount")?.value) || 600;
+      const REINVEST_THRESHOLD = 2000;
 
-    totalIncomeImpact = incomePrimary + incomeSecondary + incomeSupport;
+      let primaryAmt = 0;
+      let secondaryAmt = 0;
+      let supportAmt = 0;
+      let fourthAmt = 0;
+      let totalIncomeImpact = 0;
 
-    document.getElementById("primaryReason").innerText =
-      `Attack Mode • +£${formatMoney(incomePrimary)}/yr • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
+      if (total < REINVEST_THRESHOLD) {
+        primaryAmt = Math.round(total * 0.5);
+        secondaryAmt = Math.round(total * 0.33);
+        supportAmt = total - primaryAmt - secondaryAmt;
 
-    document.getElementById("secondaryReason").innerText =
-      `+£${formatMoney(incomeSecondary)}/yr • Yield ${ranked[1].yieldPct.toFixed(2)}%`;
+        const maxPrimaryAmt = Math.round(total * MAX_PRIMARY_SHARE);
 
-    document.getElementById("supportReason").innerText =
-      `+£${formatMoney(incomeSupport)}/yr • Yield ${ranked[2].yieldPct.toFixed(2)}%`;
-  }
+        if (primaryAmt > maxPrimaryAmt) {
+          const excess = primaryAmt - maxPrimaryAmt;
+          primaryAmt = maxPrimaryAmt;
 
-  // =============================
-  // REINVEST MODE (All 4)
-  // =============================
-  else {
-    primaryAmt = Math.round(total * 0.35);
-    secondaryAmt = Math.round(total * 0.30);
-    supportAmt = Math.round(total * 0.20);
-    fourthAmt = total - primaryAmt - secondaryAmt - supportAmt;
+          const secondaryAdd = Math.round(excess * 0.65);
+          const supportAdd = excess - secondaryAdd;
 
-    document.getElementById("primaryBuy").innerText = ranked[0].name;
-    document.getElementById("secondaryBuy").innerText = ranked[1].name;
-    document.getElementById("supportBuy").innerText = ranked[2].name;
+          secondaryAmt += secondaryAdd;
+          supportAmt += supportAdd;
+        }
 
-    document.querySelectorAll(".buy-box .amt")[0].innerText = `£${primaryAmt}`;
-    document.querySelectorAll(".buy-box .amt")[1].innerText = `£${secondaryAmt}`;
-    document.querySelectorAll(".buy-box .amt")[2].innerText = `£${supportAmt}`;
+        document.getElementById("primaryBuy").innerText = ranked[0].name;
+        document.getElementById("secondaryBuy").innerText = ranked[1].name;
+        document.getElementById("supportBuy").innerText = ranked[2].name;
 
-    const incomePrimary = calculateIncomeFromAmount(ranked[0].key, primaryAmt);
-    const incomeSecondary = calculateIncomeFromAmount(ranked[1].key, secondaryAmt);
-    const incomeSupport = calculateIncomeFromAmount(ranked[2].key, supportAmt);
-    const incomeFourth = calculateIncomeFromAmount(ranked[3].key, fourthAmt);
+        document.querySelectorAll(".buy-box .amt")[0].innerText = `£${primaryAmt}`;
+        document.querySelectorAll(".buy-box .amt")[1].innerText = `£${secondaryAmt}`;
+        document.querySelectorAll(".buy-box .amt")[2].innerText = `£${supportAmt}`;
 
-    totalIncomeImpact = incomePrimary + incomeSecondary + incomeSupport + incomeFourth;
+        const incomePrimary = calculateIncomeFromAmount(ranked[0].key, primaryAmt);
+        const incomeSecondary = calculateIncomeFromAmount(ranked[1].key, secondaryAmt);
+        const incomeSupport = calculateIncomeFromAmount(ranked[2].key, supportAmt);
 
-    document.getElementById("primaryReason").innerText =
-      `Reinvest Mode • +£${formatMoney(incomePrimary)}/yr • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
+        totalIncomeImpact = incomePrimary + incomeSecondary + incomeSupport;
 
-    document.getElementById("secondaryReason").innerText =
-      `+£${formatMoney(incomeSecondary)}/yr • Yield ${ranked[1].yieldPct.toFixed(2)}%`;
+        document.getElementById("primaryReason").innerText =
+          `Attack Mode • +£${formatMoney(incomePrimary)}/yr • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
 
-    document.getElementById("supportReason").innerText =
-      `3rd: +£${formatMoney(incomeSupport)}/yr • 4th: ${ranked[3].name} +£${formatMoney(incomeFourth)}/yr`;
-  }
+        document.getElementById("secondaryReason").innerText =
+          `+£${formatMoney(incomeSecondary)}/yr • Yield ${ranked[1].yieldPct.toFixed(2)}%`;
 
-  document.getElementById("decisionIncomeAnnual").innerText =
-    `+£${formatMoney(totalIncomeImpact)}/yr`;
-  document.getElementById("decisionIncomeMonthly").innerText =
-    `+£${formatMoney(totalIncomeImpact / 12)}/month`;
+        document.getElementById("supportReason").innerText =
+          `+£${formatMoney(incomeSupport)}/yr • Yield ${ranked[2].yieldPct.toFixed(2)}%`;
+      } else {
+        primaryAmt = Math.round(total * 0.35);
+        secondaryAmt = Math.round(total * 0.30);
+        supportAmt = Math.round(total * 0.20);
+        fourthAmt = total - primaryAmt - secondaryAmt - supportAmt;
 
-  updateMasterIncomeGoal(totalIncomeImpact);
+        document.getElementById("primaryBuy").innerText = ranked[0].name;
+        document.getElementById("secondaryBuy").innerText = ranked[1].name;
+        document.getElementById("supportBuy").innerText = ranked[2].name;
 
-  document.getElementById("bestReinvestTarget").innerText = ranked[0].name;
-  document.getElementById("bestValueBuy").innerText = ranked[0].name;
-  document.getElementById("bestValueBuyMeta").innerText =
-    `Yield ${ranked[0].yieldPct.toFixed(2)}% • Gap £${formatMoney(ranked[0].gap)}`;
-}
+        document.querySelectorAll(".buy-box .amt")[0].innerText = `£${primaryAmt}`;
+        document.querySelectorAll(".buy-box .amt")[1].innerText = `£${secondaryAmt}`;
+        document.querySelectorAll(".buy-box .amt")[2].innerText = `£${supportAmt}`;
 
-function getTargetDps(stockName) {
-  const fieldId = dpsFieldMap[stockName];
-  return parseFloat(document.getElementById(fieldId)?.value) || 0;
-}
+        const incomePrimary = calculateIncomeFromAmount(ranked[0].key, primaryAmt);
+        const incomeSecondary = calculateIncomeFromAmount(ranked[1].key, secondaryAmt);
+        const incomeSupport = calculateIncomeFromAmount(ranked[2].key, supportAmt);
+        const incomeFourth = calculateIncomeFromAmount(ranked[3].key, fourthAmt);
 
-function updateLogPreview() {
-  const into = document.getElementById("logInto").value;
-  const price = parseFloat(document.getElementById("logPrice").value);
-  const amount = parseFloat(document.getElementById("logAmount").value);
-  const dps = getTargetDps(into);
+        totalIncomeImpact = incomePrimary + incomeSecondary + incomeSupport + incomeFourth;
 
-  let yieldPct = 0;
-  let incomeAdded = 0;
+        document.getElementById("primaryReason").innerText =
+          `Reinvest Mode • +£${formatMoney(incomePrimary)}/yr • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
 
-  if (!isNaN(price) && price > 0 && dps > 0) {
-    yieldPct = (dps / price) * 100;
-  }
+        document.getElementById("secondaryReason").innerText =
+          `+£${formatMoney(incomeSecondary)}/yr • Yield ${ranked[1].yieldPct.toFixed(2)}%`;
 
-  if (!isNaN(amount) && amount > 0 && yieldPct > 0) {
-    incomeAdded = amount * (yieldPct / 100);
-  }
+        document.getElementById("supportReason").innerText =
+          `3rd: +£${formatMoney(incomeSupport)}/yr • 4th: ${ranked[3].name} +£${formatMoney(incomeFourth)}/yr`;
+      }
 
-  document.getElementById("logYieldAuto").value = yieldPct > 0 ? yieldPct.toFixed(2) : "";
-  document.getElementById("logIncomePreview").innerText = `£${formatMoney(incomeAdded)}`;
-}
+      document.getElementById("decisionIncomeAnnual").innerText =
+        `+£${formatMoney(totalIncomeImpact)}/yr`;
+      document.getElementById("decisionIncomeMonthly").innerText =
+        `+£${formatMoney(totalIncomeImpact / 12)}/month`;
 
-function updateSmartReinvestPanel() {
-  return;
-}
+      updateMasterIncomeGoal(totalIncomeImpact);
 
-function getStoredLogs() {
-  return JSON.parse(localStorage.getItem(LOG_STORAGE_KEY) || "[]");
-}
-
-function updateReinvestTotals(logs = null) {
-  const records = logs || getStoredLogs();
-  const total = records.reduce((sum, log) => sum + (Number(log.incomeAdded) || 0), 0);
-
-  const currentYear = new Date().getFullYear();
-  const yearTotal = records.reduce((sum, log) => {
-    const logYear = String(log.date || "").slice(0, 4);
-    if (Number(logYear) === currentYear) {
-      return sum + (Number(log.incomeAdded) || 0);
+      document.getElementById("bestReinvestTarget").innerText = ranked[0].name;
+      document.getElementById("bestValueBuy").innerText = ranked[0].name;
+      document.getElementById("bestValueBuyMeta").innerText =
+        `Yield ${ranked[0].yieldPct.toFixed(2)}% • Gap £${formatMoney(ranked[0].gap)}`;
     }
-    return sum;
-  }, 0);
 
-  document.getElementById("reinvestTotal").innerText = `£${formatMoney(total)}`;
-  document.getElementById("reinvestYearTotal").innerText = `£${formatMoney(yearTotal)}`;
-}
+    function getTargetDps(stockName) {
+      const fieldId = dpsFieldMap[stockName];
+      return parseFloat(document.getElementById(fieldId)?.value) || 0;
+    }
 
-function updateMasterIncomeGoal(totalIncomeImpact = 0) {
-  const { incomes } = getPillarData();
+    function updateLogPreview() {
+      const into = document.getElementById("logInto").value;
+      const price = parseFloat(document.getElementById("logPrice").value);
+      const amount = parseFloat(document.getElementById("logAmount").value);
+      const dps = getTargetDps(into);
 
-  const currentAnnual = incomes.lng + incomes.mng + incomes.sdlf + incomes.supr;
-  const projectedAnnual = currentAnnual + totalIncomeImpact;
+      let yieldPct = 0;
+      let incomeAdded = 0;
 
-  const projectedMonthly = projectedAnnual / 12;
-  const targetMonthly = 2000;
-  const remainingMonthly = Math.max(targetMonthly - projectedMonthly, 0);
+      if (!isNaN(price) && price > 0 && dps > 0) {
+        yieldPct = (dps / price) * 100;
+      }
 
-  document.getElementById("goalIncomeCurrent").innerText =
-    `£${formatMoney(projectedMonthly)}/month`;
+      if (!isNaN(amount) && amount > 0 && yieldPct > 0) {
+        incomeAdded = amount * (yieldPct / 100);
+      }
 
-  document.getElementById("goalIncomeRemaining").innerText =
-    `£${formatMoney(remainingMonthly)}/month still needed to reach £2,000/month`;
-}
+      document.getElementById("logYieldAuto").value = yieldPct > 0 ? yieldPct.toFixed(2) : "";
+      document.getElementById("logIncomePreview").innerText = `£${formatMoney(incomeAdded)}`;
+    }
 
-function migrateLegacyLogsIfNeeded() {
-  const existing = localStorage.getItem(LOG_STORAGE_KEY);
-  if (existing) return;
+    function updateSmartReinvestPanel() {
+      return;
+    }
 
-  const legacy =
-    localStorage.getItem(LEGACY_LOG_STORAGE_KEY_V4) ||
-    localStorage.getItem(LEGACY_LOG_STORAGE_KEY_V3) ||
-    localStorage.getItem(LEGACY_LOG_STORAGE_KEY_V2);
+    function getStoredLogs() {
+      return JSON.parse(localStorage.getItem(LOG_STORAGE_KEY) || "[]");
+    }
 
-  if (!legacy) return;
+    function updateReinvestTotals(logs = null) {
+      const records = logs || getStoredLogs();
+      const total = records.reduce((sum, log) => sum + (Number(log.incomeAdded) || 0), 0);
 
-  try {
-    const legacyLogs = JSON.parse(legacy);
-    const upgraded = legacyLogs.map(log => ({
-      id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
-      date: log.date,
-      source: log.from === "Phoenix" ? "Standard Life" : (log.from || "Dividend"),
-      amount: Number(log.amount) || 0,
-      into: log.into === "Phoenix" ? "Standard Life" : log.into,
-      yieldUsed: log.yieldUsed == null ? null : Number(log.yieldUsed),
-      incomeAdded: Number(log.incomeAdded) || 0
-    }));
-    localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(upgraded));
-  } catch (e) {
-    console.error("Could not migrate legacy logs.", e);
-  }
-}
+      const currentYear = new Date().getFullYear();
+      const yearTotal = records.reduce((sum, log) => {
+        const logYear = String(log.date || "").slice(0, 4);
+        if (Number(logYear) === currentYear) {
+          return sum + (Number(log.incomeAdded) || 0);
+        }
+        return sum;
+      }, 0);
 
-function deleteLog(id) {
-  const logs = getStoredLogs().filter(log => log.id !== id);
-  localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(logs));
-  loadLogs();
-}
+      document.getElementById("reinvestTotal").innerText = `£${formatMoney(total)}`;
+      document.getElementById("reinvestYearTotal").innerText = `£${formatMoney(yearTotal)}`;
+    }
 
-function loadLogs() {
-  const logs = getStoredLogs();
-  const tbody = document.getElementById("logTableBody");
+    function migrateLegacyLogsIfNeeded() {
+      const existing = localStorage.getItem(LOG_STORAGE_KEY);
+      if (existing) return;
 
-  tbody.innerHTML = "";
+      const legacy =
+        localStorage.getItem(LEGACY_LOG_STORAGE_KEY_V4) ||
+        localStorage.getItem(LEGACY_LOG_STORAGE_KEY_V3) ||
+        localStorage.getItem(LEGACY_LOG_STORAGE_KEY_V2);
 
-  logs.forEach(log => {
-    const row = document.createElement("tr");
-    const yieldDisplay = log.yieldUsed == null ? "—" : `${Number(log.yieldUsed).toFixed(2)}%`;
+      if (!legacy) return;
 
-    row.innerHTML = `
-      <td>${log.date}</td>
-      <td>${log.source}</td>
-      <td>£${formatMoney(log.amount)}</td>
-      <td>${log.into}</td>
-      <td>${yieldDisplay}</td>
-      <td>+£${formatMoney(log.incomeAdded)}/yr</td>
-      <td><button class="delete-btn" data-id="${log.id}">Delete</button></td>
-    `;
-    tbody.appendChild(row);
-  });
+      try {
+        const legacyLogs = JSON.parse(legacy);
+        const upgraded = legacyLogs.map(log => ({
+          id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+          date: log.date,
+          source: log.from === "Phoenix" ? "Standard Life" : (log.from || "Dividend"),
+          amount: Number(log.amount) || 0,
+          into: log.into === "Phoenix" ? "Standard Life" : log.into,
+          yieldUsed: log.yieldUsed == null ? null : Number(log.yieldUsed),
+          incomeAdded: Number(log.incomeAdded) || 0
+        }));
+        localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(upgraded));
+      } catch (e) {
+        console.error("Could not migrate legacy logs.", e);
+      }
+    }
 
-  tbody.querySelectorAll(".delete-btn").forEach(btn => {
-    btn.addEventListener("click", () => deleteLog(btn.dataset.id));
-  });
+    function deleteLog(id) {
+      const logs = getStoredLogs().filter(log => log.id !== id);
+      localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(logs));
+      loadLogs();
+    }
 
-  updateReinvestTotals(logs);
-}
+    function loadLogs() {
+      const logs = getStoredLogs();
+      const tbody = document.getElementById("logTableBody");
 
-function addLog() {
-  const date = document.getElementById("logDate").value;
-  const source = document.getElementById("logSource").value.trim();
-  const amount = parseFloat(document.getElementById("logAmount").value);
-  const into = document.getElementById("logInto").value;
-  const buyPrice = parseFloat(document.getElementById("logPrice").value);
-  const targetDps = getTargetDps(into);
+      tbody.innerHTML = "";
 
-  if (!date || !source || !into) return;
-  if (isNaN(amount) || amount <= 0) return;
-  if (isNaN(buyPrice) || buyPrice <= 0) return;
-  if (targetDps <= 0) return;
+      logs.forEach(log => {
+        const row = document.createElement("tr");
+        const yieldDisplay = log.yieldUsed == null ? "—" : `${Number(log.yieldUsed).toFixed(2)}%`;
 
-  const yieldUsed = (targetDps / buyPrice) * 100;
-  const incomeAdded = amount * (yieldUsed / 100);
+        row.innerHTML = `
+          <td>${log.date}</td>
+          <td>${log.source}</td>
+          <td>£${formatMoney(log.amount)}</td>
+          <td>${log.into}</td>
+          <td>${yieldDisplay}</td>
+          <td>+£${formatMoney(log.incomeAdded)}/yr</td>
+          <td><button class="delete-btn" data-id="${log.id}">Delete</button></td>
+        `;
+        tbody.appendChild(row);
+      });
 
-  const logs = getStoredLogs();
-  logs.unshift({
-    id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
-    date,
-    source,
-    amount,
-    into,
-    yieldUsed,
-    incomeAdded
-  });
+      tbody.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click", () => deleteLog(btn.dataset.id));
+      });
 
-  localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(logs));
-  loadLogs();
+      updateReinvestTotals(logs);
+    }
 
-  document.getElementById("logDate").value = "";
-  document.getElementById("logSource").value = "";
-  document.getElementById("logAmount").value = "";
-  document.getElementById("logPrice").value = "";
-  document.getElementById("logYieldAuto").value = "";
-  document.getElementById("logIncomePreview").innerText = `£${formatMoney(0)}`;
-  updateSmartReinvestPanel();
-}
+    function addLog() {
+      const date = document.getElementById("logDate").value;
+      const source = document.getElementById("logSource").value.trim();
+      const amount = parseFloat(document.getElementById("logAmount").value);
+      const into = document.getElementById("logInto").value;
+      const buyPrice = parseFloat(document.getElementById("logPrice").value);
+      const targetDps = getTargetDps(into);
 
-function updateAll() {
-  const { incomes, stage } = getPillarData();
+      if (!date || !source || !into) return;
+      if (isNaN(amount) || amount <= 0) return;
+      if (isNaN(buyPrice) || buyPrice <= 0) return;
+      if (targetDps <= 0) return;
 
-  document.getElementById("stageLabel").innerText = `${stage.stageIndex} / 8`;
-  document.getElementById("stageTargetLabel").innerText = `£${formatWhole(stage.target)}`;
-  document.getElementById("nextStageLabel").innerText = `£${formatWhole(stage.nextTarget)}`;
-  document.getElementById("targetHeading").innerText = formatWhole(stage.target);
+      const yieldUsed = (targetDps / buyPrice) * 100;
+      const incomeAdded = amount * (yieldUsed / 100);
 
-  updatePillar("lng", incomes.lng, stage.target, stage.nextTarget);
-  updatePillar("mng", incomes.mng, stage.target, stage.nextTarget);
-  updatePillar("sdlf", incomes.sdlf, stage.target, stage.nextTarget);
-  updatePillar("supr", incomes.supr, stage.target, stage.nextTarget);
+      const logs = getStoredLogs();
+      logs.unshift({
+        id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+        date,
+        source,
+        amount,
+        into,
+        yieldUsed,
+        incomeAdded
+      });
 
-  const totalAnnual = incomes.lng + incomes.mng + incomes.sdlf + incomes.supr;
-  document.getElementById("totalAnnual").innerText = formatMoney(totalAnnual);
-  document.getElementById("totalMonthly").innerText = formatMoney(totalAnnual / 12);
+      localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(logs));
+      loadLogs();
 
-  updateDecision();
-  updateLogPreview();
-  updateSmartReinvestPanel();
-  saveValues();
-}
+      document.getElementById("logDate").value = "";
+      document.getElementById("logSource").value = "";
+      document.getElementById("logAmount").value = "";
+      document.getElementById("logPrice").value = "";
+      document.getElementById("logYieldAuto").value = "";
+      document.getElementById("logIncomePreview").innerText = `£${formatMoney(0)}`;
+      updateSmartReinvestPanel();
+    }
 
-migrateLegacyLogsIfNeeded();
-loadSavedValues();
-loadLogs();
+    function updateAll() {
+      const { incomes, stage } = getPillarData();
 
-ids.forEach(id => {
-  const el = document.getElementById(id);
-  if (el) {
-    el.addEventListener("input", updateAll);
-    el.addEventListener("change", updateAll);
-  }
-});
+      document.getElementById("stageLabel").innerText = `${stage.stageIndex} / 8`;
+      document.getElementById("stageTargetLabel").innerText = `£${formatWhole(stage.target)}`;
+      document.getElementById("nextStageLabel").innerText = `£${formatWhole(stage.nextTarget)}`;
+      document.getElementById("targetHeading").innerText = formatWhole(stage.target);
 
-["logInto", "logPrice", "logAmount"].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) {
-    el.addEventListener("input", updateLogPreview);
-    el.addEventListener("change", updateLogPreview);
-  }
-});
+      updatePillar("lng", incomes.lng, stage.target, stage.nextTarget);
+      updatePillar("mng", incomes.mng, stage.target, stage.nextTarget);
+      updatePillar("sdlf", incomes.sdlf, stage.target, stage.nextTarget);
+      updatePillar("supr", incomes.supr, stage.target, stage.nextTarget);
 
-document.getElementById("addLogBtn").addEventListener("click", addLog);
-document.getElementById("paydayAmount").addEventListener("input", updateAll);
+      const totalAnnual = incomes.lng + incomes.mng + incomes.sdlf + incomes.supr;
+      document.getElementById("totalAnnual").innerText = formatMoney(totalAnnual);
+      document.getElementById("totalMonthly").innerText = formatMoney(totalAnnual / 12);
 
-updateAll();
+      updateDecision();
+      updateLogPreview();
+      updateSmartReinvestPanel();
+      saveValues();
+    }
+
+    migrateLegacyLogsIfNeeded();
+    loadSavedValues();
+    loadLogs();
+
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("input", updateAll);
+        el.addEventListener("change", updateAll);
+      }
+    });
+
+    ["logInto", "logPrice", "logAmount"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("input", updateLogPreview);
+        el.addEventListener("change", updateLogPreview);
+      }
+    });
+
+    document.getElementById("addLogBtn").addEventListener("click", addLog);
+    document.getElementById("paydayAmount").addEventListener("input", updateAll);
+
+    updateAll();
   </script>
 </body>
 </html>
-
