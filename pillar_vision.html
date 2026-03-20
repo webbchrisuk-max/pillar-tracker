@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>Aurora Pillar Vision</title>
- <style>
+  <style>
     :root {
       --bg: #071018;
       --bg2: #0c1624;
@@ -239,6 +239,7 @@
     .ahead { color: var(--green); }
     .track { color: var(--amber); }
     .later { color: var(--muted); }
+    .risk { color: var(--red); }
 
     .pillar-grid {
       display: grid;
@@ -283,6 +284,13 @@
     .pillar-stats {
       display: grid;
       grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .pillar-live-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
       gap: 8px;
       margin-top: 10px;
     }
@@ -367,7 +375,46 @@
       line-height: 1.5;
     }
 
-    /* ===================== CHART / FORECAST ===================== */
+    .sync-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sync-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 12px rgba(80,255,143,0.65);
+      flex: 0 0 auto;
+    }
+
+    .sync-dot.sync-warn {
+      background: var(--amber);
+      box-shadow: 0 0 12px rgba(255,200,87,0.65);
+    }
+
+    .sync-dot.sync-bad {
+      background: var(--red);
+      box-shadow: 0 0 12px rgba(255,107,138,0.65);
+    }
+
+    .live-up {
+      color: var(--green);
+      text-shadow: 0 0 10px rgba(80,255,143,0.25);
+    }
+
+    .live-down {
+      color: var(--red);
+      text-shadow: 0 0 10px rgba(255,107,138,0.25);
+    }
+
+    .live-neutral {
+      color: var(--text);
+    }
+
     canvas {
       width: 100%;
       max-width: 100%;
@@ -406,6 +453,10 @@
       .timeline-status {
         text-align: left;
       }
+
+      .pillar-live-grid {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
     }
 
     @media (max-width: 720px) {
@@ -414,7 +465,8 @@
       .quad-grid,
       .leader-grid,
       .phase-grid,
-      .pillar-grid {
+      .pillar-grid,
+      .pillar-live-grid {
         grid-template-columns: 1fr;
       }
 
@@ -445,17 +497,17 @@
     <section class="hero">
       <h1>Aurora Pillar Vision</h1>
       <div class="sub">
-        Visual mission-control dashboard for pillar progress, timeline milestones, target gaps, and the road to £2,000/month.
+        Visual mission-control dashboard for pillar progress, timeline milestones, target gaps, live pillar strength, and the road to £2,000/month.
       </div>
 
       <div class="grid top-grid">
         <div class="card">
           <div class="stat-label">Current Annual Income</div>
-          <div class="stat">£<span id="annualIncome">3432</span> <small>/ year</small></div>
+          <div class="stat">£<span id="annualIncome">0</span> <small>/ year</small></div>
         </div>
         <div class="card">
           <div class="stat-label">Current Monthly Income</div>
-          <div class="stat">£<span id="monthlyIncome">286</span> <small>/ month</small></div>
+          <div class="stat">£<span id="monthlyIncome">0</span> <small>/ month</small></div>
         </div>
         <div class="card">
           <div class="stat-label">Target Monthly Income</div>
@@ -470,7 +522,7 @@
       <div class="big-progress">
         <div class="progress-top">
           <span>Mission Progress to £2,000/month</span>
-          <span id="missionProgressText">14%</span>
+          <span id="missionProgressText">0%</span>
         </div>
         <div class="bar">
           <div class="fill" id="missionBar"></div>
@@ -484,57 +536,84 @@
       <div class="grid quad-grid">
         <div class="mini">
           <div class="k">Monthly Shortfall</div>
-          <div class="v" id="monthlyShortfall">£1,714</div>
+          <div class="v" id="monthlyShortfall">£0</div>
           <div class="subv">Still needed to reach target</div>
         </div>
         <div class="mini">
           <div class="k">Annual Shortfall</div>
-          <div class="v" id="annualShortfall">£20,568</div>
+          <div class="v" id="annualShortfall">£0</div>
           <div class="subv">Remaining annual dividend engine</div>
         </div>
         <div class="mini">
           <div class="k">Strongest Pillar</div>
-          <div class="v" id="topPillar">Legal &amp; General</div>
+          <div class="v" id="topPillar">--</div>
           <div class="subv">Largest current income output</div>
         </div>
         <div class="mini">
           <div class="k">Best Build Route</div>
-          <div class="v" id="bestRoute">M&amp;G + LGEN</div>
+          <div class="v" id="bestRoute">--</div>
           <div class="subv">Core acceleration path</div>
         </div>
       </div>
     </section>
-    
+
     <!-- ===================== MISSION FORECAST ===================== -->
-<section class="section card">
-  <h2>Mission Forecast</h2>
+    <section class="section card">
+      <h2>Mission Forecast</h2>
 
-  <div class="grid triple-grid">
-    <div class="mini">
-      <div class="k">Projected Years to Target</div>
-      <div class="v" id="yearsToTarget">--</div>
-      <div class="subv" id="yearsToTargetSub">Waiting for live projection</div>
-    </div>
+      <div class="grid triple-grid">
+        <div class="mini">
+          <div class="k">Projected Years to Target</div>
+          <div class="v" id="yearsToTarget">--</div>
+          <div class="subv" id="yearsToTargetSub">Waiting for live projection</div>
+        </div>
 
-    <div class="mini">
-      <div class="k">Projected Target Date</div>
-      <div class="v" id="projectedTargetDate">--</div>
-      <div class="subv" id="projectedTargetDateSub">Based on current pace</div>
-    </div>
+        <div class="mini">
+          <div class="k">Projected Target Date</div>
+          <div class="v" id="projectedTargetDate">--</div>
+          <div class="subv" id="projectedTargetDateSub">Based on current pace</div>
+        </div>
 
-    <div class="mini">
-      <div class="k">Next Best Move</div>
-      <div class="v" id="nextBestMove">--</div>
-      <div class="subv" id="nextBestMoveSub">Waiting for live ranking</div>
-    </div>
-  </div>
-</section>
+        <div class="mini">
+          <div class="k">Next Best Move</div>
+          <div class="v" id="nextBestMove">--</div>
+          <div class="subv" id="nextBestMoveSub">Waiting for live ranking</div>
+        </div>
+      </div>
+    </section>
 
-<!-- ===================== INCOME PROJECTION CHART ===================== -->
-<section class="section card">
-  <h2>Projected Income Curve</h2>
-  <canvas id="incomeProjectionChart" height="120"></canvas>
-</section>
+    <!-- ===================== MOMENTUM / PRESSURE ===================== -->
+    <section class="section card">
+      <h2>Mission Pressure</h2>
+      <div class="grid quad-grid">
+        <div class="mini">
+          <div class="k">Required Pace</div>
+          <div class="v" id="requiredMonthlyPace">£0</div>
+          <div class="subv" id="requiredMonthlyPaceSub">Needed per month from here</div>
+        </div>
+        <div class="mini">
+          <div class="k">Current Pace Gap</div>
+          <div class="v" id="paceGap">£0</div>
+          <div class="subv" id="paceGapSub">Difference vs target runway</div>
+        </div>
+        <div class="mini">
+          <div class="k">Typical £500 Impact</div>
+          <div class="v" id="fiveHundredImpact">+£0/y</div>
+          <div class="subv" id="fiveHundredImpactSub">Based on best route now</div>
+        </div>
+        <div class="mini">
+          <div class="k">Mission Status</div>
+          <div class="v" id="missionStatus">--</div>
+          <div class="subv" id="missionStatusSub">Runway confidence</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== INCOME PROJECTION CHART ===================== -->
+    <section class="section card">
+      <h2>Projected Income Curve</h2>
+      <canvas id="incomeProjectionChart" height="140"></canvas>
+    </section>
 
     <!-- ===================== TIMELINE ===================== -->
     <section class="section card">
@@ -550,16 +629,16 @@
         <div class="pillar-card">
           <div class="pillar-top">
             <div class="pillar-name">Legal &amp; General</div>
-            <div class="badge amber">Anchor</div>
+            <div class="badge amber" id="lngBadge">Anchor</div>
           </div>
           <div class="pillar-stats">
             <div class="mini">
               <div class="k">Annual Income</div>
-              <div class="v" id="lngIncome">£1,691</div>
+              <div class="v" id="lngIncome">£0</div>
             </div>
             <div class="mini">
               <div class="k">Gap to £2k/y</div>
-              <div class="v" id="lngGap">£309</div>
+              <div class="v" id="lngGap">£0</div>
             </div>
             <div class="mini">
               <div class="k">Role</div>
@@ -567,11 +646,29 @@
             </div>
             <div class="mini">
               <div class="k">Strength</div>
-              <div class="v" id="lngStrengthText">85%</div>
+              <div class="v" id="lngStrengthText">0%</div>
+            </div>
+          </div>
+          <div class="pillar-live-grid">
+            <div class="mini">
+              <div class="k">Live Price</div>
+              <div class="v" id="lngLivePrice">--</div>
+            </div>
+            <div class="mini">
+              <div class="k">Live Value</div>
+              <div class="v" id="lngLiveValue">£0</div>
+            </div>
+            <div class="mini">
+              <div class="k">Gain %</div>
+              <div class="v" id="lngGainPct">0.00%</div>
+            </div>
+            <div class="mini">
+              <div class="k">Yield</div>
+              <div class="v" id="lngYieldPct">0.00%</div>
             </div>
           </div>
           <div class="strength-wrap">
-            <div class="progress-top"><span>Pillar Strength</span><span id="lngStrengthPct">85%</span></div>
+            <div class="progress-top"><span>Pillar Strength</span><span id="lngStrengthPct">0%</span></div>
             <div class="strength-bar"><div class="strength-fill" id="lngStrengthBar"></div></div>
           </div>
         </div>
@@ -579,16 +676,16 @@
         <div class="pillar-card">
           <div class="pillar-top">
             <div class="pillar-name">M&amp;G</div>
-            <div class="badge green">Accelerator</div>
+            <div class="badge green" id="mngBadge">Accelerator</div>
           </div>
           <div class="pillar-stats">
             <div class="mini">
               <div class="k">Annual Income</div>
-              <div class="v" id="mngIncome">£1,138</div>
+              <div class="v" id="mngIncome">£0</div>
             </div>
             <div class="mini">
               <div class="k">Gap to £2k/y</div>
-              <div class="v" id="mngGap">£862</div>
+              <div class="v" id="mngGap">£0</div>
             </div>
             <div class="mini">
               <div class="k">Role</div>
@@ -596,11 +693,29 @@
             </div>
             <div class="mini">
               <div class="k">Strength</div>
-              <div class="v" id="mngStrengthText">70%</div>
+              <div class="v" id="mngStrengthText">0%</div>
+            </div>
+          </div>
+          <div class="pillar-live-grid">
+            <div class="mini">
+              <div class="k">Live Price</div>
+              <div class="v" id="mngLivePrice">--</div>
+            </div>
+            <div class="mini">
+              <div class="k">Live Value</div>
+              <div class="v" id="mngLiveValue">£0</div>
+            </div>
+            <div class="mini">
+              <div class="k">Gain %</div>
+              <div class="v" id="mngGainPct">0.00%</div>
+            </div>
+            <div class="mini">
+              <div class="k">Yield</div>
+              <div class="v" id="mngYieldPct">0.00%</div>
             </div>
           </div>
           <div class="strength-wrap">
-            <div class="progress-top"><span>Pillar Strength</span><span id="mngStrengthPct">70%</span></div>
+            <div class="progress-top"><span>Pillar Strength</span><span id="mngStrengthPct">0%</span></div>
             <div class="strength-bar"><div class="strength-fill" id="mngStrengthBar"></div></div>
           </div>
         </div>
@@ -608,16 +723,16 @@
         <div class="pillar-card">
           <div class="pillar-top">
             <div class="pillar-name">Standard Life</div>
-            <div class="badge amber">Balance</div>
+            <div class="badge amber" id="sdlfBadge">Balance</div>
           </div>
           <div class="pillar-stats">
             <div class="mini">
               <div class="k">Annual Income</div>
-              <div class="v" id="sdlfIncome">£910</div>
+              <div class="v" id="sdlfIncome">£0</div>
             </div>
             <div class="mini">
               <div class="k">Gap to £2k/y</div>
-              <div class="v" id="sdlfGap">£1,090</div>
+              <div class="v" id="sdlfGap">£0</div>
             </div>
             <div class="mini">
               <div class="k">Role</div>
@@ -625,11 +740,29 @@
             </div>
             <div class="mini">
               <div class="k">Strength</div>
-              <div class="v" id="sdlfStrengthText">58%</div>
+              <div class="v" id="sdlfStrengthText">0%</div>
+            </div>
+          </div>
+          <div class="pillar-live-grid">
+            <div class="mini">
+              <div class="k">Live Price</div>
+              <div class="v" id="sdlfLivePrice">--</div>
+            </div>
+            <div class="mini">
+              <div class="k">Live Value</div>
+              <div class="v" id="sdlfLiveValue">£0</div>
+            </div>
+            <div class="mini">
+              <div class="k">Gain %</div>
+              <div class="v" id="sdlfGainPct">0.00%</div>
+            </div>
+            <div class="mini">
+              <div class="k">Yield</div>
+              <div class="v" id="sdlfYieldPct">0.00%</div>
             </div>
           </div>
           <div class="strength-wrap">
-            <div class="progress-top"><span>Pillar Strength</span><span id="sdlfStrengthPct">58%</span></div>
+            <div class="progress-top"><span>Pillar Strength</span><span id="sdlfStrengthPct">0%</span></div>
             <div class="strength-bar"><div class="strength-fill" id="sdlfStrengthBar"></div></div>
           </div>
         </div>
@@ -637,16 +770,16 @@
         <div class="pillar-card">
           <div class="pillar-top">
             <div class="pillar-name">Supermarket REIT</div>
-            <div class="badge red">Stabiliser</div>
+            <div class="badge red" id="suprBadge">Stabiliser</div>
           </div>
           <div class="pillar-stats">
             <div class="mini">
               <div class="k">Annual Income</div>
-              <div class="v" id="suprIncome">£784</div>
+              <div class="v" id="suprIncome">£0</div>
             </div>
             <div class="mini">
               <div class="k">Gap to £2k/y</div>
-              <div class="v" id="suprGap">£1,216</div>
+              <div class="v" id="suprGap">£0</div>
             </div>
             <div class="mini">
               <div class="k">Role</div>
@@ -654,11 +787,29 @@
             </div>
             <div class="mini">
               <div class="k">Strength</div>
-              <div class="v" id="suprStrengthText">50%</div>
+              <div class="v" id="suprStrengthText">0%</div>
+            </div>
+          </div>
+          <div class="pillar-live-grid">
+            <div class="mini">
+              <div class="k">Live Price</div>
+              <div class="v" id="suprLivePrice">--</div>
+            </div>
+            <div class="mini">
+              <div class="k">Live Value</div>
+              <div class="v" id="suprLiveValue">£0</div>
+            </div>
+            <div class="mini">
+              <div class="k">Gain %</div>
+              <div class="v" id="suprGainPct">0.00%</div>
+            </div>
+            <div class="mini">
+              <div class="k">Yield</div>
+              <div class="v" id="suprYieldPct">0.00%</div>
             </div>
           </div>
           <div class="strength-wrap">
-            <div class="progress-top"><span>Pillar Strength</span><span id="suprStrengthPct">50%</span></div>
+            <div class="progress-top"><span>Pillar Strength</span><span id="suprStrengthPct">0%</span></div>
             <div class="strength-bar"><div class="strength-fill" id="suprStrengthBar"></div></div>
           </div>
         </div>
@@ -671,23 +822,23 @@
       <div class="leader-grid">
         <div class="leader-card">
           <div class="leader-title">Highest Income</div>
-          <div class="leader-name" id="leaderIncomeName">Legal &amp; General</div>
-          <div class="leader-meta" id="leaderIncomeMeta">£1,691/year</div>
+          <div class="leader-name" id="leaderIncomeName">--</div>
+          <div class="leader-meta" id="leaderIncomeMeta">--</div>
         </div>
         <div class="leader-card">
           <div class="leader-title">Fastest Builder</div>
-          <div class="leader-name" id="leaderBuilderName">M&amp;G</div>
-          <div class="leader-meta" id="leaderBuilderMeta">Best acceleration route</div>
+          <div class="leader-name" id="leaderBuilderName">--</div>
+          <div class="leader-meta" id="leaderBuilderMeta">--</div>
         </div>
         <div class="leader-card">
           <div class="leader-title">Closest to Target</div>
-          <div class="leader-name" id="leaderClosestName">Legal &amp; General</div>
-          <div class="leader-meta" id="leaderClosestMeta">£309 gap</div>
+          <div class="leader-name" id="leaderClosestName">--</div>
+          <div class="leader-meta" id="leaderClosestMeta">--</div>
         </div>
         <div class="leader-card">
           <div class="leader-title">Needs Most Work</div>
-          <div class="leader-name" id="leaderWeakestName">Supermarket REIT</div>
-          <div class="leader-meta" id="leaderWeakestMeta">£1,216 gap</div>
+          <div class="leader-name" id="leaderWeakestName">--</div>
+          <div class="leader-meta" id="leaderWeakestMeta">--</div>
         </div>
       </div>
     </section>
@@ -711,6 +862,37 @@
       </div>
     </section>
 
+    <!-- ===================== SYNC / ENGINE STATUS ===================== -->
+    <section class="section card">
+      <h2>Engine Status</h2>
+      <div class="grid quad-grid">
+        <div class="mini">
+          <div class="k">Live Sync</div>
+          <div class="v sync-row">
+            <span class="sync-dot" id="syncDot"></span>
+            <span id="syncStatusText">Waiting…</span>
+          </div>
+          <div class="subv" id="syncStatusSub">No refresh yet</div>
+        </div>
+        <div class="mini">
+          <div class="k">Live Portfolio Value</div>
+          <div class="v" id="livePortfolioValue">£0</div>
+          <div class="subv">Across tracked pillars</div>
+        </div>
+        <div class="mini">
+          <div class="k">Live Gain / Loss</div>
+          <div class="v" id="livePortfolioGain">£0</div>
+          <div class="subv" id="livePortfolioGainPct">0.00%</div>
+        </div>
+        <div class="mini">
+          <div class="k">Forecast Yield Basis</div>
+          <div class="v" id="forecastYieldBasis">0.00%</div>
+          <div class="subv">Blended live pillar yield</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FOOTER ===================== -->
     <div class="footer">
       Aurora Pillar Vision • Visual Layer • Timeline • Mission Control
     </div>
@@ -718,380 +900,612 @@
   </div>
 
   <script>
-  const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
-  const SHEET_NAME = "Holdings";
-  const TARGET_MONTHLY = 2000;
-  const TARGET_ANNUAL = TARGET_MONTHLY * 12;
-  const TARGET_ANNUAL_PER_PILLAR = 2000;
+    // ===================== CORE CONFIG =====================
+    const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
+    const SHEET_NAME = "Holdings";
+    const TARGET_MONTHLY = 2000;
+    const TARGET_ANNUAL = TARGET_MONTHLY * 12;
+    const TARGET_YEAR = 2033;
+    const TARGET_ANNUAL_PER_PILLAR = 2000;
 
-  const MONTHLY_CONTRIBUTION = 800;
-  const DEFAULT_YIELD = 0.085;
+    const MONTHLY_CONTRIBUTION = 800;
+    const DEFAULT_YIELD = 0.085;
+    const IMPACT_TEST_AMOUNT = 500;
 
-  const pillarMap = {
-    lng: {
-      tickers: ["LGEN", "LON:LGEN"],
-      name: "Legal & General"
-    },
-    mng: {
-      tickers: ["MNG", "LON:MNG"],
-      name: "M&G"
-    },
-    sdlf: {
-      tickers: ["SDLF", "LON:SDLF"],
-      name: "Standard Life"
-    },
-    supr: {
-      tickers: ["SUPR", "LON:SUPR"],
-      name: "Supermarket REIT"
-    }
-  };
-
-  function parseNumber(value) {
-    return parseFloat(String(value || "").replace(/[^0-9.-]+/g, "")) || 0;
-  }
-
-  function formatMoney(value, decimals = 0) {
-    return Number(value || 0).toLocaleString("en-GB", {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals
-    });
-  }
-
-  function setText(id, value) {
-    const el = document.getElementById(id);
-    if (el) el.innerText = value;
-  }
-
-  function getTimelineStatus(currentMonthly) {
-    return [
-      { year: 2026, min: 250, target: "£250–£350/month" },
-      { year: 2027, min: 350, target: "£350–£500/month" },
-      { year: 2028, min: 500, target: "£500–£700/month" },
-      { year: 2029, min: 800, target: "£800–£1,100/month" },
-      { year: 2030, min: 1150, target: "£1,150–£1,400/month" },
-      { year: 2031, min: 1400, target: "£1,400–£1,600/month" },
-      { year: 2032, min: 1600, target: "£1,600–£1,800/month" },
-      { year: 2033, min: 2000, target: "£2,000/month" }
-    ].map(item => {
-      let status = "Future phase";
-      let tone = "later";
-
-      if (currentMonthly >= item.min) {
-        status = "Ahead / achieved";
-        tone = "ahead";
-      } else if (currentMonthly >= item.min * 0.75) {
-        status = "On track";
-        tone = "track";
+    const pillarMap = {
+      lng: {
+        tickers: ["LGEN", "LON:LGEN", "LGEN.L"],
+        name: "Legal & General"
+      },
+      mng: {
+        tickers: ["MNG", "LON:MNG", "MNG.L"],
+        name: "M&G"
+      },
+      sdlf: {
+        tickers: ["SDLF", "LON:SDLF", "SDLF.L", "PHNX", "PHNX.L", "STANDARD LIFE"],
+        name: "Standard Life"
+      },
+      supr: {
+        tickers: ["SUPR", "LON:SUPR", "SUPR.L"],
+        name: "Supermarket REIT"
       }
-
-      if (item.year === 2029 && currentMonthly < item.min * 0.75) {
-        status = "Major uplift year";
-        tone = "track";
-      }
-
-      if (item.year === 2033 && currentMonthly < 2000) {
-        status = "Mission target";
-        tone = currentMonthly >= 1500 ? "track" : "later";
-      }
-
-      return {
-        year: item.year,
-        target: item.target,
-        status,
-        tone
-      };
-    });
-  }
-
-  function renderTimeline(currentMonthly) {
-    const rows = getTimelineStatus(currentMonthly);
-    const wrap = document.getElementById("timelineRows");
-    if (!wrap) return;
-
-    wrap.innerHTML = "";
-
-    rows.forEach(item => {
-      const row = document.createElement("div");
-      row.className = "timeline-row";
-      row.innerHTML = `
-        <div class="timeline-year">${item.year}</div>
-        <div class="timeline-target">${item.target}</div>
-        <div class="timeline-status ${item.tone}">${item.status}</div>
-      `;
-      wrap.appendChild(row);
-    });
-  }
-
-  function buildEmptyPillarState() {
-    return {
-      lng: { name: "Legal & General", income: 0, gap: TARGET_ANNUAL_PER_PILLAR, strength: 0, value: 0, cost: 0, gain: 0, gainPct: 0, yieldPct: 0 },
-      mng: { name: "M&G", income: 0, gap: TARGET_ANNUAL_PER_PILLAR, strength: 0, value: 0, cost: 0, gain: 0, gainPct: 0, yieldPct: 0 },
-      sdlf: { name: "Standard Life", income: 0, gap: TARGET_ANNUAL_PER_PILLAR, strength: 0, value: 0, cost: 0, gain: 0, gainPct: 0, yieldPct: 0 },
-      supr: { name: "Supermarket REIT", income: 0, gap: TARGET_ANNUAL_PER_PILLAR, strength: 0, value: 0, cost: 0, gain: 0, gainPct: 0, yieldPct: 0 }
     };
-  }
 
-  function updateMissionTotals(totalAnnual) {
-    const currentMonthly = totalAnnual / 12;
-    const monthlyShortfall = Math.max(TARGET_MONTHLY - currentMonthly, 0);
-    const annualShortfall = Math.max(TARGET_ANNUAL - totalAnnual, 0);
-    const progressPct = Math.min((currentMonthly / TARGET_MONTHLY) * 100, 100);
+    let lastGoodPillars = buildEmptyPillarState();
+    let lastBlendedYield = DEFAULT_YIELD;
 
-    setText("annualIncome", formatMoney(totalAnnual, 0));
-    setText("monthlyIncome", formatMoney(currentMonthly, 0));
-    setText("missionProgressText", `${progressPct.toFixed(1)}%`);
-    setText("monthlyShortfall", `£${formatMoney(monthlyShortfall, 0)}`);
-    setText("annualShortfall", `£${formatMoney(annualShortfall, 0)}`);
+    // ===================== HELPERS =====================
+    function parseNumber(value) {
+      const cleaned = String(value ?? "").replace(/[^0-9.-]+/g, "");
+      const parsed = parseFloat(cleaned);
+      return Number.isFinite(parsed) ? parsed : NaN;
+    }
 
-    const missionBar = document.getElementById("missionBar");
-    if (missionBar) missionBar.style.width = `${progressPct}%`;
-
-    renderTimeline(currentMonthly);
-
-    return currentMonthly;
-  }
-
-  function updatePillarVisuals(pillars) {
-    Object.keys(pillars).forEach(key => {
-      const pillar = pillars[key];
-      const strength = Math.min((pillar.income / TARGET_ANNUAL_PER_PILLAR) * 100, 100);
-      const gap = Math.max(TARGET_ANNUAL_PER_PILLAR - pillar.income, 0);
-
-      pillar.strength = strength;
-      pillar.gap = gap;
-
-      setText(`${key}Income`, `£${formatMoney(pillar.income, 0)}`);
-      setText(`${key}Gap`, `£${formatMoney(gap, 0)}`);
-      setText(`${key}StrengthText`, `${Math.round(strength)}%`);
-      setText(`${key}StrengthPct`, `${Math.round(strength)}%`);
-
-      const bar = document.getElementById(`${key}StrengthBar`);
-      if (bar) bar.style.width = `${strength}%`;
-    });
-  }
-
-  function updateLeaders(pillars) {
-    const list = Object.keys(pillars).map(key => ({
-      key,
-      ...pillars[key]
-    }));
-
-    const highestIncome = [...list].sort((a, b) => b.income - a.income)[0];
-    const closestTarget = [...list].sort((a, b) => a.gap - b.gap)[0];
-    const weakestGap = [...list].sort((a, b) => b.gap - a.gap)[0];
-    const fastestBuilder = [...list].sort((a, b) => b.yieldPct - a.yieldPct)[0];
-
-    setText("leaderIncomeName", highestIncome.name);
-    setText("leaderIncomeMeta", `£${formatMoney(highestIncome.income, 0)}/year`);
-
-    setText("leaderBuilderName", fastestBuilder.name);
-    setText("leaderBuilderMeta", `Yield ${fastestBuilder.yieldPct.toFixed(2)}%`);
-
-    setText("leaderClosestName", closestTarget.name);
-    setText("leaderClosestMeta", `£${formatMoney(closestTarget.gap, 0)} gap`);
-
-    setText("leaderWeakestName", weakestGap.name);
-    setText("leaderWeakestMeta", `£${formatMoney(weakestGap.gap, 0)} gap`);
-
-    setText("topPillar", highestIncome.name);
-
-    let bestRouteText = `${fastestBuilder.name} + ${closestTarget.name}`;
-    if (fastestBuilder.name === closestTarget.name) {
-    const secondBest = [...list]
-    .filter(item => item.name !== fastestBuilder.name)
-    .sort((a, b) => b.yieldPct - a.yieldPct)[0];
-
-    bestRouteText = secondBest
-    ? `${fastestBuilder.name} + ${secondBest.name}`
-    : fastestBuilder.name;
-}
-
-setText("bestRoute", bestRouteText);
-
-    setText("nextBestMove", fastestBuilder.name);
-    setText("nextBestMoveSub", `Yield ${fastestBuilder.yieldPct.toFixed(2)}% • Gap £${formatMoney(fastestBuilder.gap, 0)}`);
-  }
-
-  function projectIncome(currentAnnual, avgYield = DEFAULT_YIELD, monthlyContribution = MONTHLY_CONTRIBUTION, years = 10) {
-    let annualIncome = currentAnnual;
-    const monthlyYieldIncome = (monthlyContribution * 12) * avgYield;
-    const points = [];
-
-    for (let year = 0; year <= years; year++) {
-      const projectedMonthly = annualIncome / 12;
-      points.push({
-        yearOffset: year,
-        annual: annualIncome,
-        monthly: projectedMonthly
+    function formatMoney(value, decimals = 0) {
+      return Number(value || 0).toLocaleString("en-GB", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
       });
-
-      annualIncome = annualIncome + (annualIncome * avgYield) + monthlyYieldIncome;
     }
 
-    return points;
-  }
-
-  function updateForecast(totalAnnual, pillars) {
-    const weightedYieldBase = Object.values(pillars).reduce((sum, p) => sum + p.yieldPct, 0);
-    const weightedYield = weightedYieldBase > 0 ? (weightedYieldBase / Object.keys(pillars).length) / 100 : DEFAULT_YIELD;
-
-    const projection = projectIncome(totalAnnual, weightedYield || DEFAULT_YIELD, MONTHLY_CONTRIBUTION, 12);
-
-    let yearsToTarget = null;
-    projection.forEach(point => {
-      if (yearsToTarget === null && point.monthly >= TARGET_MONTHLY) {
-        yearsToTarget = point.yearOffset;
-      }
-    });
-
-    if (yearsToTarget === null) {
-      setText("yearsToTarget", "12+ yrs");
-      setText("yearsToTargetSub", "At current pace");
-      setText("projectedTargetDate", "Beyond model");
-      setText("projectedTargetDateSub", "Needs longer runway");
-    } else {
-      const currentYear = new Date().getFullYear();
-      const targetYear = currentYear + yearsToTarget;
-
-      setText("yearsToTarget", `${yearsToTarget} yrs`);
-      setText("yearsToTargetSub", "At current pace");
-      setText("projectedTargetDate", `${targetYear}`);
-      setText("projectedTargetDateSub", "Estimated mission hit year");
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.innerText = value;
     }
 
-    drawProjectionChart(projection);
-  }
+    function normaliseTicker(value) {
+      return String(value || "").trim().toUpperCase();
+    }
 
-  function drawProjectionChart(points) {
-    const canvas = document.getElementById("incomeProjectionChart");
-    if (!canvas) return;
+    function getPillarKeyFromTicker(ticker) {
+      const t = normaliseTicker(ticker);
 
-    const ctx = canvas.getContext("2d");
-    const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
+      if (pillarMap.lng.tickers.includes(t)) return "lng";
+      if (pillarMap.mng.tickers.includes(t)) return "mng";
+      if (pillarMap.sdlf.tickers.includes(t)) return "sdlf";
+      if (pillarMap.supr.tickers.includes(t)) return "supr";
 
-    canvas.width = rect.width * dpr;
-    canvas.height = 120 * dpr;
-    ctx.scale(dpr, dpr);
+      return null;
+    }
 
-    const width = rect.width;
-    const height = 120;
+    function normalisePrice(rawPrice) {
+      if (!Number.isFinite(rawPrice) || rawPrice <= 0) return NaN;
+      return rawPrice > 20 ? rawPrice / 100 : rawPrice;
+    }
 
-    ctx.clearRect(0, 0, width, height);
+    function setGainClass(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
 
-    const padding = 16;
-    const maxY = Math.max(TARGET_MONTHLY, ...points.map(p => p.monthly));
-    const minY = 0;
+      el.classList.remove("live-up", "live-down", "live-neutral");
 
-    ctx.strokeStyle = "rgba(255,255,255,0.10)";
-    ctx.lineWidth = 1;
+      if (value > 0) el.classList.add("live-up");
+      else if (value < 0) el.classList.add("live-down");
+      else el.classList.add("live-neutral");
+    }
 
-    ctx.beginPath();
-    ctx.moveTo(padding, height - padding);
-    ctx.lineTo(width - padding, height - padding);
-    ctx.stroke();
+    function buildEmptyPillarState() {
+      return {
+        lng: { name: "Legal & General", income: 0, gap: TARGET_ANNUAL_PER_PILLAR, strength: 0, value: 0, cost: 0, gain: 0, gainPct: 0, yieldPct: 0, price: 0, shares: 0, dps: 0 },
+        mng: { name: "M&G", income: 0, gap: TARGET_ANNUAL_PER_PILLAR, strength: 0, value: 0, cost: 0, gain: 0, gainPct: 0, yieldPct: 0, price: 0, shares: 0, dps: 0 },
+        sdlf: { name: "Standard Life", income: 0, gap: TARGET_ANNUAL_PER_PILLAR, strength: 0, value: 0, cost: 0, gain: 0, gainPct: 0, yieldPct: 0, price: 0, shares: 0, dps: 0 },
+        supr: { name: "Supermarket REIT", income: 0, gap: TARGET_ANNUAL_PER_PILLAR, strength: 0, value: 0, cost: 0, gain: 0, gainPct: 0, yieldPct: 0, price: 0, shares: 0, dps: 0 }
+      };
+    }
 
-    ctx.beginPath();
-    ctx.moveTo(padding, padding);
-    ctx.lineTo(padding, height - padding);
-    ctx.stroke();
+    function getBadgeTone(strength) {
+      if (strength >= 80) return "green";
+      if (strength >= 45) return "amber";
+      return "red";
+    }
 
-    const xStep = (width - padding * 2) / Math.max(points.length - 1, 1);
+    // ===================== TIMELINE =====================
+    function getTimelineTargets() {
+      return [
+        { year: 2026, min: 250, target: "£250–£350/month" },
+        { year: 2027, min: 350, target: "£350–£500/month" },
+        { year: 2028, min: 500, target: "£500–£700/month" },
+        { year: 2029, min: 800, target: "£800–£1,100/month" },
+        { year: 2030, min: 1150, target: "£1,150–£1,400/month" },
+        { year: 2031, min: 1400, target: "£1,400–£1,600/month" },
+        { year: 2032, min: 1600, target: "£1,600–£1,800/month" },
+        { year: 2033, min: 2000, target: "£2,000/month" }
+      ];
+    }
 
-    ctx.strokeStyle = "rgba(98,243,255,0.95)";
-    ctx.lineWidth = 3;
-    ctx.beginPath();
+    function renderTimeline(currentMonthly, projectedHitYear = null) {
+      const rows = getTimelineTargets().map(item => {
+        let status = "Future phase";
+        let tone = "later";
 
-    points.forEach((point, i) => {
-      const x = padding + i * xStep;
-      const y = height - padding - ((point.monthly - minY) / (maxY - minY)) * (height - padding * 2);
+        if (currentMonthly >= item.min) {
+          status = "Ahead / achieved";
+          tone = "ahead";
+        } else if (currentMonthly >= item.min * 0.75) {
+          status = "On track";
+          tone = "track";
+        }
 
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
+        if (item.year === 2029 && currentMonthly < item.min * 0.75) {
+          status = "Major uplift year";
+          tone = "track";
+        }
 
-    ctx.stroke();
-
-    const targetY = height - padding - ((TARGET_MONTHLY - minY) / (maxY - minY)) * (height - padding * 2);
-    ctx.strokeStyle = "rgba(255,200,87,0.8)";
-    ctx.lineWidth = 2;
-    ctx.setLineDash([6, 6]);
-    ctx.beginPath();
-    ctx.moveTo(padding, targetY);
-    ctx.lineTo(width - padding, targetY);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    ctx.fillStyle = "rgba(150,171,197,0.9)";
-    ctx.font = "12px Inter, sans-serif";
-    ctx.fillText("Now", padding, height - 4);
-    ctx.fillText(`Target £${TARGET_MONTHLY}/m`, padding + 6, Math.max(targetY - 6, 12));
-    ctx.fillText(`+${points.length - 1}y`, width - padding - 30, height - 4);
-  }
-
-  async function loadVisionData() {
-    const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
-
-    try {
-      const res = await fetch(url);
-      const data = await res.json();
-
-      const pillars = buildEmptyPillarState();
-
-      data.forEach(row => {
-        const ticker = String(row.ticker || "").trim().toUpperCase();
-        const shares = parseNumber(row.shares);
-        const dps = parseNumber(row.annual_dividend_per_share);
-        const rawPrice = parseNumber(row.live_price);
-        const cost = parseNumber(row.book_cost);
-
-        let price = rawPrice;
-        if (price > 20) price = price / 100;
-
-        let matchedKey = null;
-
-        Object.keys(pillarMap).forEach(key => {
-          if (pillarMap[key].tickers.includes(ticker)) {
-            matchedKey = key;
+        if (projectedHitYear !== null) {
+          if (item.year < projectedHitYear && item.min >= currentMonthly && item.year >= new Date().getFullYear()) {
+            status = item.year < TARGET_YEAR ? "Build phase" : status;
           }
-        });
 
-        if (!matchedKey) return;
+          if (item.year === projectedHitYear) {
+            status = "Projected hit year";
+            tone = projectedHitYear <= TARGET_YEAR ? "ahead" : "track";
+          }
 
-        const income = shares * dps;
-        const value = shares * price;
-        const gain = value - cost;
-        const gainPct = cost > 0 ? (gain / cost) * 100 : 0;
-        const yieldPct = price > 0 ? (dps / price) * 100 : 0;
+          if (item.year === TARGET_YEAR && projectedHitYear > TARGET_YEAR) {
+            status = "Target at risk";
+            tone = "risk";
+          }
+        }
 
-        pillars[matchedKey] = {
-          ...pillars[matchedKey],
-          income,
-          value,
-          cost,
-          gain,
-          gainPct,
-          yieldPct
+        return {
+          year: item.year,
+          target: item.target,
+          status,
+          tone
         };
       });
 
-      const totalAnnual = Object.values(pillars).reduce((sum, pillar) => sum + pillar.income, 0);
+      const wrap = document.getElementById("timelineRows");
+      if (!wrap) return;
 
-      updateMissionTotals(totalAnnual);
-      updatePillarVisuals(pillars);
-      updateLeaders(pillars);
-      updateForecast(totalAnnual, pillars);
-    } catch (err) {
-      console.error("Aurora Pillar Vision sync failed", err);
+      wrap.innerHTML = "";
+
+      rows.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "timeline-row";
+        row.innerHTML = `
+          <div class="timeline-year">${item.year}</div>
+          <div class="timeline-target">${item.target}</div>
+          <div class="timeline-status ${item.tone}">${item.status}</div>
+        `;
+        wrap.appendChild(row);
+      });
     }
-  }
 
-  loadVisionData();
-  setInterval(loadVisionData, 30000);
+    // ===================== MISSION TOTALS =====================
+    function updateMissionTotals(totalAnnual) {
+      const currentMonthly = totalAnnual / 12;
+      const monthlyShortfall = Math.max(TARGET_MONTHLY - currentMonthly, 0);
+      const annualShortfall = Math.max(TARGET_ANNUAL - totalAnnual, 0);
+      const progressPct = Math.min((currentMonthly / TARGET_MONTHLY) * 100, 100);
 
-  window.addEventListener("resize", () => {
+      setText("annualIncome", formatMoney(totalAnnual, 0));
+      setText("monthlyIncome", formatMoney(currentMonthly, 0));
+      setText("missionProgressText", `${progressPct.toFixed(1)}%`);
+      setText("monthlyShortfall", `£${formatMoney(monthlyShortfall, 0)}`);
+      setText("annualShortfall", `£${formatMoney(annualShortfall, 0)}`);
+      setText("targetYear", TARGET_YEAR);
+
+      const missionBar = document.getElementById("missionBar");
+      if (missionBar) missionBar.style.width = `${progressPct}%`;
+
+      return currentMonthly;
+    }
+
+    // ===================== PILLAR VISUALS =====================
+    function updatePillarVisuals(pillars) {
+      Object.keys(pillars).forEach(key => {
+        const pillar = pillars[key];
+        const strength = Math.min((pillar.income / TARGET_ANNUAL_PER_PILLAR) * 100, 100);
+        const gap = Math.max(TARGET_ANNUAL_PER_PILLAR - pillar.income, 0);
+
+        pillar.strength = strength;
+        pillar.gap = gap;
+
+        setText(`${key}Income`, `£${formatMoney(pillar.income, 0)}`);
+        setText(`${key}Gap`, `£${formatMoney(gap, 0)}`);
+        setText(`${key}StrengthText`, `${Math.round(strength)}%`);
+        setText(`${key}StrengthPct`, `${Math.round(strength)}%`);
+
+        setText(`${key}LivePrice`, pillar.price > 0 ? `£${pillar.price.toFixed(3)}` : "--");
+        setText(`${key}LiveValue`, `£${formatMoney(pillar.value, 0)}`);
+        setText(`${key}GainPct`, `${pillar.gainPct.toFixed(2)}%`);
+        setText(`${key}YieldPct`, `${pillar.yieldPct.toFixed(2)}%`);
+
+        setGainClass(`${key}GainPct`, pillar.gainPct);
+
+        const bar = document.getElementById(`${key}StrengthBar`);
+        if (bar) bar.style.width = `${strength}%`;
+
+        const badge = document.getElementById(`${key}Badge`);
+        if (badge) {
+          badge.classList.remove("green", "amber", "red");
+          badge.classList.add(getBadgeTone(strength));
+        }
+      });
+    }
+
+    // ===================== LEADERS =====================
+    function updateLeaders(pillars) {
+      const list = Object.keys(pillars).map(key => ({
+        key,
+        ...pillars[key]
+      }));
+
+      const highestIncome = [...list].sort((a, b) => b.income - a.income)[0];
+      const closestTarget = [...list].sort((a, b) => a.gap - b.gap)[0];
+      const weakestGap = [...list].sort((a, b) => b.gap - a.gap)[0];
+      const fastestBuilder = [...list].sort((a, b) => b.yieldPct - a.yieldPct)[0];
+
+      setText("leaderIncomeName", highestIncome.name);
+      setText("leaderIncomeMeta", `£${formatMoney(highestIncome.income, 0)}/year`);
+
+      setText("leaderBuilderName", fastestBuilder.name);
+      setText("leaderBuilderMeta", `Yield ${fastestBuilder.yieldPct.toFixed(2)}%`);
+
+      setText("leaderClosestName", closestTarget.name);
+      setText("leaderClosestMeta", `£${formatMoney(closestTarget.gap, 0)} gap`);
+
+      setText("leaderWeakestName", weakestGap.name);
+      setText("leaderWeakestMeta", `£${formatMoney(weakestGap.gap, 0)} gap`);
+
+      setText("topPillar", highestIncome.name);
+
+      let bestRouteText = `${fastestBuilder.name} + ${closestTarget.name}`;
+      if (fastestBuilder.name === closestTarget.name) {
+        const secondBest = [...list]
+          .filter(item => item.name !== fastestBuilder.name)
+          .sort((a, b) => b.yieldPct - a.yieldPct)[0];
+
+        bestRouteText = secondBest
+          ? `${fastestBuilder.name} + ${secondBest.name}`
+          : fastestBuilder.name;
+      }
+
+      setText("bestRoute", bestRouteText);
+      setText("nextBestMove", fastestBuilder.name);
+      setText("nextBestMoveSub", `Yield ${fastestBuilder.yieldPct.toFixed(2)}% • Gap £${formatMoney(fastestBuilder.gap, 0)}`);
+
+      return {
+        highestIncome,
+        closestTarget,
+        weakestGap,
+        fastestBuilder,
+        bestRouteText
+      };
+    }
+
+    // ===================== FORECAST / PRESSURE =====================
+    function projectIncome(currentAnnual, avgYield = DEFAULT_YIELD, monthlyContribution = MONTHLY_CONTRIBUTION, years = 12) {
+      let annualIncome = currentAnnual;
+      const annualIncomeFromNewMoney = (monthlyContribution * 12) * avgYield;
+      const points = [];
+
+      for (let year = 0; year <= years; year++) {
+        points.push({
+          yearOffset: year,
+          annual: annualIncome,
+          monthly: annualIncome / 12
+        });
+
+        annualIncome = annualIncome + (annualIncome * avgYield) + annualIncomeFromNewMoney;
+      }
+
+      return points;
+    }
+
+    function getRequiredMonthlyPace(currentMonthly) {
+      const currentYear = new Date().getFullYear();
+      const yearsLeft = Math.max(TARGET_YEAR - currentYear, 1);
+      return Math.max((TARGET_MONTHLY - currentMonthly) / yearsLeft, 0);
+    }
+
+    function calculateOneOffImpact(bestBuilder) {
+      if (!bestBuilder || !bestBuilder.price || !bestBuilder.dps) return 0;
+      return IMPACT_TEST_AMOUNT * (bestBuilder.dps / bestBuilder.price);
+    }
+
+    function updateMissionPressure(currentMonthly, pillars, leaderData) {
+      const requiredMonthlyPace = getRequiredMonthlyPace(currentMonthly);
+      const currentYear = new Date().getFullYear();
+      const idealMonthlyNow = ((currentYear - 2026) / Math.max(TARGET_YEAR - 2026, 1)) * TARGET_MONTHLY;
+      const paceGap = currentMonthly - idealMonthlyNow;
+      const impact = calculateOneOffImpact(leaderData.fastestBuilder);
+
+      setText("requiredMonthlyPace", `£${formatMoney(requiredMonthlyPace, 0)}`);
+      setText("requiredMonthlyPaceSub", "Needed extra per year of runway");
+
+      const paceGapText = `${paceGap >= 0 ? "+" : ""}£${formatMoney(paceGap, 0)}`;
+      setText("paceGap", paceGapText);
+      setText("paceGapSub", paceGap >= 0 ? "Ahead of ideal glidepath" : "Below ideal glidepath");
+
+      const paceGapEl = document.getElementById("paceGap");
+      if (paceGapEl) {
+        paceGapEl.classList.remove("live-up", "live-down", "live-neutral");
+        if (paceGap > 0) paceGapEl.classList.add("live-up");
+        else if (paceGap < 0) paceGapEl.classList.add("live-down");
+        else paceGapEl.classList.add("live-neutral");
+      }
+
+      setText("fiveHundredImpact", `+£${formatMoney(impact, 0)}/y`);
+      setText("fiveHundredImpactSub", `${leaderData.fastestBuilder.name} best current route`);
+
+      let status = "Steady Build";
+      let statusSub = "Current runway is workable";
+
+      if (currentMonthly >= TARGET_MONTHLY) {
+        status = "Mission Complete";
+        statusSub = "Target income already reached";
+      } else if (paceGap >= 50) {
+        status = "Ahead of Pace";
+        statusSub = "Current build speed is strong";
+      } else if (paceGap >= -75) {
+        status = "On Track";
+        statusSub = "Runway still healthy";
+      } else {
+        status = "Needs Pressure";
+        statusSub = "Acceleration would help";
+      }
+
+      setText("missionStatus", status);
+      setText("missionStatusSub", statusSub);
+    }
+
+    function updateForecast(totalAnnual, pillars, currentMonthly) {
+      const yieldValues = Object.values(pillars)
+        .map(p => p.yieldPct)
+        .filter(v => Number.isFinite(v) && v > 0);
+
+      const blendedYield = yieldValues.length
+        ? (yieldValues.reduce((sum, v) => sum + v, 0) / yieldValues.length) / 100
+        : DEFAULT_YIELD;
+
+      lastBlendedYield = blendedYield || DEFAULT_YIELD;
+      setText("forecastYieldBasis", `${(lastBlendedYield * 100).toFixed(2)}%`);
+
+      const projection = projectIncome(totalAnnual, lastBlendedYield, MONTHLY_CONTRIBUTION, 12);
+
+      let yearsToTarget = null;
+      projection.forEach(point => {
+        if (yearsToTarget === null && point.monthly >= TARGET_MONTHLY) {
+          yearsToTarget = point.yearOffset;
+        }
+      });
+
+      let projectedHitYear = null;
+
+      if (yearsToTarget === null) {
+        setText("yearsToTarget", "12+ yrs");
+        setText("yearsToTargetSub", "At current pace");
+        setText("projectedTargetDate", "Beyond model");
+        setText("projectedTargetDateSub", "Needs longer runway");
+      } else {
+        projectedHitYear = new Date().getFullYear() + yearsToTarget;
+        setText("yearsToTarget", `${yearsToTarget} yrs`);
+        setText("yearsToTargetSub", "At current pace");
+        setText("projectedTargetDate", `${projectedHitYear}`);
+        setText("projectedTargetDateSub", projectedHitYear <= TARGET_YEAR ? "Target year protected" : "Later than mission target");
+      }
+
+      renderTimeline(currentMonthly, projectedHitYear);
+      drawProjectionChart(projection, currentMonthly);
+    }
+
+    // ===================== CHART =====================
+    function drawProjectionChart(points, currentMonthly) {
+      const canvas = document.getElementById("incomeProjectionChart");
+      if (!canvas) return;
+
+      const ctx = canvas.getContext("2d");
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+
+      canvas.width = rect.width * dpr;
+      canvas.height = 140 * dpr;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+
+      const width = rect.width;
+      const height = 140;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const padding = 18;
+      const maxY = Math.max(TARGET_MONTHLY, ...points.map(p => p.monthly));
+      const minY = 0;
+
+      // Axes
+      ctx.strokeStyle = "rgba(255,255,255,0.10)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padding, height - padding);
+      ctx.lineTo(width - padding, height - padding);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(padding, padding);
+      ctx.lineTo(padding, height - padding);
+      ctx.stroke();
+
+      const xStep = (width - padding * 2) / Math.max(points.length - 1, 1);
+
+      // Projected line
+      ctx.strokeStyle = "rgba(98,243,255,0.95)";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+
+      points.forEach((point, i) => {
+        const x = padding + i * xStep;
+        const y = height - padding - ((point.monthly - minY) / (maxY - minY || 1)) * (height - padding * 2);
+
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.stroke();
+
+      // Required pace line
+      ctx.strokeStyle = "rgba(110,168,255,0.85)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+
+      points.forEach((point, i) => {
+        const requiredMonthly = Math.min(TARGET_MONTHLY, currentMonthly + ((TARGET_MONTHLY - currentMonthly) / Math.max(points.length - 1, 1)) * i);
+        const x = padding + i * xStep;
+        const y = height - padding - ((requiredMonthly - minY) / (maxY - minY || 1)) * (height - padding * 2);
+
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Target line
+      const targetY = height - padding - ((TARGET_MONTHLY - minY) / (maxY - minY || 1)) * (height - padding * 2);
+      ctx.strokeStyle = "rgba(255,200,87,0.8)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.moveTo(padding, targetY);
+      ctx.lineTo(width - padding, targetY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Hit marker
+      const hitIndex = points.findIndex(point => point.monthly >= TARGET_MONTHLY);
+      if (hitIndex >= 0) {
+        const hitX = padding + hitIndex * xStep;
+        const hitY = height - padding - ((points[hitIndex].monthly - minY) / (maxY - minY || 1)) * (height - padding * 2);
+
+        ctx.fillStyle = "rgba(80,255,143,1)";
+        ctx.beginPath();
+        ctx.arc(hitX, hitY, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.font = "12px Inter, sans-serif";
+        ctx.fillStyle = "rgba(80,255,143,0.95)";
+        ctx.fillText("Hit", Math.min(hitX + 6, width - 38), Math.max(hitY - 8, 12));
+      }
+
+      ctx.fillStyle = "rgba(150,171,197,0.9)";
+      ctx.font = "12px Inter, sans-serif";
+      ctx.fillText("Now", padding, height - 4);
+      ctx.fillText(`Target £${TARGET_MONTHLY}/m`, padding + 6, Math.max(targetY - 6, 12));
+      ctx.fillText(`+${points.length - 1}y`, width - padding - 26, height - 4);
+    }
+
+    // ===================== LIVE DATA LOAD =====================
+    async function loadVisionData() {
+      const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        const pillars = { ...lastGoodPillars };
+        let totalPortfolioValue = 0;
+        let totalPortfolioCost = 0;
+
+        data.forEach(row => {
+          const ticker = normaliseTicker(row.ticker);
+          const matchedKey = getPillarKeyFromTicker(ticker);
+
+          if (!matchedKey) return;
+
+          const shares = parseNumber(row.shares);
+          const dps = parseNumber(row.annual_dividend_per_share);
+          const rawPrice = parseNumber(row.live_price);
+          const cost = parseNumber(row.book_cost);
+
+          if (!Number.isFinite(shares) || shares <= 0) return;
+
+          const previous = pillars[matchedKey];
+          const price = normalisePrice(rawPrice);
+          const safePrice = Number.isFinite(price) && price > 0 ? price : previous.price || 0;
+          const safeCost = Number.isFinite(cost) && cost >= 0 ? cost : previous.cost || 0;
+          const safeDps = Number.isFinite(dps) && dps >= 0 ? dps : previous.dps || 0;
+
+          const income = shares * safeDps;
+          const value = shares * safePrice;
+          const gain = value - safeCost;
+          const gainPct = safeCost > 0 ? (gain / safeCost) * 100 : 0;
+          const yieldPct = safePrice > 0 ? (safeDps / safePrice) * 100 : 0;
+
+          pillars[matchedKey] = {
+            ...previous,
+            shares,
+            dps: safeDps,
+            price: safePrice,
+            income,
+            value,
+            cost: safeCost,
+            gain,
+            gainPct,
+            yieldPct
+          };
+
+          totalPortfolioValue += value;
+          totalPortfolioCost += safeCost;
+        });
+
+        lastGoodPillars = {
+          lng: { ...pillars.lng },
+          mng: { ...pillars.mng },
+          sdlf: { ...pillars.sdlf },
+          supr: { ...pillars.supr }
+        };
+
+        const totalAnnual = Object.values(pillars).reduce((sum, pillar) => sum + pillar.income, 0);
+        const currentMonthly = updateMissionTotals(totalAnnual);
+
+        updatePillarVisuals(pillars);
+        const leaderData = updateLeaders(pillars);
+        updateMissionPressure(currentMonthly, pillars, leaderData);
+        updateForecast(totalAnnual, pillars, currentMonthly);
+
+        const realGain = totalPortfolioValue - totalPortfolioCost;
+        const realGainPct = totalPortfolioCost > 0 ? (realGain / totalPortfolioCost) * 100 : 0;
+
+        setText("livePortfolioValue", `£${formatMoney(totalPortfolioValue, 0)}`);
+        setText("livePortfolioGain", `£${formatMoney(realGain, 0)}`);
+        setText("livePortfolioGainPct", `${realGainPct.toFixed(2)}%`);
+        setGainClass("livePortfolioGain", realGain);
+
+        setText("syncStatusText", "Live Connected");
+        setText("syncStatusSub", new Date().toLocaleTimeString());
+
+        const syncDot = document.getElementById("syncDot");
+        if (syncDot) syncDot.className = "sync-dot";
+
+      } catch (err) {
+        console.error("Aurora Pillar Vision sync failed", err);
+
+        const totalAnnual = Object.values(lastGoodPillars).reduce((sum, pillar) => sum + pillar.income, 0);
+        const currentMonthly = updateMissionTotals(totalAnnual);
+        updatePillarVisuals(lastGoodPillars);
+        const leaderData = updateLeaders(lastGoodPillars);
+        updateMissionPressure(currentMonthly, lastGoodPillars, leaderData);
+        updateForecast(totalAnnual, lastGoodPillars, currentMonthly);
+
+        setText("syncStatusText", "Sync Failed");
+        setText("syncStatusSub", "Using last good snapshot");
+
+        const syncDot = document.getElementById("syncDot");
+        if (syncDot) syncDot.className = "sync-dot sync-bad";
+      }
+    }
+
+    // ===================== INIT =====================
     loadVisionData();
-  });
-</script>
+    setInterval(loadVisionData, 30000);
+
+    window.addEventListener("resize", () => {
+      const totalAnnual = Object.values(lastGoodPillars).reduce((sum, pillar) => sum + pillar.income, 0);
+      drawProjectionChart(projectIncome(totalAnnual, lastBlendedYield, MONTHLY_CONTRIBUTION, 12), totalAnnual / 12);
+      updatePillarVisuals(lastGoodPillars);
+    });
+  </script>
 </body>
 </html>
