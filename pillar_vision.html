@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Aurora Pillar Vision</title>
+  <style>
+    :root {
+      --bg: #071018;
+      --bg2: #0c1624;
+      --panel: rgba(15, 27, 43, 0.88);
+      --panel-2: rgba(10, 20, 34, 0.9);
+      --line: rgba(101, 225, 255, 0.16);
+      --cyan: #62f3ff;
+      --cyan-2: #1ad1ff;
+      --blue: #6ea8ff;
+      --green: #50ff8f;
+      --amber: #ffc857;
+      --red: #ff6b8a;
+      --text: #e9f4ff;
+      --muted: #96abc5;
+      --glow: 0 0 22px rgba(26, 209, 255, 0.22);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top right, rgba(26, 209, 255, 0.14), transparent 28%),
+        radial-gradient(circle at top left, rgba(110, 168, 255, 0.12), transparent 25%),
+        linear-gradient(180deg, var(--bg), #050b13 100%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    body {
+      padding: 18px 14px 42px;
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      background: linear-gradient(145deg, rgba(12, 22, 36, 0.95), rgba(6, 13, 23, 0.95));
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: var(--glow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(98,243,255,0.08), transparent);
+      transform: translateX(-100%);
+      animation: scan 8s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes scan {
+      to { transform: translateX(100%); }
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.05;
+      letter-spacing: 0.3px;
+    }
+
+    .sub {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .top-grid {
+      grid-template-columns: repeat(4, minmax(0,1fr));
+    }
+
+    .dual-grid {
+      grid-template-columns: repeat(2, minmax(0,1fr));
+    }
+
+    .triple-grid {
+      grid-template-columns: repeat(3, minmax(0,1fr));
+    }
+
+    .quad-grid {
+      grid-template-columns: repeat(4, minmax(0,1fr));
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      backdrop-filter: blur(8px);
+    }
+
+    .section {
+      margin-top: 14px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat {
+      margin-top: 6px;
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .stat small {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .mini {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .mini .k {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .mini .v {
+      margin-top: 4px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .mini .subv {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .big-progress {
+      margin-top: 12px;
+    }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .bar {
+      height: 16px;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--cyan-2), var(--cyan));
+      box-shadow: 0 0 20px rgba(98,243,255,0.35);
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 10px;
+    }
+
+    .timeline-row {
+      display: grid;
+      grid-template-columns: 90px 1fr 120px;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .timeline-year {
+      font-weight: 800;
+      color: var(--cyan);
+    }
+
+    .timeline-target {
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .timeline-status {
+      text-align: right;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+    }
+
+    .ahead { color: var(--green); }
+    .track { color: var(--amber); }
+    .later { color: var(--muted); }
+
+    .pillar-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 14px;
+    }
+
+    .pillar-card {
+      background: linear-gradient(145deg, rgba(12, 24, 39, 0.96), rgba(7, 15, 25, 0.96));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .pillar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .pillar-name {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .badge {
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.7px;
+      border: 1px solid currentColor;
+    }
+
+    .green { color: var(--green); }
+    .amber { color: var(--amber); }
+    .red { color: var(--red); }
+
+    .pillar-stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .strength-wrap {
+      margin-top: 12px;
+    }
+
+    .strength-bar {
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .strength-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--blue), var(--cyan));
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    .leader-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 14px;
+    }
+
+    .leader-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .leader-title {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .leader-name {
+      margin-top: 8px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .leader-meta {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 14px;
+    }
+
+    .phase-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .phase-card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .phase-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .footer {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 860px) {
+      .top-grid,
+      .quad-grid,
+      .leader-grid,
+      .phase-grid {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+
+      .pillar-grid,
+      .dual-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .timeline-row {
+        grid-template-columns: 80px 1fr;
+      }
+
+      .timeline-status {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .top-grid,
+      .triple-grid,
+      .quad-grid,
+      .leader-grid,
+      .phase-grid,
+      .pillar-grid {
+        grid-template-columns: 1fr;
+      }
+
+      h1 { font-size: 25px; }
+      .stat { font-size: 24px; }
+
+      .timeline-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- ===================== HERO ===================== -->
+    <section class="hero">
+      <h1>Aurora Pillar Vision</h1>
+      <div class="sub">
+        Visual mission-control dashboard for pillar progress, timeline milestones, target gaps, and the road to £2,000/month.
+      </div>
+
+      <div class="grid top-grid">
+        <div class="card">
+          <div class="stat-label">Current Annual Income</div>
+          <div class="stat">£<span id="annualIncome">3432</span> <small>/ year</small></div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Current Monthly Income</div>
+          <div class="stat">£<span id="monthlyIncome">286</span> <small>/ month</small></div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Target Monthly Income</div>
+          <div class="stat">£<span>2000</span> <small>/ month</small></div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Target Year</div>
+          <div class="stat"><span id="targetYear">2033</span></div>
+        </div>
+      </div>
+
+      <div class="big-progress">
+        <div class="progress-top">
+          <span>Mission Progress to £2,000/month</span>
+          <span id="missionProgressText">14%</span>
+        </div>
+        <div class="bar">
+          <div class="fill" id="missionBar"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== COMMAND SNAPSHOT ===================== -->
+    <section class="section card">
+      <h2>Mission Snapshot</h2>
+      <div class="grid quad-grid">
+        <div class="mini">
+          <div class="k">Monthly Shortfall</div>
+          <div class="v" id="monthlyShortfall">£1,714</div>
+          <div class="subv">Still needed to reach target</div>
+        </div>
+        <div class="mini">
+          <div class="k">Annual Shortfall</div>
+          <div class="v" id="annualShortfall">£20,568</div>
+          <div class="subv">Remaining annual dividend engine</div>
+        </div>
+        <div class="mini">
+          <div class="k">Strongest Pillar</div>
+          <div class="v" id="topPillar">Legal &amp; General</div>
+          <div class="subv">Largest current income output</div>
+        </div>
+        <div class="mini">
+          <div class="k">Best Build Route</div>
+          <div class="v" id="bestRoute">M&amp;G + LGEN</div>
+          <div class="subv">Core acceleration path</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TIMELINE ===================== -->
+    <section class="section card">
+      <h2>Roadmap Timeline</h2>
+      <div class="timeline" id="timelineRows"></div>
+    </section>
+
+    <!-- ===================== PILLAR VISUALS ===================== -->
+    <section class="section card">
+      <h2>Pillar Visual Engine</h2>
+
+      <div class="pillar-grid">
+        <div class="pillar-card">
+          <div class="pillar-top">
+            <div class="pillar-name">Legal &amp; General</div>
+            <div class="badge amber">Anchor</div>
+          </div>
+          <div class="pillar-stats">
+            <div class="mini">
+              <div class="k">Annual Income</div>
+              <div class="v" id="lngIncome">£1,691</div>
+            </div>
+            <div class="mini">
+              <div class="k">Gap to £2k/y</div>
+              <div class="v" id="lngGap">£309</div>
+            </div>
+            <div class="mini">
+              <div class="k">Role</div>
+              <div class="v">Core Builder</div>
+            </div>
+            <div class="mini">
+              <div class="k">Strength</div>
+              <div class="v" id="lngStrengthText">85%</div>
+            </div>
+          </div>
+          <div class="strength-wrap">
+            <div class="progress-top"><span>Pillar Strength</span><span id="lngStrengthPct">85%</span></div>
+            <div class="strength-bar"><div class="strength-fill" id="lngStrengthBar"></div></div>
+          </div>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-top">
+            <div class="pillar-name">M&amp;G</div>
+            <div class="badge green">Accelerator</div>
+          </div>
+          <div class="pillar-stats">
+            <div class="mini">
+              <div class="k">Annual Income</div>
+              <div class="v" id="mngIncome">£1,138</div>
+            </div>
+            <div class="mini">
+              <div class="k">Gap to £2k/y</div>
+              <div class="v" id="mngGap">£862</div>
+            </div>
+            <div class="mini">
+              <div class="k">Role</div>
+              <div class="v">Fastest Builder</div>
+            </div>
+            <div class="mini">
+              <div class="k">Strength</div>
+              <div class="v" id="mngStrengthText">70%</div>
+            </div>
+          </div>
+          <div class="strength-wrap">
+            <div class="progress-top"><span>Pillar Strength</span><span id="mngStrengthPct">70%</span></div>
+            <div class="strength-bar"><div class="strength-fill" id="mngStrengthBar"></div></div>
+          </div>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-top">
+            <div class="pillar-name">Standard Life</div>
+            <div class="badge amber">Balance</div>
+          </div>
+          <div class="pillar-stats">
+            <div class="mini">
+              <div class="k">Annual Income</div>
+              <div class="v" id="sdlfIncome">£910</div>
+            </div>
+            <div class="mini">
+              <div class="k">Gap to £2k/y</div>
+              <div class="v" id="sdlfGap">£1,090</div>
+            </div>
+            <div class="mini">
+              <div class="k">Role</div>
+              <div class="v">Later Support</div>
+            </div>
+            <div class="mini">
+              <div class="k">Strength</div>
+              <div class="v" id="sdlfStrengthText">58%</div>
+            </div>
+          </div>
+          <div class="strength-wrap">
+            <div class="progress-top"><span>Pillar Strength</span><span id="sdlfStrengthPct">58%</span></div>
+            <div class="strength-bar"><div class="strength-fill" id="sdlfStrengthBar"></div></div>
+          </div>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-top">
+            <div class="pillar-name">Supermarket REIT</div>
+            <div class="badge red">Stabiliser</div>
+          </div>
+          <div class="pillar-stats">
+            <div class="mini">
+              <div class="k">Annual Income</div>
+              <div class="v" id="suprIncome">£784</div>
+            </div>
+            <div class="mini">
+              <div class="k">Gap to £2k/y</div>
+              <div class="v" id="suprGap">£1,216</div>
+            </div>
+            <div class="mini">
+              <div class="k">Role</div>
+              <div class="v">Cashflow Smooth</div>
+            </div>
+            <div class="mini">
+              <div class="k">Strength</div>
+              <div class="v" id="suprStrengthText">50%</div>
+            </div>
+          </div>
+          <div class="strength-wrap">
+            <div class="progress-top"><span>Pillar Strength</span><span id="suprStrengthPct">50%</span></div>
+            <div class="strength-bar"><div class="strength-fill" id="suprStrengthBar"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== LEADERS ===================== -->
+    <section class="section card">
+      <h2>Pillar Leaders</h2>
+      <div class="leader-grid">
+        <div class="leader-card">
+          <div class="leader-title">Highest Income</div>
+          <div class="leader-name" id="leaderIncomeName">Legal &amp; General</div>
+          <div class="leader-meta" id="leaderIncomeMeta">£1,691/year</div>
+        </div>
+        <div class="leader-card">
+          <div class="leader-title">Fastest Builder</div>
+          <div class="leader-name" id="leaderBuilderName">M&amp;G</div>
+          <div class="leader-meta" id="leaderBuilderMeta">Best acceleration route</div>
+        </div>
+        <div class="leader-card">
+          <div class="leader-title">Closest to Target</div>
+          <div class="leader-name" id="leaderClosestName">Legal &amp; General</div>
+          <div class="leader-meta" id="leaderClosestMeta">£309 gap</div>
+        </div>
+        <div class="leader-card">
+          <div class="leader-title">Needs Most Work</div>
+          <div class="leader-name" id="leaderWeakestName">Supermarket REIT</div>
+          <div class="leader-meta" id="leaderWeakestMeta">£1,216 gap</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== STRATEGY PHASES ===================== -->
+    <section class="section card">
+      <h2>Strategy Phases</h2>
+      <div class="phase-grid">
+        <div class="phase-card">
+          <h3>Phase 1 — Core Build</h3>
+          <p>Scale the strongest income engines first and keep the current tracker as the stable operating system.</p>
+        </div>
+        <div class="phase-card">
+          <h3>Phase 2 — Acceleration</h3>
+          <p>Use contribution pressure, reinvestment, and targeted buys to push the biggest gaps down faster.</p>
+        </div>
+        <div class="phase-card">
+          <h3>Phase 3 — Target Lock</h3>
+          <p>Convert from pure build mode into smoothing, milestone control, and final run-in toward £2,000/month.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      Aurora Pillar Vision • Visual Layer • Timeline • Mission Control
+    </div>
+
+  </div>
+
+  <script>
+  const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
+  const SHEET_NAME = "Holdings";
+  const TARGET_MONTHLY = 2000;
+  const TARGET_ANNUAL_PER_PILLAR = 2000;
+
+  const pillarMap = {
+    lng: {
+      tickers: ["LGEN", "LON:LGEN"],
+      name: "Legal & General",
+      role: "Core Builder",
+      badge: "Anchor"
+    },
+    mng: {
+      tickers: ["MNG", "LON:MNG"],
+      name: "M&G",
+      role: "Fastest Builder",
+      badge: "Accelerator"
+    },
+    sdlf: {
+      tickers: ["SDLF", "LON:SDLF"],
+      name: "Standard Life",
+      role: "Later Support",
+      badge: "Balance"
+    },
+    supr: {
+      tickers: ["SUPR", "LON:SUPR"],
+      name: "Supermarket REIT",
+      role: "Cashflow Smooth",
+      badge: "Stabiliser"
+    }
+  };
+
+  function parseNumber(value) {
+    return parseFloat(String(value || "").replace(/[^0-9.-]+/g, "")) || 0;
+  }
+
+  function formatMoney(value, decimals = 0) {
+    return Number(value || 0).toLocaleString("en-GB", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    });
+  }
+
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = value;
+  }
+
+  function getTimelineStatus(currentMonthly) {
+    return [
+      { year: 2026, min: 250, target: "£250–£350/month" },
+      { year: 2027, min: 350, target: "£350–£500/month" },
+      { year: 2028, min: 500, target: "£500–£700/month" },
+      { year: 2029, min: 800, target: "£800–£1,100/month" },
+      { year: 2030, min: 1150, target: "£1,150–£1,400/month" },
+      { year: 2031, min: 1400, target: "£1,400–£1,600/month" },
+      { year: 2032, min: 1600, target: "£1,600–£1,800/month" },
+      { year: 2033, min: 2000, target: "£2,000/month" }
+    ].map(item => {
+      let status = "Future phase";
+      let tone = "later";
+
+      if (currentMonthly >= item.min) {
+        status = "Ahead / achieved";
+        tone = "ahead";
+      } else if (currentMonthly >= item.min * 0.75) {
+        status = "On track";
+        tone = "track";
+      }
+
+      if (item.year === 2029 && currentMonthly < item.min * 0.75) {
+        status = "Major uplift year";
+        tone = "track";
+      }
+
+      if (item.year === 2033 && currentMonthly < 2000) {
+        status = "Mission target";
+        tone = currentMonthly >= 1500 ? "track" : "later";
+      }
+
+      return {
+        year: item.year,
+        target: item.target,
+        status,
+        tone
+      };
+    });
+  }
+
+  function renderTimeline(currentMonthly) {
+    const rows = getTimelineStatus(currentMonthly);
+    const wrap = document.getElementById("timelineRows");
+    if (!wrap) return;
+
+    wrap.innerHTML = "";
+
+    rows.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "timeline-row";
+      row.innerHTML = `
+        <div class="timeline-year">${item.year}</div>
+        <div class="timeline-target">${item.target}</div>
+        <div class="timeline-status ${item.tone}">${item.status}</div>
+      `;
+      wrap.appendChild(row);
+    });
+  }
+
+  function buildEmptyPillarState() {
+    return {
+      lng: { name: "Legal & General", income: 0, gap: TARGET_ANNUAL_PER_PILLAR, strength: 0, value: 0, cost: 0, gain: 0, gainPct: 0, yieldPct: 0 },
+      mng: { name: "M&G", income: 0, gap: TARGET_ANNUAL_PER_PILLAR, strength: 0, value: 0, cost: 0, gain: 0, gainPct: 0, yieldPct: 0 },
+      sdlf: { name: "Standard Life", income: 0, gap: TARGET_ANNUAL_PER_PILLAR, strength: 0, value: 0, cost: 0, gain: 0, gainPct: 0, yieldPct: 0 },
+      supr: { name: "Supermarket REIT", income: 0, gap: TARGET_ANNUAL_PER_PILLAR, strength: 0, value: 0, cost: 0, gain: 0, gainPct: 0, yieldPct: 0 }
+    };
+  }
+
+  function updateMissionTotals(totalAnnual) {
+    const currentMonthly = totalAnnual / 12;
+    const annualTarget = TARGET_MONTHLY * 12;
+    const monthlyShortfall = Math.max(TARGET_MONTHLY - currentMonthly, 0);
+    const annualShortfall = Math.max(annualTarget - totalAnnual, 0);
+    const progressPct = Math.min((currentMonthly / TARGET_MONTHLY) * 100, 100);
+
+    setText("annualIncome", formatMoney(totalAnnual, 0));
+    setText("monthlyIncome", formatMoney(currentMonthly, 0));
+    setText("missionProgressText", `${progressPct.toFixed(1)}%`);
+    setText("monthlyShortfall", `£${formatMoney(monthlyShortfall, 0)}`);
+    setText("annualShortfall", `£${formatMoney(annualShortfall, 0)}`);
+
+    const missionBar = document.getElementById("missionBar");
+    if (missionBar) missionBar.style.width = `${progressPct}%`;
+
+    renderTimeline(currentMonthly);
+
+    return currentMonthly;
+  }
+
+  function updatePillarVisuals(pillars) {
+    Object.keys(pillars).forEach(key => {
+      const pillar = pillars[key];
+      const strength = Math.min((pillar.income / TARGET_ANNUAL_PER_PILLAR) * 100, 100);
+      const gap = Math.max(TARGET_ANNUAL_PER_PILLAR - pillar.income, 0);
+
+      pillar.strength = strength;
+      pillar.gap = gap;
+
+      setText(`${key}Income`, `£${formatMoney(pillar.income, 0)}`);
+      setText(`${key}Gap`, `£${formatMoney(gap, 0)}`);
+      setText(`${key}StrengthText`, `${Math.round(strength)}%`);
+      setText(`${key}StrengthPct`, `${Math.round(strength)}%`);
+
+      const bar = document.getElementById(`${key}StrengthBar`);
+      if (bar) bar.style.width = `${strength}%`;
+    });
+  }
+
+  function updateLeaders(pillars) {
+    const list = Object.keys(pillars).map(key => ({
+      key,
+      ...pillars[key]
+    }));
+
+    const highestIncome = [...list].sort((a, b) => b.income - a.income)[0];
+    const closestTarget = [...list].sort((a, b) => a.gap - b.gap)[0];
+    const weakestGap = [...list].sort((a, b) => b.gap - a.gap)[0];
+    const fastestBuilder = [...list].sort((a, b) => b.yieldPct - a.yieldPct)[0];
+
+    setText("leaderIncomeName", highestIncome.name);
+    setText("leaderIncomeMeta", `£${formatMoney(highestIncome.income, 0)}/year`);
+
+    setText("leaderBuilderName", fastestBuilder.name);
+    setText("leaderBuilderMeta", `Yield ${fastestBuilder.yieldPct.toFixed(2)}%`);
+
+    setText("leaderClosestName", closestTarget.name);
+    setText("leaderClosestMeta", `£${formatMoney(closestTarget.gap, 0)} gap`);
+
+    setText("leaderWeakestName", weakestGap.name);
+    setText("leaderWeakestMeta", `£${formatMoney(weakestGap.gap, 0)} gap`);
+
+    setText("topPillar", highestIncome.name);
+    setText("bestRoute", `${fastestBuilder.name} + ${closestTarget.name}`);
+  }
+
+  async function loadVisionData() {
+    const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      const pillars = buildEmptyPillarState();
+
+      data.forEach(row => {
+        const ticker = String(row.ticker || "").trim().toUpperCase();
+        const shares = parseNumber(row.shares);
+        const dps = parseNumber(row.annual_dividend_per_share);
+        const rawPrice = parseNumber(row.live_price);
+        const cost = parseNumber(row.book_cost);
+
+        let price = rawPrice;
+        if (price > 20) price = price / 100;
+
+        let matchedKey = null;
+
+        Object.keys(pillarMap).forEach(key => {
+          if (pillarMap[key].tickers.includes(ticker)) {
+            matchedKey = key;
+          }
+        });
+
+        if (!matchedKey) return;
+
+        const income = shares * dps;
+        const value = shares * price;
+        const gain = value - cost;
+        const gainPct = cost > 0 ? (gain / cost) * 100 : 0;
+        const yieldPct = price > 0 ? (dps / price) * 100 : 0;
+
+        pillars[matchedKey] = {
+          ...pillars[matchedKey],
+          income,
+          value,
+          cost,
+          gain,
+          gainPct,
+          yieldPct
+        };
+      });
+
+      const totalAnnual = Object.values(pillars).reduce((sum, pillar) => sum + pillar.income, 0);
+
+      updateMissionTotals(totalAnnual);
+      updatePillarVisuals(pillars);
+      updateLeaders(pillars);
+    } catch (err) {
+      console.error("Aurora Pillar Vision sync failed", err);
+    }
+  }
+
+  loadVisionData();
+  setInterval(loadVisionData, 30000);
+</script>
+</body>
+</html>
