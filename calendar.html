@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Aurora Dividend Calendar</title>
+
+  <style>
+    :root {
+      --bg: #071018;
+      --bg2: #0c1624;
+      --panel: rgba(15, 27, 43, 0.88);
+      --panel-2: rgba(10, 20, 34, 0.9);
+      --line: rgba(101, 225, 255, 0.16);
+      --cyan: #62f3ff;
+      --cyan-2: #1ad1ff;
+      --blue: #6ea8ff;
+      --green: #50ff8f;
+      --amber: #ffc857;
+      --red: #ff6b8a;
+      --text: #e9f4ff;
+      --muted: #96abc5;
+      --glow: 0 0 22px rgba(26, 209, 255, 0.22);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top right, rgba(26, 209, 255, 0.14), transparent 28%),
+        radial-gradient(circle at top left, rgba(110, 168, 255, 0.12), transparent 25%),
+        linear-gradient(180deg, var(--bg), #050b13 100%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    body {
+      padding: 18px 14px 42px;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      background: linear-gradient(145deg, rgba(12, 22, 36, 0.95), rgba(6, 13, 23, 0.95));
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: var(--glow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(98,243,255,0.08), transparent);
+      transform: translateX(-100%);
+      animation: scan 8s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes scan {
+      to { transform: translateX(100%); }
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.05;
+      letter-spacing: 0.3px;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 17px;
+      letter-spacing: 0.4px;
+    }
+
+    .sub {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .top-grid {
+      grid-template-columns: repeat(4, minmax(0,1fr));
+    }
+
+    .triple-grid {
+      grid-template-columns: repeat(3, minmax(0,1fr));
+    }
+
+    .months-grid {
+      grid-template-columns: repeat(4, minmax(0,1fr));
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      backdrop-filter: blur(8px);
+    }
+
+    .section {
+      margin-top: 14px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat {
+      margin-top: 6px;
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .stat small {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .mini {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .mini .k {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .mini .v {
+      margin-top: 4px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .mini .subv {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .sync-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sync-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 12px rgba(80,255,143,0.65);
+      flex: 0 0 auto;
+    }
+
+    .sync-dot.sync-warn {
+      background: var(--amber);
+      box-shadow: 0 0 12px rgba(255,200,87,0.65);
+    }
+
+    .sync-dot.sync-bad {
+      background: var(--red);
+      box-shadow: 0 0 12px rgba(255,107,138,0.65);
+    }
+
+    .payment-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .payment-card {
+      background: linear-gradient(145deg, rgba(12, 24, 39, 0.96), rgba(7, 15, 25, 0.96));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .payment-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .payment-name {
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .payment-ticker {
+      color: var(--cyan);
+      font-size: 12px;
+      margin-top: 4px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+
+    .payment-amount {
+      font-size: 22px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .payment-meta {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.7px;
+      border: 1px solid currentColor;
+      white-space: nowrap;
+    }
+
+    .green { color: var(--green); }
+    .amber { color: var(--amber); }
+    .red { color: var(--red); }
+    .cyan { color: var(--cyan); }
+
+    .month-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .month-name {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .month-total {
+      margin-top: 8px;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .month-bar {
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .month-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--cyan-2), var(--cyan));
+      width: 0%;
+      transition: width 0.35s ease;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 920px;
+    }
+
+    th, td {
+      padding: 11px 9px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .live-up {
+      color: var(--green);
+      text-shadow: 0 0 10px rgba(80,255,143,0.25);
+    }
+
+    .live-down {
+      color: var(--red);
+      text-shadow: 0 0 10px rgba(255,107,138,0.25);
+    }
+
+    .footer {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      font-size: 13px;
+      padding: 12px 0 2px;
+    }
+
+    @media (max-width: 860px) {
+      .top-grid,
+      .months-grid,
+      .triple-grid {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+
+      .payment-meta {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .top-grid,
+      .months-grid,
+      .triple-grid,
+      .payment-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .payment-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      h1 { font-size: 25px; }
+      .stat { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- ===================== HERO ===================== -->
+    <section class="hero">
+      <h1>Aurora Dividend Calendar</h1>
+      <div class="sub">
+        Cashflow runway dashboard for ex-dividend dates, pay dates, estimated payments, received dividends, and monthly income timing from your Dividend sheet.
+      </div>
+
+      <div class="grid top-grid">
+        <div class="card">
+          <div class="stat-label">Projected Annual Income</div>
+          <div class="stat">£<span id="annualIncome">0.00</span> <small>/ year</small></div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Projected Monthly Average</div>
+          <div class="stat">£<span id="monthlyAverage">0.00</span> <small>/ month</small></div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Next Payment</div>
+          <div class="stat"><span id="nextPaymentAmount">--</span></div>
+          <div class="sub" id="nextPaymentName">Waiting for data</div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Live Sync</div>
+          <div class="stat sync-row">
+            <span class="sync-dot" id="syncDot"></span>
+            <span id="syncStatusText">Waiting…</span>
+          </div>
+          <div class="sub" id="syncStatusSub">No refresh yet</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SNAPSHOT ===================== -->
+    <section class="section card">
+      <h2>Runway Snapshot</h2>
+      <div class="grid top-grid">
+        <div class="mini">
+          <div class="k">Next Ex-Dividend</div>
+          <div class="v" id="nextExDate">--</div>
+          <div class="subv" id="nextExDateSub">No ex-date found</div>
+        </div>
+        <div class="mini">
+          <div class="k">Next Pay Date</div>
+          <div class="v" id="nextPayDate">--</div>
+          <div class="subv" id="nextPayDateSub">No pay-date found</div>
+        </div>
+        <div class="mini">
+          <div class="k">Next 30 Days</div>
+          <div class="v" id="next30Days">£0.00</div>
+          <div class="subv">Expected cash due</div>
+        </div>
+        <div class="mini">
+          <div class="k">Next 90 Days</div>
+          <div class="v" id="next90Days">£0.00</div>
+          <div class="subv">Expected cash due</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== UPCOMING PAYMENTS ===================== -->
+    <section class="section card">
+      <h2>Upcoming Payments</h2>
+      <div class="payment-list" id="upcomingPayments"></div>
+      <div class="empty-state" id="upcomingEmpty" style="display:none;">No upcoming payment dates found in the Dividend sheet yet.</div>
+    </section>
+
+    <!-- ===================== MONTHLY MAP ===================== -->
+    <section class="section card">
+      <h2>Monthly Income Map</h2>
+      <div class="grid months-grid" id="monthlyMap"></div>
+    </section>
+
+    <!-- ===================== HIGHLIGHTS ===================== -->
+    <section class="section card">
+      <h2>Calendar Highlights</h2>
+      <div class="grid triple-grid">
+        <div class="mini">
+          <div class="k">Strongest Month</div>
+          <div class="v" id="strongestMonth">--</div>
+          <div class="subv" id="strongestMonthSub">£0.00</div>
+        </div>
+        <div class="mini">
+          <div class="k">Weakest Month</div>
+          <div class="v" id="weakestMonth">--</div>
+          <div class="subv" id="weakestMonthSub">£0.00</div>
+        </div>
+        <div class="mini">
+          <div class="k">Tracked Entries</div>
+          <div class="v" id="trackedPayments">0</div>
+          <div class="subv">Dividend rows with usable data</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PAYMENT TABLE ===================== -->
+    <section class="section card">
+      <h2>Dividend Payment Table</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Account</th>
+              <th>Holding</th>
+              <th>Ticker</th>
+              <th>Ex-Dividend</th>
+              <th>Pay Date</th>
+              <th>DPS (£)</th>
+              <th>Shares @ Ex-Div</th>
+              <th>Total Dividend</th>
+              <th>Received</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="paymentTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="footer">
+      Aurora Dividend Calendar • Income Runway • Ex-Dates • Pay Dates
+    </div>
+  </div>
+
+  <script>
+    // ===================== CONFIG =====================
+    const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
+    const SHEET_NAME = "Dividends";
+
+    const MONTH_NAMES = [
+      "January","February","March","April","May","June",
+      "July","August","September","October","November","December"
+    ];
+
+    // ===================== HELPERS =====================
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.innerText = value;
+    }
+
+    function parseNumber(value) {
+      const cleaned = String(value ?? "").replace(/[^0-9.-]+/g, "");
+      const parsed = parseFloat(cleaned);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function formatMoney(value, decimals = 2) {
+      return Number(value || 0).toLocaleString("en-GB", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    }
+
+    function safeText(value, fallback = "—") {
+      const text = String(value ?? "").trim();
+      return text || fallback;
+    }
+
+    function firstFilled(row, keys) {
+      for (const key of keys) {
+        if (row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== "") {
+          return row[key];
+        }
+      }
+      return "";
+    }
+
+    function parseDateValue(value) {
+      if (!value) return null;
+
+      const raw = String(value).trim();
+      if (!raw) return null;
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+        const d = new Date(`${raw}T00:00:00`);
+        return isNaN(d.getTime()) ? null : d;
+      }
+
+      if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(raw)) {
+        const [dd, mm, yyyy] = raw.split("/").map(Number);
+        const d = new Date(yyyy, mm - 1, dd);
+        return isNaN(d.getTime()) ? null : d;
+      }
+
+      if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(raw)) {
+        const [dd, mm, yyyy] = raw.split("-").map(Number);
+        const d = new Date(yyyy, mm - 1, dd);
+        return isNaN(d.getTime()) ? null : d;
+      }
+
+      const fallback = new Date(raw);
+      return isNaN(fallback.getTime()) ? null : fallback;
+    }
+
+    function formatDate(date) {
+      if (!date) return "—";
+      return date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      });
+    }
+
+    function daysUntil(date) {
+      if (!date) return null;
+
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const diffMs = target - today;
+
+      return Math.round(diffMs / 86400000);
+    }
+
+    function estimateTotalDividend(row) {
+      const totalDividend = parseNumber(row.total_dividend);
+      if (totalDividend > 0) return totalDividend;
+
+      const dps = parseNumber(row.dividend_per_share);
+      const sharesAtExDiv = parseNumber(row.shares_at_exdiv);
+      const shares = parseNumber(row.shares);
+
+      return (sharesAtExDiv || shares) * dps;
+    }
+
+    function getStatusTone(status, payDate, received) {
+      const text = String(status || "").trim().toLowerCase();
+      if (received > 0 || text.includes("received")) return "green";
+      if (text.includes("missed") || text.includes("cancel")) return "red";
+      if (payDate && daysUntil(payDate) !== null && daysUntil(payDate) < 0) return "amber";
+      return "cyan";
+    }
+
+    function createStatusBadge(status, payDate, received) {
+      const tone = getStatusTone(status, payDate, received);
+      const label = safeText(status, received > 0 ? "Received" : "Upcoming");
+      return `<span class="badge ${tone}">${label}</span>`;
+    }
+
+    // ===================== RENDER =====================
+    function renderUpcomingPayments(items) {
+      const wrap = document.getElementById("upcomingPayments");
+      const empty = document.getElementById("upcomingEmpty");
+      if (!wrap) return;
+
+      wrap.innerHTML = "";
+
+      if (!items.length) {
+        if (empty) empty.style.display = "block";
+        return;
+      }
+
+      if (empty) empty.style.display = "none";
+
+      items.slice(0, 8).forEach(item => {
+        const exDays = daysUntil(item.exDate);
+        const payDays = daysUntil(item.payDate);
+
+        const card = document.createElement("div");
+        card.className = "payment-card";
+        card.innerHTML = `
+          <div class="payment-top">
+            <div>
+              <div class="payment-name">${safeText(item.name)}</div>
+              <div class="payment-ticker">${safeText(item.ticker)}</div>
+            </div>
+            <div class="payment-amount">£${formatMoney(item.totalDividend)}</div>
+          </div>
+
+          <div class="payment-meta">
+            <div class="mini">
+              <div class="k">Account</div>
+              <div class="v">${safeText(item.account)}</div>
+              <div class="subv">Payment source</div>
+            </div>
+            <div class="mini">
+              <div class="k">Ex-Dividend</div>
+              <div class="v">${formatDate(item.exDate)}</div>
+              <div class="subv">${exDays === null ? "No ex-date" : `${exDays >= 0 ? exDays : Math.abs(exDays)} day${Math.abs(exDays) === 1 ? "" : "s"} ${exDays >= 0 ? "away" : "ago"}`}</div>
+            </div>
+            <div class="mini">
+              <div class="k">Pay Date</div>
+              <div class="v">${formatDate(item.payDate)}</div>
+              <div class="subv">${payDays === null ? "No pay-date" : `${payDays >= 0 ? payDays : Math.abs(payDays)} day${Math.abs(payDays) === 1 ? "" : "s"} ${payDays >= 0 ? "away" : "ago"}`}</div>
+            </div>
+            <div class="mini">
+              <div class="k">Status</div>
+              <div class="v">${createStatusBadge(item.status, item.payDate, item.dividendReceived)}</div>
+              <div class="subv">Received £${formatMoney(item.dividendReceived)}</div>
+            </div>
+          </div>
+        `;
+        wrap.appendChild(card);
+      });
+    }
+
+    function renderMonthlyMap(monthTotals) {
+      const wrap = document.getElementById("monthlyMap");
+      if (!wrap) return;
+
+      wrap.innerHTML = "";
+
+      const maxTotal = Math.max(...monthTotals.map(x => x.total), 1);
+
+      monthTotals.forEach((item, index) => {
+        const pct = maxTotal > 0 ? (item.total / maxTotal) * 100 : 0;
+
+        const card = document.createElement("div");
+        card.className = "month-card";
+        card.innerHTML = `
+          <div class="month-name">${MONTH_NAMES[index]}</div>
+          <div class="month-total">£${formatMoney(item.total)}</div>
+          <div class="mini" style="margin-top:10px;">
+            <div class="k">Payments</div>
+            <div class="v">${item.count}</div>
+          </div>
+          <div class="month-bar">
+            <div class="month-fill" style="width:${pct}%"></div>
+          </div>
+        `;
+        wrap.appendChild(card);
+      });
+    }
+
+    function renderTable(items) {
+      const tbody = document.getElementById("paymentTableBody");
+      if (!tbody) return;
+
+      tbody.innerHTML = "";
+
+      items.forEach(item => {
+        const receivedClass = item.dividendReceived > 0 ? "live-up" : "";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${safeText(item.account)}</td>
+          <td>${safeText(item.name)}</td>
+          <td>${safeText(item.ticker)}</td>
+          <td>${formatDate(item.exDate)}</td>
+          <td>${formatDate(item.payDate)}</td>
+          <td>${formatMoney(item.dividendPerShare, 4)}</td>
+          <td>${formatMoney(item.sharesAtExDiv, 0)}</td>
+          <td>£${formatMoney(item.totalDividend)}</td>
+          <td class="${receivedClass}">£${formatMoney(item.dividendReceived)}</td>
+          <td>${createStatusBadge(item.status, item.payDate, item.dividendReceived)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ===================== MAIN LOAD =====================
+    async function loadDividendCalendar() {
+      const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        const rows = data
+          .map(row => {
+            const account = firstFilled(row, ["Account", "account"]);
+            const ticker = firstFilled(row, ["ticker", "Ticker"]);
+            const name = firstFilled(row, ["name", "Name"]);
+            const exRaw = firstFilled(row, ["ex_div_date", "ex_dividend_date", "ex date", "ex_date"]);
+            const payRaw = firstFilled(row, ["pay_date", "payment_date", "pay date", "payment date"]);
+            const dividendPerShare = parseNumber(firstFilled(row, ["dividend_per_share", "dps"]));
+            const shares = parseNumber(firstFilled(row, ["shares", "Shares"]));
+            const sharesAtExDiv = parseNumber(firstFilled(row, ["shares_at_exdiv", "shares_at_ex_div", "shares at exdiv"])) || shares;
+            const totalDividend = estimateTotalDividend(row);
+            const dividendReceived = parseNumber(firstFilled(row, ["dividend_received", "received"]));
+            const status = firstFilled(row, ["status", "Status"]);
+
+            return {
+              account,
+              ticker,
+              name,
+              exDate: parseDateValue(exRaw),
+              payDate: parseDateValue(payRaw),
+              dividendPerShare,
+              shares,
+              sharesAtExDiv,
+              totalDividend,
+              dividendReceived,
+              status
+            };
+          })
+          .filter(item =>
+            (item.ticker || item.name) &&
+            (item.totalDividend > 0 || item.dividendPerShare > 0 || item.dividendReceived > 0)
+          );
+
+        const annualIncome = rows.reduce((sum, item) => sum + item.totalDividend, 0);
+        const monthlyAverage = annualIncome / 12;
+
+        const futurePayRows = rows
+          .filter(item => item.payDate && daysUntil(item.payDate) !== null && daysUntil(item.payDate) >= 0)
+          .sort((a, b) => a.payDate - b.payDate);
+
+        const futureExRows = rows
+          .filter(item => item.exDate && daysUntil(item.exDate) !== null && daysUntil(item.exDate) >= 0)
+          .sort((a, b) => a.exDate - b.exDate);
+
+        const nextPayment = futurePayRows[0] || null;
+        const nextEx = futureExRows[0] || null;
+
+        const today = new Date();
+        const next30Limit = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 30);
+        const next90Limit = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 90);
+
+        const next30DaysTotal = futurePayRows
+          .filter(item => item.payDate <= next30Limit)
+          .reduce((sum, item) => sum + item.totalDividend, 0);
+
+        const next90DaysTotal = futurePayRows
+          .filter(item => item.payDate <= next90Limit)
+          .reduce((sum, item) => sum + item.totalDividend, 0);
+
+        const monthTotals = Array.from({ length: 12 }, () => ({ total: 0, count: 0 }));
+        rows.forEach(item => {
+          if (!item.payDate) return;
+          const m = item.payDate.getMonth();
+          monthTotals[m].total += item.totalDividend;
+          monthTotals[m].count += 1;
+        });
+
+        const strongestMonthIndex = monthTotals.reduce((bestIdx, item, idx, arr) =>
+          item.total > arr[bestIdx].total ? idx : bestIdx, 0);
+
+        const weakestMonthIndex = monthTotals.reduce((worstIdx, item, idx, arr) =>
+          item.total < arr[worstIdx].total ? idx : worstIdx, 0);
+
+        setText("annualIncome", formatMoney(annualIncome));
+        setText("monthlyAverage", formatMoney(monthlyAverage));
+
+        setText("nextPaymentAmount", nextPayment ? `£${formatMoney(nextPayment.totalDividend)}` : "--");
+        setText("nextPaymentName", nextPayment ? `${safeText(nextPayment.name)} • ${formatDate(nextPayment.payDate)}` : "No payment dates found");
+
+        setText("nextExDate", nextEx ? formatDate(nextEx.exDate) : "--");
+        setText("nextExDateSub", nextEx ? safeText(nextEx.name) : "No ex-date found");
+
+        setText("nextPayDate", nextPayment ? formatDate(nextPayment.payDate) : "--");
+        setText("nextPayDateSub", nextPayment ? safeText(nextPayment.name) : "No pay-date found");
+
+        setText("next30Days", `£${formatMoney(next30DaysTotal)}`);
+        setText("next90Days", `£${formatMoney(next90DaysTotal)}`);
+
+        setText("strongestMonth", MONTH_NAMES[strongestMonthIndex]);
+        setText("strongestMonthSub", `£${formatMoney(monthTotals[strongestMonthIndex].total)}`);
+
+        setText("weakestMonth", MONTH_NAMES[weakestMonthIndex]);
+        setText("weakestMonthSub", `£${formatMoney(monthTotals[weakestMonthIndex].total)}`);
+
+        setText("trackedPayments", rows.length);
+
+        renderUpcomingPayments(futurePayRows);
+        renderMonthlyMap(monthTotals);
+        renderTable(
+          [...rows].sort((a, b) => {
+            const aTime = a.payDate ? a.payDate.getTime() : Number.MAX_SAFE_INTEGER;
+            const bTime = b.payDate ? b.payDate.getTime() : Number.MAX_SAFE_INTEGER;
+            return aTime - bTime;
+          })
+        );
+
+        setText("syncStatusText", "Live Connected");
+        setText("syncStatusSub", new Date().toLocaleTimeString());
+        const syncDot = document.getElementById("syncDot");
+        if (syncDot) syncDot.className = "sync-dot";
+
+      } catch (err) {
+        console.error("Dividend calendar sync failed", err);
+        setText("syncStatusText", "Sync Failed");
+        setText("syncStatusSub", "Dividend sheet fetch error");
+        const syncDot = document.getElementById("syncDot");
+        if (syncDot) syncDot.className = "sync-dot sync-bad";
+      }
+    }
+
+    loadDividendCalendar();
+    setInterval(loadDividendCalendar, 60000);
+  </script>
+</body>
+</html>
