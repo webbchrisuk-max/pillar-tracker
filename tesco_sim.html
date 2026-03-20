@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Aurora Tesco Simulator</title>
+  <style>
+    :root {
+      --bg: #071018;
+      --bg2: #0c1624;
+      --panel: rgba(15, 27, 43, 0.88);
+      --panel-2: rgba(10, 20, 34, 0.9);
+      --line: rgba(101, 225, 255, 0.16);
+      --cyan: #62f3ff;
+      --cyan-2: #1ad1ff;
+      --blue: #6ea8ff;
+      --green: #50ff8f;
+      --amber: #ffc857;
+      --red: #ff6b8a;
+      --text: #e9f4ff;
+      --muted: #96abc5;
+      --glow: 0 0 22px rgba(26, 209, 255, 0.22);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top right, rgba(26, 209, 255, 0.14), transparent 28%),
+        radial-gradient(circle at top left, rgba(110, 168, 255, 0.12), transparent 25%),
+        linear-gradient(180deg, var(--bg), #050b13 100%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    body {
+      padding: 18px 14px 42px;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      background: linear-gradient(145deg, rgba(12, 22, 36, 0.95), rgba(6, 13, 23, 0.95));
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: var(--glow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(98,243,255,0.08), transparent);
+      transform: translateX(-100%);
+      animation: scan 8s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes scan {
+      to { transform: translateX(100%); }
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.05;
+      letter-spacing: 0.3px;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 17px;
+      letter-spacing: 0.4px;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: 0.3px;
+    }
+
+    .sub {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .section {
+      margin-top: 14px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .top-grid {
+      grid-template-columns: repeat(4, minmax(0,1fr));
+    }
+
+    .triple-grid {
+      grid-template-columns: repeat(3, minmax(0,1fr));
+    }
+
+    .dual-grid {
+      grid-template-columns: repeat(2, minmax(0,1fr));
+    }
+
+    .quad-grid {
+      grid-template-columns: repeat(4, minmax(0,1fr));
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      backdrop-filter: blur(8px);
+    }
+
+    .mini {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .mini .k {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .mini .v {
+      margin-top: 4px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .mini .subv {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat {
+      margin-top: 6px;
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .stat small {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .input-box {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .input-box label {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+    }
+
+    .input-box input,
+    .input-box select {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .strategy-btns {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .strategy-btn {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .strategy-btn.active {
+      border-color: rgba(98,243,255,0.55);
+      box-shadow: 0 0 0 1px rgba(98,243,255,0.18), 0 0 18px rgba(98,243,255,0.15);
+      color: var(--cyan);
+    }
+
+    .timeline {
+      display: grid;
+      gap: 10px;
+    }
+
+    .timeline-row {
+      display: grid;
+      grid-template-columns: 130px 1fr 150px;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .timeline-year {
+      font-weight: 800;
+      color: var(--cyan);
+    }
+
+    .timeline-target {
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .timeline-status {
+      text-align: right;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+    }
+
+    .ahead { color: var(--green); }
+    .track { color: var(--amber); }
+    .later { color: var(--muted); }
+
+    .bar-wrap {
+      margin-top: 12px;
+    }
+
+    .bar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+      gap: 12px;
+    }
+
+    .bar {
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--cyan-2), var(--cyan));
+      box-shadow: 0 0 20px rgba(98,243,255,0.35);
+      width: 0%;
+      transition: width 0.35s ease;
+    }
+
+    .allocation-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .allocation-card {
+      background: linear-gradient(145deg, rgba(12, 24, 39, 0.96), rgba(7, 15, 25, 0.96));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .allocation-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .allocation-name {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.7px;
+      border: 1px solid currentColor;
+      white-space: nowrap;
+    }
+
+    .green { color: var(--green); }
+    .amber { color: var(--amber); }
+    .red { color: var(--red); }
+    .cyan { color: var(--cyan); }
+
+    .results-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .footer {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .top-grid,
+      .quad-grid,
+      .strategy-btns {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+
+      .timeline-row {
+        grid-template-columns: 110px 1fr;
+      }
+
+      .timeline-status {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .top-grid,
+      .triple-grid,
+      .dual-grid,
+      .quad-grid,
+      .strategy-btns {
+        grid-template-columns: 1fr;
+      }
+
+      .timeline-row {
+        grid-template-columns: 1fr;
+      }
+
+      .allocation-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      h1 { font-size: 25px; }
+      .stat { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- ===================== HERO ===================== -->
+    <section class="hero">
+      <h1>Aurora Tesco Simulator</h1>
+      <div class="sub">
+        Dedicated Tesco SAYE maturity command centre for ISA deployment waves, capital planning, income impact, and pillar allocation testing.
+      </div>
+
+      <div class="grid top-grid">
+        <div class="card">
+          <div class="stat-label">Tesco Value</div>
+          <div class="stat">£<span id="tescoValueHero">68,432.51</span></div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Potential Gain</div>
+          <div class="stat">£<span id="tescoGainHero">36,833.91</span></div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Deployable by ISA Plan</div>
+          <div class="stat">£<span id="deployableHero">60,000.00</span></div>
+        </div>
+        <div class="card">
+          <div class="stat-label">Remaining Flexible Pot</div>
+          <div class="stat">£<span id="remainingHero">8,432.51</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SAYE SNAPSHOT ===================== -->
+    <div class="mini">
+  <div class="k">Tesco Live Price</div>
+  <div class="v" id="tescoLivePrice">£4.764</div>
+  <div class="subv">Pulled from Holdings sheet</div>
+</div>
+    <section class="section card">
+      <h2>Tesco SAYE Snapshot</h2>
+      <div class="grid quad-grid">
+        <div class="mini">
+          <div class="k">Value of SAYE</div>
+          <div class="v" id="tescoValue">£68,432.51</div>
+          <div class="subv">Current total value</div>
+        </div>
+        <div class="mini">
+          <div class="k">Savings to Date</div>
+          <div class="v" id="tescoSavingsToDate">£12,500.00</div>
+          <div class="subv">Cash saved so far</div>
+        </div>
+        <div class="mini">
+          <div class="k">Potential Gain</div>
+          <div class="v" id="tescoPotentialGain">£36,833.91</div>
+          <div class="subv">Value over option cost</div>
+        </div>
+        <div class="mini">
+          <div class="k">Monthly Savings</div>
+          <div class="v" id="tescoMonthlySavings">£500.00</div>
+          <div class="subv">Current contribution</div>
+        </div>
+        <div class="mini">
+          <div class="k">Shares / Options</div>
+          <div class="v" id="tescoShares">14,363</div>
+          <div class="subv">Locked option quantity</div>
+        </div>
+        <div class="mini">
+          <div class="k">Option Price</div>
+          <div class="v" id="tescoOptionPrice">£2.20</div>
+          <div class="subv">Exercise price per share</div>
+        </div>
+        <div class="mini">
+          <div class="k">Total Option Cost</div>
+          <div class="v" id="tescoOptionCost">£31,598.60</div>
+          <div class="subv">Exercise cost for all shares</div>
+        </div>
+        <div class="mini">
+          <div class="k">Maturity Date</div>
+          <div class="v" id="tescoMaturityDate">01/03/2029</div>
+          <div class="subv">Planned capital event</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== ISA WAVE PLAN ===================== -->
+    <section class="section card">
+      <h2>ISA Deployment Wave Plan</h2>
+      <div class="grid quad-grid">
+        <div class="mini">
+          <div class="k">March 2029 ISA Wave</div>
+          <div class="v" id="waveOne">£20,000.00</div>
+          <div class="subv">First ISA deployment</div>
+        </div>
+        <div class="mini">
+          <div class="k">April 2029 ISA Wave</div>
+          <div class="v" id="waveTwo">£20,000.00</div>
+          <div class="subv">Second ISA deployment</div>
+        </div>
+        <div class="mini">
+          <div class="k">April 2030 ISA Wave</div>
+          <div class="v" id="waveThree">£20,000.00</div>
+          <div class="subv">Third ISA deployment</div>
+        </div>
+        <div class="mini">
+          <div class="k">Flexible Balance</div>
+          <div class="v" id="flexBalance">£8,432.51</div>
+          <div class="subv">Remaining outside core ISA waves</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CONTROLS ===================== -->
+    <section class="section card">
+      <h2>Simulation Controls</h2>
+      <div class="grid dual-grid">
+        <div class="input-box">
+          <label for="simAmount">Simulation Amount (£)</label>
+          <input id="simAmount" type="number" value="20000" step="1000" min="0" />
+        </div>
+        <div class="input-box">
+          <label for="simYield">Assumed Portfolio Yield (%)</label>
+          <input id="simYield" type="number" value="8.00" step="0.1" min="0" />
+        </div>
+      </div>
+
+      <div class="strategy-btns">
+        <button class="strategy-btn active" data-strategy="coreAttack">Core Attack</button>
+        <button class="strategy-btn" data-strategy="balanced">Balanced Pillars</button>
+        <button class="strategy-btn" data-strategy="incomeSmooth">Income + Smoothing</button>
+        <button class="strategy-btn" data-strategy="custom">Custom Split</button>
+      </div>
+
+      <div class="grid quad-grid" id="customSplitWrap" style="display:none;">
+        <div class="input-box">
+          <label for="customMng">M&G %</label>
+          <input id="customMng" type="number" value="40" step="1" min="0" max="100" />
+        </div>
+        <div class="input-box">
+          <label for="customLng">Legal & General %</label>
+          <input id="customLng" type="number" value="30" step="1" min="0" max="100" />
+        </div>
+        <div class="input-box">
+          <label for="customSdlf">Standard Life %</label>
+          <input id="customSdlf" type="number" value="15" step="1" min="0" max="100" />
+        </div>
+        <div class="input-box">
+          <label for="customSupr">Supermarket REIT %</label>
+          <input id="customSupr" type="number" value="15" step="1" min="0" max="100" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== OUTPUT ===================== -->
+    <section class="section card">
+      <h2>Simulation Output</h2>
+      <div class="grid top-grid">
+        <div class="mini">
+          <div class="k">Annual Income Added</div>
+          <div class="v" id="annualIncomeAdded">£1,600.00</div>
+          <div class="subv">From selected amount + yield</div>
+        </div>
+        <div class="mini">
+          <div class="k">Monthly Income Added</div>
+          <div class="v" id="monthlyIncomeAdded">£133.33</div>
+          <div class="subv">Run-rate added per month</div>
+        </div>
+        <div class="mini">
+          <div class="k">Projected Total Monthly</div>
+          <div class="v" id="projectedMonthlyTotal">£535.30</div>
+          <div class="subv">Based on current £401.97/month</div>
+        </div>
+        <div class="mini">
+          <div class="k">Stage Jump View</div>
+          <div class="v" id="stageJump">Meaningful jump</div>
+          <div class="subv" id="stageJumpSub">Big capital deployment effect</div>
+        </div>
+      </div>
+
+      <div class="bar-wrap">
+        <div class="bar-top">
+          <span>Progress to £2,000/month after simulation</span>
+          <span id="missionProgressText">26.8%</span>
+        </div>
+        <div class="bar">
+          <div class="fill" id="missionBar"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== ALLOCATION BREAKDOWN ===================== -->
+    <section class="section card">
+      <h2>Allocation Breakdown</h2>
+      <div class="allocation-grid" id="allocationGrid"></div>
+      <div class="results-note" id="strategyNote">
+        Core Attack is built to push your strongest income engines first, with M&amp;G and Legal &amp; General doing the heavy lifting.
+      </div>
+    </section>
+
+    <!-- ===================== TIMELINE ===================== -->
+    <section class="section card">
+      <h2>Tesco Roadmap Timeline</h2>
+      <div class="timeline">
+        <div class="timeline-row">
+          <div class="timeline-year">01/03/2024</div>
+          <div class="timeline-target">SAYE start date</div>
+          <div class="timeline-status ahead">Active</div>
+        </div>
+        <div class="timeline-row">
+          <div class="timeline-year">01/03/2029</div>
+          <div class="timeline-target">Maturity date + first ISA deployment window</div>
+          <div class="timeline-status track">Core trigger</div>
+        </div>
+        <div class="timeline-row">
+          <div class="timeline-year">04/2029</div>
+          <div class="timeline-target">Second ISA wave into income engine / balance system</div>
+          <div class="timeline-status track">Scale up</div>
+        </div>
+        <div class="timeline-row">
+          <div class="timeline-year">04/2030</div>
+          <div class="timeline-target">Third ISA wave + optimisation phase</div>
+          <div class="timeline-status later">Finish shaping</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      Aurora Tesco Simulator • SAYE Maturity • ISA Waves • Capital Deployment
+    </div>
+  </div>
+
+  <script>
+  const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
+  const HOLDINGS_SHEET = "Holdings";
+
+  const CURRENT_MONTHLY_INCOME = 401.97;
+  const TARGET_MONTHLY = 2000;
+
+  const tescoData = {
+    shares: 14363,
+    monthlySavings: 500.00,
+    optionPrice: 2.20,
+    totalOptionCost: 31598.60,
+    startDate: "2024-03-01",
+    maturityDate: "2029-03-01",
+    baseSavingsToDate: 12500.00,
+    fallbackLivePrice: 4.764
+  };
+
+  const pillarAssumptions = {
+    mng: { name: "M&G", yield: 8.2, role: "Accelerator" },
+    lng: { name: "Legal & General", yield: 7.8, role: "Anchor" },
+    sdlf: { name: "Standard Life", yield: 9.0, role: "Balance" },
+    supr: { name: "Supermarket REIT", yield: 8.0, role: "Smoother" }
+  };
+
+  const strategyPresets = {
+    coreAttack: {
+      label: "Core Attack",
+      note: "Core Attack is built to push your strongest income engines first, with M&G and Legal & General doing the heavy lifting.",
+      split: { mng: 70, lng: 30, sdlf: 0, supr: 0 }
+    },
+    balanced: {
+      label: "Balanced Pillars",
+      note: "Balanced Pillars spreads capital across all four pillars to keep the structure level while still lifting total income hard.",
+      split: { mng: 25, lng: 25, sdlf: 25, supr: 25 }
+    },
+    incomeSmooth: {
+      label: "Income + Smoothing",
+      note: "Income + Smoothing keeps a strong core attack but allocates some capital to the support pillars to help future calendar balancing.",
+      split: { mng: 40, lng: 30, sdlf: 15, supr: 15 }
+    }
+  };
+
+  let activeStrategy = "coreAttack";
+  let tescoLivePrice = tescoData.fallbackLivePrice;
+
+  function money(v, decimals = 2) {
+    return Number(v || 0).toLocaleString("en-GB", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    });
+  }
+
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = value;
+  }
+
+  function parseNumber(value) {
+    const cleaned = String(value ?? "").replace(/[^0-9.-]+/g, "");
+    const parsed = parseFloat(cleaned);
+    return Number.isFinite(parsed) ? parsed : NaN;
+  }
+
+  function normaliseTicker(value) {
+    return String(value || "").trim().toUpperCase();
+  }
+
+  function normalisePrice(rawPrice) {
+    if (!Number.isFinite(rawPrice) || rawPrice <= 0) return NaN;
+    return rawPrice > 20 ? rawPrice / 100 : rawPrice;
+  }
+
+  function monthsBetween(start, end) {
+    let months = (end.getFullYear() - start.getFullYear()) * 12;
+    months += end.getMonth() - start.getMonth();
+
+    if (end.getDate() >= start.getDate()) {
+      months += 1;
+    }
+
+    return Math.max(months, 0);
+  }
+
+  function getDynamicSavingsToDate() {
+    const start = new Date(`${tescoData.startDate}T00:00:00`);
+    const maturity = new Date(`${tescoData.maturityDate}T00:00:00`);
+    const today = new Date();
+
+    const effectiveDate = today < maturity ? today : maturity;
+    const contributionMonths = monthsBetween(start, effectiveDate);
+    return contributionMonths * tescoData.monthlySavings;
+  }
+
+  function getLiveTescoValue() {
+    return tescoData.shares * tescoLivePrice;
+  }
+
+  function getPotentialGain() {
+    return getLiveTescoValue() - tescoData.totalOptionCost;
+  }
+
+  function getDeployableAmount() {
+    const liveValue = getLiveTescoValue();
+    return Math.min(60000, liveValue);
+  }
+
+  function getFlexibleBalance() {
+    return Math.max(getLiveTescoValue() - 60000, 0);
+  }
+
+  function getSimAmount() {
+    return parseFloat(document.getElementById("simAmount")?.value) || 0;
+  }
+
+  function getSimYield() {
+    return parseFloat(document.getElementById("simYield")?.value) || 0;
+  }
+
+  function getCurrentSplit() {
+    if (activeStrategy !== "custom") {
+      return strategyPresets[activeStrategy].split;
+    }
+
+    return {
+      mng: parseFloat(document.getElementById("customMng")?.value) || 0,
+      lng: parseFloat(document.getElementById("customLng")?.value) || 0,
+      sdlf: parseFloat(document.getElementById("customSdlf")?.value) || 0,
+      supr: parseFloat(document.getElementById("customSupr")?.value) || 0
+    };
+  }
+
+  function normaliseSplit(split) {
+    const total = Object.values(split).reduce((sum, n) => sum + n, 0);
+    if (total <= 0) {
+      return { mng: 0, lng: 0, sdlf: 0, supr: 0, total: 0 };
+    }
+
+    return {
+      mng: (split.mng / total) * 100,
+      lng: (split.lng / total) * 100,
+      sdlf: (split.sdlf / total) * 100,
+      supr: (split.supr / total) * 100,
+      total: 100
+    };
+  }
+
+  function getWeightedYield(split) {
+    const pct = normaliseSplit(split);
+    return (
+      (pct.mng * pillarAssumptions.mng.yield) +
+      (pct.lng * pillarAssumptions.lng.yield) +
+      (pct.sdlf * pillarAssumptions.sdlf.yield) +
+      (pct.supr * pillarAssumptions.supr.yield)
+    ) / 100;
+  }
+
+  function getStageJumpText(monthlyAdded) {
+    if (monthlyAdded >= 300) {
+      return { title: "Major jump", sub: "Serious capital acceleration" };
+    }
+    if (monthlyAdded >= 150) {
+      return { title: "Strong jump", sub: "Meaningful income lift" };
+    }
+    if (monthlyAdded >= 75) {
+      return { title: "Good jump", sub: "Useful acceleration move" };
+    }
+    return { title: "Light jump", sub: "Smaller support move" };
+  }
+
+  function renderAllocationCards(split, simAmount) {
+    const grid = document.getElementById("allocationGrid");
+    if (!grid) return;
+
+    grid.innerHTML = "";
+
+    const pct = normaliseSplit(split);
+
+    Object.keys(pct).filter(k => k !== "total").forEach(key => {
+      const percentage = pct[key];
+      const amount = simAmount * (percentage / 100);
+      const yieldPct = pillarAssumptions[key].yield;
+      const annualIncome = amount * (yieldPct / 100);
+      const monthlyIncome = annualIncome / 12;
+
+      const card = document.createElement("div");
+      card.className = "allocation-card";
+      card.innerHTML = `
+        <div class="allocation-top">
+          <div class="allocation-name">${pillarAssumptions[key].name}</div>
+          <div class="badge cyan">${pillarAssumptions[key].role}</div>
+        </div>
+        <div class="grid quad-grid">
+          <div class="mini">
+            <div class="k">Allocation %</div>
+            <div class="v">${percentage.toFixed(1)}%</div>
+          </div>
+          <div class="mini">
+            <div class="k">Capital</div>
+            <div class="v">£${money(amount)}</div>
+          </div>
+          <div class="mini">
+            <div class="k">Annual Income</div>
+            <div class="v">£${money(annualIncome)}</div>
+          </div>
+          <div class="mini">
+            <div class="k">Monthly Income</div>
+            <div class="v">£${money(monthlyIncome)}</div>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function refreshTescoSnapshot() {
+    const liveValue = getLiveTescoValue();
+    const savingsToDate = getDynamicSavingsToDate();
+    const potentialGain = getPotentialGain();
+    const deployable = getDeployableAmount();
+    const flexible = getFlexibleBalance();
+
+    setText("tescoValueHero", money(liveValue));
+    setText("tescoGainHero", money(potentialGain));
+    setText("deployableHero", money(deployable));
+    setText("remainingHero", money(flexible));
+
+    setText("tescoValue", `£${money(liveValue)}`);
+    setText("tescoSavingsToDate", `£${money(savingsToDate)}`);
+    setText("tescoPotentialGain", `£${money(potentialGain)}`);
+    setText("tescoMonthlySavings", `£${money(tescoData.monthlySavings)}`);
+    setText("tescoShares", money(tescoData.shares, 0));
+    setText("tescoOptionPrice", `£${money(tescoData.optionPrice)}`);
+    setText("tescoOptionCost", `£${money(tescoData.totalOptionCost)}`);
+    setText("tescoMaturityDate", "01/03/2029");
+
+    setText("waveOne", `£${money(20000)}`);
+    setText("waveTwo", `£${money(20000)}`);
+    setText("waveThree", `£${money(20000)}`);
+    setText("flexBalance", `£${money(flexible)}`);
+
+    const livePriceEl = document.getElementById("tescoLivePrice");
+    if (livePriceEl) {
+      livePriceEl.innerText = `£${money(tescoLivePrice, 3)}`;
+    }
+  }
+
+  function updateSimulator() {
+    const simAmount = getSimAmount();
+    const split = getCurrentSplit();
+    const weightedYield = activeStrategy === "custom"
+      ? getWeightedYield(split)
+      : (getSimYield() || getWeightedYield(split));
+
+    const annualIncomeAdded = simAmount * (weightedYield / 100);
+    const monthlyIncomeAdded = annualIncomeAdded / 12;
+    const projectedMonthlyTotal = CURRENT_MONTHLY_INCOME + monthlyIncomeAdded;
+    const missionPct = Math.min((projectedMonthlyTotal / TARGET_MONTHLY) * 100, 100);
+    const stageText = getStageJumpText(monthlyIncomeAdded);
+
+    setText("annualIncomeAdded", `£${money(annualIncomeAdded)}`);
+    setText("monthlyIncomeAdded", `£${money(monthlyIncomeAdded)}`);
+    setText("projectedMonthlyTotal", `£${money(projectedMonthlyTotal)}`);
+    setText("stageJump", stageText.title);
+    setText("stageJumpSub", stageText.sub);
+    setText("missionProgressText", `${missionPct.toFixed(1)}%`);
+
+    const bar = document.getElementById("missionBar");
+    if (bar) bar.style.width = `${missionPct}%`;
+
+    const note = document.getElementById("strategyNote");
+    if (note) {
+      if (activeStrategy === "custom") {
+        const totalPct = Object.values(split).reduce((sum, n) => sum + (Number(n) || 0), 0);
+        note.innerText = `Custom split mode is active. Current entered percentages total ${totalPct.toFixed(1)}%. The simulator normalises them automatically before calculating results.`;
+      } else {
+        note.innerText = strategyPresets[activeStrategy].note;
+      }
+    }
+
+    renderAllocationCards(split, simAmount);
+    refreshTescoSnapshot();
+  }
+
+  function setStrategy(strategy) {
+    activeStrategy = strategy;
+
+    document.querySelectorAll(".strategy-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.strategy === strategy);
+    });
+
+    const customWrap = document.getElementById("customSplitWrap");
+    if (customWrap) {
+      customWrap.style.display = strategy === "custom" ? "grid" : "none";
+    }
+
+    if (strategy !== "custom") {
+      document.getElementById("simYield").value = getWeightedYield(strategyPresets[strategy].split).toFixed(2);
+    }
+
+    updateSimulator();
+  }
+
+  async function loadTescoLivePrice() {
+    const url = `https://opensheet.elk.sh/${SHEET_ID}/${HOLDINGS_SHEET}`;
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      let matchedPrice = NaN;
+
+      data.forEach(row => {
+        const ticker = normaliseTicker(row.ticker);
+        if (["TSCO", "TSCO.L", "LON:TSCO"].includes(ticker)) {
+          const price = normalisePrice(parseNumber(row.live_price));
+          if (Number.isFinite(price) && price > 0) {
+            matchedPrice = price;
+          }
+        }
+      });
+
+      if (Number.isFinite(matchedPrice) && matchedPrice > 0) {
+        tescoLivePrice = matchedPrice;
+      }
+
+      refreshTescoSnapshot();
+      updateSimulator();
+    } catch (err) {
+      console.error("Tesco live price fetch failed", err);
+      refreshTescoSnapshot();
+      updateSimulator();
+    }
+  }
+
+  function initStaticData() {
+    refreshTescoSnapshot();
+    document.getElementById("simYield").value = getWeightedYield(strategyPresets.coreAttack.split).toFixed(2);
+  }
+
+  document.querySelectorAll(".strategy-btn").forEach(btn => {
+    btn.addEventListener("click", () => setStrategy(btn.dataset.strategy));
+  });
+
+  ["simAmount", "simYield", "customMng", "customLng", "customSdlf", "customSupr"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", updateSimulator);
+      el.addEventListener("change", updateSimulator);
+    }
+  });
+
+  initStaticData();
+  loadTescoLivePrice();
+  setInterval(loadTescoLivePrice, 60000);
+</script>
+</body>
+</html>
