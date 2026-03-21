@@ -24,6 +24,7 @@
     }
 
     * { box-sizing: border-box; }
+
     html, body {
       margin: 0;
       background:
@@ -33,6 +34,7 @@
       color: var(--text);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
+
     body { padding: 18px 14px 42px; }
 
     .wrap { max-width: 900px; margin: 0 auto; }
@@ -46,18 +48,31 @@
       position: relative;
       overflow: hidden;
     }
+
     .hero:before {
       content: "";
-      position: absolute; inset: 0;
+      position: absolute;
+      inset: 0;
       background: linear-gradient(90deg, transparent, rgba(98,243,255,0.08), transparent);
       transform: translateX(-100%);
       animation: scan 8s linear infinite;
       pointer-events: none;
     }
+
     @keyframes scan { to { transform: translateX(100%); } }
 
-    h1 { margin: 0; font-size: 28px; line-height: 1.05; letter-spacing: 0.3px; }
-    .sub { margin-top: 6px; color: var(--muted); font-size: 13px; }
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.05;
+      letter-spacing: 0.3px;
+    }
+
+    .sub {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
 
     .grid { display: grid; gap: 14px; margin-top: 14px; }
     .top-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
@@ -73,9 +88,24 @@
       backdrop-filter: blur(8px);
     }
 
-    .stat-label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
-    .stat { margin-top: 6px; font-size: 28px; font-weight: 700; }
-    .stat small { font-size: 14px; color: var(--muted); font-weight: 500; }
+    .stat-label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat {
+      margin-top: 6px;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .stat small {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 500;
+    }
 
     .decision {
       margin-top: 14px;
@@ -83,39 +113,74 @@
       border: 1px solid rgba(80,255,143,0.2);
       box-shadow: 0 0 0 1px rgba(80,255,143,0.06), 0 0 26px rgba(80,255,143,0.09);
     }
-    .decision h2, .section h2 { margin: 0 0 10px; font-size: 16px; letter-spacing: 0.4px; }
+
+    .decision h2,
+    .section h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      letter-spacing: 0.4px;
+    }
+
     .decision-plan {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
+      grid-template-columns: repeat(4, minmax(0,1fr));
       gap: 10px;
     }
+
     .buy-box {
       padding: 12px;
       border-radius: 14px;
       background: var(--panel-2);
       border: 1px solid var(--line);
     }
-    .buy-box .amt { font-size: 24px; font-weight: 800; margin-top: 4px; }
-    .buy-box .name { color: var(--cyan); font-size: 13px; }
-    .buy-box .mini-note { margin-top: 6px; color: var(--muted); font-size: 11px; }
+
+    .buy-box .amt {
+      font-size: 24px;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .buy-box .name {
+      color: var(--cyan);
+      font-size: 13px;
+    }
+
+    .buy-box .mini-note {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
 
     .section { margin-top: 14px; }
     .pillars { display: grid; gap: 12px; }
+
     .pillar {
       background: linear-gradient(145deg, rgba(12, 24, 39, 0.96), rgba(7, 15, 25, 0.96));
       border: 1px solid var(--line);
       border-radius: 18px;
       padding: 14px;
     }
+
     .pillar-top {
-      display: flex; justify-content: space-between; gap: 10px; align-items: center;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
       margin-bottom: 10px;
     }
+
     .pillar-name { font-size: 18px; font-weight: 700; }
+
     .signal {
-      padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: 0.8px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
       border: 1px solid currentColor;
     }
+
     .green { color: var(--green); }
     .amber { color: var(--amber); }
     .red { color: var(--red); }
@@ -126,37 +191,90 @@
       gap: 8px;
       margin-bottom: 12px;
     }
+
     .mini {
       background: rgba(255,255,255,0.02);
       border: 1px solid rgba(255,255,255,0.05);
       border-radius: 12px;
       padding: 10px;
     }
-    .mini .k { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; }
-    .mini .v { margin-top: 4px; font-size: 18px; font-weight: 700; }
-    .mini .subv { margin-top: 6px; color: var(--muted); font-size: 12px; }
+
+    .mini .k {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .mini .v {
+      margin-top: 4px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .mini .subv {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
 
     .progress-wrap { margin-top: 8px; }
-    .progress-top { display:flex; justify-content:space-between; align-items:center; font-size: 13px; color: var(--muted); }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
     .bar {
-      height: 14px; border-radius: 999px; overflow: hidden; margin-top: 8px;
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.04);
     }
+
     .fill {
-      height: 100%; border-radius: 999px;
+      height: 100%;
+      border-radius: 999px;
       background: linear-gradient(90deg, var(--cyan-2), var(--cyan));
       box-shadow: 0 0 20px rgba(98,243,255,0.35);
       width: 0;
       transition: width 0.25s ease;
     }
 
-    .notes, .log { color: var(--muted); font-size: 13px; line-height: 1.5; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; }
-    th { color: var(--muted); font-weight: 600; }
+    .notes, .log {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
 
-    .footer { margin-top: 14px; color: var(--muted); font-size: 12px; text-align: center; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 10px 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      text-align: left;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .footer {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
 
     .inputs {
       display: grid;
@@ -164,12 +282,14 @@
       gap: 8px;
       margin-bottom: 12px;
     }
+
     .input-box {
       background: rgba(255,255,255,0.02);
       border: 1px solid rgba(255,255,255,0.05);
       border-radius: 12px;
       padding: 10px;
     }
+
     .input-box label {
       display: block;
       color: var(--muted);
@@ -178,7 +298,9 @@
       letter-spacing: 0.8px;
       margin-bottom: 6px;
     }
-    .input-box input, .input-box select {
+
+    .input-box input,
+    .input-box select {
       width: 100%;
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.08);
@@ -203,7 +325,8 @@
       margin-bottom: 12px;
     }
 
-    .log-btn {
+    .log-btn,
+    #addLogBtn {
       width: 100%;
       background: linear-gradient(90deg, var(--cyan-2), var(--cyan));
       color: #071018;
@@ -226,9 +349,7 @@
       font-weight: 700;
     }
 
-    .table-wrap {
-      overflow-x: auto;
-    }
+    .table-wrap { overflow-x: auto; }
 
     .sync-row {
       display: flex;
@@ -271,7 +392,17 @@
     }
 
     @media (max-width: 720px) {
-      .top-grid, .triple-grid, .quad-grid, .decision-plan, .pillar-stats, .inputs, .log-grid, .log-preview { grid-template-columns: 1fr; }
+      .top-grid,
+      .triple-grid,
+      .quad-grid,
+      .decision-plan,
+      .pillar-stats,
+      .inputs,
+      .log-grid,
+      .log-preview {
+        grid-template-columns: 1fr;
+      }
+
       h1 { font-size: 24px; }
       .stat { font-size: 24px; }
       .pillar-name { font-size: 16px; }
@@ -312,7 +443,7 @@
         </div>
         <div class="mini">
           <div class="k">Best Value Buy</div>
-          <div class="v" id="bestValueBuy">M&amp;G</div>
+          <div class="v" id="bestValueBuy">--</div>
           <div class="subv" id="bestValueBuyMeta">Yield + target gap</div>
         </div>
         <div class="mini">
@@ -328,38 +459,51 @@
 
     <section class="card decision">
       <h2>Payday Decision Box</h2>
+
       <div class="mini" style="margin-top:12px;">
         <div class="k">Master Income Goal</div>
         <div class="v" id="goalIncomeCurrent">£0.00/month</div>
         <div class="subv" id="goalIncomeRemaining">£0.00/month still needed to reach £2,000/month</div>
       </div>
+
       <div class="mini" style="margin-top:12px;">
         <div class="k">Total Income Impact</div>
         <div class="v" id="decisionIncomeAnnual">+£0.00/yr</div>
         <div class="subv" id="decisionIncomeMonthly">+£0.00/month</div>
       </div>
+
       <div class="input-box" style="margin-bottom:12px;">
         <label>Total Investment (£)</label>
         <input id="paydayAmount" type="number" value="600" />
       </div>
+
       <div class="decision-plan">
         <div class="buy-box">
           <div class="stat-label">Primary Buy</div>
-          <div class="amt">£300</div>
-          <div class="name" id="primaryBuy">M&amp;G</div>
-          <div class="mini-note" id="primaryReason">Weakest pillar</div>
+          <div class="amt">£0</div>
+          <div class="name" id="primaryBuy">--</div>
+          <div class="mini-note" id="primaryReason">--</div>
         </div>
+
         <div class="buy-box">
           <div class="stat-label">Secondary Buy</div>
-          <div class="amt">£200</div>
-          <div class="name" id="secondaryBuy">Legal &amp; General</div>
-          <div class="mini-note" id="secondaryReason">Stage support</div>
+          <div class="amt">£0</div>
+          <div class="name" id="secondaryBuy">--</div>
+          <div class="mini-note" id="secondaryReason">--</div>
         </div>
+
         <div class="buy-box">
           <div class="stat-label">Support Buy</div>
-          <div class="amt">£100</div>
-          <div class="name" id="supportBuy">Supermarket REIT</div>
-          <div class="mini-note" id="supportReason">Balance move</div>
+          <div class="amt">£0</div>
+          <div class="name" id="supportBuy">--</div>
+          <div class="mini-note" id="supportReason">--</div>
+        </div>
+
+        <div class="buy-box">
+          <div class="stat-label">Maintenance Buy</div>
+          <div class="amt">£0</div>
+          <div class="name" id="fourthBuy">--</div>
+          <div class="mini-note" id="fourthReason">--</div>
         </div>
       </div>
     </section>
@@ -370,7 +514,7 @@
         <div class="mini"><div class="k">Current Stage</div><div class="v" id="stageLabel">1 / 8</div></div>
         <div class="mini"><div class="k">Stage Target</div><div class="v" id="stageTargetLabel">£2,000</div></div>
         <div class="mini"><div class="k">Next Stage</div><div class="v" id="nextStageLabel">£4,000</div></div>
-        <div class="mini"><div class="k">System Mode</div><div class="v">Balance</div></div>
+        <div class="mini"><div class="k">System Mode</div><div class="v">Dynamic</div></div>
       </div>
     </section>
 
@@ -401,10 +545,12 @@
             <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="lngRemaining">£0</div></div>
             <div class="mini"><div class="k">Weight Role</div><div class="v">Anchor</div></div>
           </div>
+
           <div class="progress-wrap">
             <div class="progress-top"><span>Progress</span><span id="lngProgressText">0%</span></div>
             <div class="bar"><div class="fill" id="lngBar"></div></div>
           </div>
+
           <div class="grid top-grid">
             <div class="mini">
               <div class="k">Live Price</div>
@@ -433,16 +579,19 @@
               <input id="mngDps" type="number" step="0.0001" value="0.2048" />
             </div>
           </div>
+
           <div class="pillar-stats">
             <div class="mini"><div class="k">Current Income</div><div class="v" id="mngIncome">£0</div></div>
             <div class="mini"><div class="k">Gap to Target</div><div class="v" id="mngGap">£0</div></div>
             <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="mngRemaining">£0</div></div>
             <div class="mini"><div class="k">Weight Role</div><div class="v">Accelerator</div></div>
           </div>
+
           <div class="progress-wrap">
             <div class="progress-top"><span>Progress</span><span id="mngProgressText">0%</span></div>
             <div class="bar"><div class="fill" id="mngBar"></div></div>
           </div>
+
           <div class="grid top-grid">
             <div class="mini">
               <div class="k">Live Price</div>
@@ -478,10 +627,12 @@
             <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="sdlfRemaining">£0</div></div>
             <div class="mini"><div class="k">Weight Role</div><div class="v">Later Balance</div></div>
           </div>
+
           <div class="progress-wrap">
             <div class="progress-top"><span>Progress</span><span id="sdlfProgressText">0%</span></div>
             <div class="bar"><div class="fill" id="sdlfBar"></div></div>
           </div>
+
           <div class="grid top-grid">
             <div class="mini">
               <div class="k">Live Price</div>
@@ -517,10 +668,12 @@
             <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="suprRemaining">£0</div></div>
             <div class="mini"><div class="k">Weight Role</div><div class="v">Cashflow Stabiliser</div></div>
           </div>
+
           <div class="progress-wrap">
             <div class="progress-top"><span>Progress</span><span id="suprProgressText">0%</span></div>
             <div class="bar"><div class="fill" id="suprBar"></div></div>
           </div>
+
           <div class="grid top-grid">
             <div class="mini">
               <div class="k">Live Price</div>
@@ -532,6 +685,7 @@
             </div>
           </div>
         </div>
+
       </div>
     </section>
 
@@ -543,14 +697,17 @@
           <label for="logDate">Date</label>
           <input id="logDate" type="date" />
         </div>
+
         <div class="input-box">
           <label for="logSource">Funding Source</label>
           <input id="logSource" type="text" placeholder="Dividend, Tesco, Bonus, Spare Cash" />
         </div>
+
         <div class="input-box">
           <label for="logAmount">Amount (£)</label>
           <input id="logAmount" type="number" step="0.01" />
         </div>
+
         <div class="input-box">
           <label for="logInto">Into</label>
           <select id="logInto">
@@ -560,10 +717,12 @@
             <option>Supermarket REIT</option>
           </select>
         </div>
+
         <div class="input-box">
           <label for="logPrice">Buy Price (£)</label>
           <input id="logPrice" type="number" step="0.0001" />
         </div>
+
         <div class="input-box">
           <label for="logYieldAuto">Yield %</label>
           <input id="logYieldAuto" type="text" disabled />
@@ -585,7 +744,7 @@
         </div>
         <div class="mini">
           <div class="k">Best Target</div>
-          <div class="v" id="bestReinvestTarget">M&amp;G</div>
+          <div class="v" id="bestReinvestTarget">--</div>
         </div>
       </div>
 
@@ -612,642 +771,611 @@
     <div class="footer">
       Aurora Mode Active • Live Sheet + Smart Allocation + Dividend Engine
     </div>
-
   </div>
 
- <script>
-  const STORAGE_KEY = "pillarTrackerInputs_v2_safe";
-  const LOG_STORAGE_KEY = "pillarTrackerLogs_v2_safe";
-  const LEGACY_LOG_STORAGE_KEY_V4 = "pillarTrackerLogs_v4";
-  const LEGACY_LOG_STORAGE_KEY_V3 = "pillarTrackerLogs_v3";
-  const LEGACY_LOG_STORAGE_KEY_V2 = "pillarTrackerLogs_v2";
+  <script>
+    const STORAGE_KEY = "pillarTrackerInputs_v2_safe";
+    const LEGACY_LOG_STORAGE_KEY_V4 = "pillarTrackerLogs_v4";
+    const LEGACY_LOG_STORAGE_KEY_V3 = "pillarTrackerLogs_v3";
+    const LEGACY_LOG_STORAGE_KEY_V2 = "pillarTrackerLogs_v2";
 
-  const STAGES = [2000, 4000, 6000, 8000, 10000, 12000, 15000, 20000];
-  const MAX_PRIMARY_SHARE = 0.5;
+    const STAGES = [2000, 4000, 6000, 8000, 10000, 12000, 15000, 20000];
 
-  const ids = [
-    "lngDps",
-    "mngDps",
-    "sdlfDps",
-    "suprDps"
-  ];
+    const ids = [
+      "lngDps",
+      "mngDps",
+      "sdlfDps",
+      "suprDps"
+    ];
 
-  const names = {
-    lng: "Legal & General",
-    mng: "M&G",
-    sdlf: "Standard Life",
-    supr: "Supermarket REIT"
-  };
+    const names = {
+      lng: "Legal & General",
+      mng: "M&G",
+      sdlf: "Standard Life",
+      supr: "Supermarket REIT"
+    };
 
-  const dpsFieldMap = {
-    "Legal & General": "lngDps",
-    "M&G": "mngDps",
-    "Standard Life": "sdlfDps",
-    "SUPR": "suprDps",
-    "Supermarket REIT": "suprDps"
-  };
+    const dpsFieldMap = {
+      "Legal & General": "lngDps",
+      "M&G": "mngDps",
+      "Standard Life": "sdlfDps",
+      "SUPR": "suprDps",
+      "Supermarket REIT": "suprDps"
+    };
 
-  const livePrices = {
-    lng: 0,
-    mng: 0,
-    sdlf: 0,
-    supr: 0
-  };
+    const livePrices = {
+      lng: 0,
+      mng: 0,
+      sdlf: 0,
+      supr: 0
+    };
 
-  const lastGoodLiveData = {
-    lng: { price: 0, value: 0, cost: 0, gain: 0 },
-    mng: { price: 0, value: 0, cost: 0, gain: 0 },
-    sdlf: { price: 0, value: 0, cost: 0, gain: 0 },
-    supr: { price: 0, value: 0, cost: 0, gain: 0 }
-  };
+    const lastGoodLiveData = {
+      lng: { price: 0, value: 0, cost: 0, gain: 0 },
+      mng: { price: 0, value: 0, cost: 0, gain: 0 },
+      sdlf: { price: 0, value: 0, cost: 0, gain: 0 },
+      supr: { price: 0, value: 0, cost: 0, gain: 0 }
+    };
 
-  const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
-  const SHEET_NAME = "Holdings";
-  const LOG_SHEET_NAME = "IncomeLog";
-  const LOG_SHEET_URL = `https://opensheet.elk.sh/${SHEET_ID}/${LOG_SHEET_NAME}`;
+    const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
+    const SHEET_NAME = "Holdings";
+    const LOG_SHEET_NAME = "IncomeLog";
+    const LOG_SHEET_URL = `https://opensheet.elk.sh/${SHEET_ID}/${LOG_SHEET_NAME}`;
 
-  function parseNumber(value) {
-    const cleaned = String(value ?? "").replace(/[^0-9.-]+/g, "");
-    const parsed = parseFloat(cleaned);
-    return Number.isFinite(parsed) ? parsed : NaN;
-  }
-
-  function normaliseTicker(value) {
-    return String(value || "").trim().toUpperCase();
-  }
-
-  function getKeyFromTicker(ticker) {
-    const t = normaliseTicker(ticker);
-
-    if (["LON:LGEN", "LGEN", "LGEN.L"].includes(t)) return "lng";
-    if (["LON:MNG", "MNG", "MNG.L"].includes(t)) return "mng";
-    if (["LON:SDLF", "SDLF", "SDLF.L", "PHNX", "PHNX.L", "STANDARD LIFE"].includes(t)) return "sdlf";
-    if (["LON:SUPR", "SUPR", "SUPR.L"].includes(t)) return "supr";
-
-    return null;
-  }
-
-  function normalisePrice(rawPrice) {
-    if (!Number.isFinite(rawPrice) || rawPrice <= 0) return NaN;
-    return rawPrice > 20 ? rawPrice / 100 : rawPrice;
-  }
-
-  async function loadLivePrices() {
-    const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
-
-    try {
-      const res = await fetch(url);
-      const data = await res.json();
-
-      let totalValue = 0;
-      let totalCost = 0;
-
-      data.forEach(row => {
-        const ticker = normaliseTicker(row.ticker);
-        const key = getKeyFromTicker(ticker);
-
-        if (!key) return;
-
-        const shares = parseNumber(row.shares);
-        const rawPrice = parseNumber(row.live_price);
-        const annualDps = parseNumber(row.annual_dividend_per_share);
-        const cost = parseNumber(row.book_cost);
-
-        if (!Number.isFinite(shares) || shares <= 0) return;
-
-        const price = normalisePrice(rawPrice);
-        const safePrice = Number.isFinite(price) && price > 0 ? price : (lastGoodLiveData[key].price || 0);
-        const safeCost = Number.isFinite(cost) && cost >= 0 ? cost : (lastGoodLiveData[key].cost || 0);
-
-        const value = shares * safePrice;
-        const gain = value - safeCost;
-
-        livePrices[key] = safePrice;
-        lastGoodLiveData[key] = {
-          price: safePrice,
-          value,
-          cost: safeCost,
-          gain
-        };
-
-        totalValue += value;
-        totalCost += safeCost;
-
-        document.getElementById(`${key}LivePrice`).innerText = safePrice > 0 ? `£${safePrice.toFixed(3)}` : "--";
-        document.getElementById(`${key}LiveValue`).innerText = `£${value.toFixed(2)}`;
-
-        if (Number.isFinite(annualDps) && annualDps > 0) {
-          document.getElementById(`${key}Dps`).value = annualDps;
-        }
-      });
-
-      const totalGain = totalValue - totalCost;
-      const gainPct = totalCost > 0 ? (totalGain / totalCost) * 100 : 0;
-
-      document.getElementById("livePortfolioValue").innerText = `£${totalValue.toFixed(2)}`;
-      document.getElementById("livePortfolioGain").innerText = `£${totalGain.toFixed(2)}`;
-      document.getElementById("livePortfolioGainPct").innerText = `${gainPct.toFixed(2)}%`;
-
-      const gainEl = document.getElementById("livePortfolioGain");
-      gainEl.classList.remove("live-up", "live-down", "live-neutral");
-      if (totalGain > 0) gainEl.classList.add("live-up");
-      else if (totalGain < 0) gainEl.classList.add("live-down");
-      else gainEl.classList.add("live-neutral");
-
-      document.getElementById("syncStatusText").innerText = "Live Connected";
-      document.getElementById("syncStatusSub").innerText = new Date().toLocaleTimeString();
-      document.getElementById("syncDot").className = "sync-dot";
-
-      updateAll();
-    } catch (err) {
-      console.error("Sheet load failed", err);
-      document.getElementById("syncStatusText").innerText = "Sync Failed";
-      document.getElementById("syncStatusSub").innerText = "Using last good snapshot";
-      document.getElementById("syncDot").className = "sync-dot sync-bad";
+    function parseNumber(value) {
+      const cleaned = String(value ?? "").replace(/[^0-9.-]+/g, "");
+      const parsed = parseFloat(cleaned);
+      return Number.isFinite(parsed) ? parsed : NaN;
     }
-  }
 
-  async function loadShareCounts() {
-    const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
-
-    try {
-      const res = await fetch(url);
-      const data = await res.json();
-
-      data.forEach(row => {
-        const ticker = normaliseTicker(row.ticker);
-        const key = getKeyFromTicker(ticker);
-        if (!key) return;
-
-        const shares = parseNumber(row.shares);
-
-        if (Number.isFinite(shares) && shares > 0) {
-          const input = document.getElementById(`${key}Shares`);
-          if (input) {
-            input.value = shares;
-          }
-        }
-      });
-
-      updateAll();
-    } catch (err) {
-      console.error("Share count sync failed", err);
+    function normaliseTicker(value) {
+      return String(value || "").trim().toUpperCase();
     }
-  }
 
-  setInterval(loadLivePrices, 30000);
-  setInterval(loadShareCounts, 30000);
+    function getKeyFromTicker(ticker) {
+      const t = normaliseTicker(ticker);
 
-  loadLivePrices();
-  loadShareCounts();
+      if (["LON:LGEN", "LGEN", "LGEN.L"].includes(t)) return "lng";
+      if (["LON:MNG", "MNG", "MNG.L"].includes(t)) return "mng";
+      if (["LON:SDLF", "SDLF", "SDLF.L", "PHNX", "PHNX.L", "STANDARD LIFE"].includes(t)) return "sdlf";
+      if (["LON:SUPR", "SUPR", "SUPR.L"].includes(t)) return "supr";
 
-  function formatMoney(value) {
-    return Number(value || 0).toLocaleString("en-GB", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  }
-
-  function formatWhole(value) {
-    return Number(value || 0).toLocaleString("en-GB", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    });
-  }
-
-  function loadSavedValues() {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return;
-
-    try {
-      const parsed = JSON.parse(saved);
-      ids.forEach(id => {
-        if (parsed[id] !== undefined && document.getElementById(id)) {
-          document.getElementById(id).value = parsed[id];
-        }
-      });
-    } catch (e) {
-      console.error("Could not load saved values.", e);
+      return null;
     }
-  }
 
-  function saveValues() {
-    const data = {};
-    ids.forEach(id => {
+    function normalisePrice(rawPrice) {
+      if (!Number.isFinite(rawPrice) || rawPrice <= 0) return NaN;
+      return rawPrice > 20 ? rawPrice / 100 : rawPrice;
+    }
+
+    function formatMoney(value) {
+      return Number(value || 0).toLocaleString("en-GB", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function formatWhole(value) {
+      return Number(value || 0).toLocaleString("en-GB", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+    }
+
+    function setText(id, value) {
       const el = document.getElementById(id);
-      if (el) data[id] = el.value;
-    });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }
+      if (el) el.innerText = value;
+    }
 
-  function getIncome(sharesId, dpsId) {
-    const shares = parseFloat(document.getElementById(sharesId).value) || 0;
-    const dps = parseFloat(document.getElementById(dpsId).value) || 0;
-    return shares * dps;
-  }
+    async function loadLivePrices() {
+      const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
 
-  function getCurrentStage(incomes) {
-    for (let i = 0; i < STAGES.length; i++) {
-      const stage = STAGES[i];
-      const allReached = Object.values(incomes).every(v => v >= stage);
-      if (!allReached) {
-        return {
-          stageIndex: i + 1,
-          target: stage,
-          nextTarget: STAGES[i + 1] || stage
-        };
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        let totalValue = 0;
+        let totalCost = 0;
+
+        data.forEach(row => {
+          const ticker = normaliseTicker(row.ticker);
+          const key = getKeyFromTicker(ticker);
+
+          if (!key) return;
+
+          const shares = parseNumber(row.shares);
+          const rawPrice = parseNumber(row.live_price);
+          const annualDps = parseNumber(row.annual_dividend_per_share);
+          const cost = parseNumber(row.book_cost);
+
+          if (!Number.isFinite(shares) || shares <= 0) return;
+
+          const price = normalisePrice(rawPrice);
+          const safePrice = Number.isFinite(price) && price > 0 ? price : (lastGoodLiveData[key].price || 0);
+          const safeCost = Number.isFinite(cost) && cost >= 0 ? cost : (lastGoodLiveData[key].cost || 0);
+
+          const value = shares * safePrice;
+          const gain = value - safeCost;
+
+          livePrices[key] = safePrice;
+          lastGoodLiveData[key] = {
+            price: safePrice,
+            value,
+            cost: safeCost,
+            gain
+          };
+
+          totalValue += value;
+          totalCost += safeCost;
+
+          setText(`${key}LivePrice`, safePrice > 0 ? `£${safePrice.toFixed(3)}` : "--");
+          setText(`${key}LiveValue`, `£${value.toFixed(2)}`);
+
+          if (Number.isFinite(annualDps) && annualDps > 0) {
+            const dpsEl = document.getElementById(`${key}Dps`);
+            if (dpsEl) dpsEl.value = annualDps;
+          }
+        });
+
+        const totalGain = totalValue - totalCost;
+        const gainPct = totalCost > 0 ? (totalGain / totalCost) * 100 : 0;
+
+        setText("livePortfolioValue", `£${totalValue.toFixed(2)}`);
+        setText("livePortfolioGain", `£${totalGain.toFixed(2)}`);
+        setText("livePortfolioGainPct", `${gainPct.toFixed(2)}%`);
+
+        const gainEl = document.getElementById("livePortfolioGain");
+        if (gainEl) {
+          gainEl.classList.remove("live-up", "live-down", "live-neutral");
+          if (totalGain > 0) gainEl.classList.add("live-up");
+          else if (totalGain < 0) gainEl.classList.add("live-down");
+          else gainEl.classList.add("live-neutral");
+        }
+
+        setText("syncStatusText", "Live Connected");
+        setText("syncStatusSub", new Date().toLocaleTimeString());
+
+        const syncDot = document.getElementById("syncDot");
+        if (syncDot) syncDot.className = "sync-dot";
+
+        updateAll();
+      } catch (err) {
+        console.error("Sheet load failed", err);
+        setText("syncStatusText", "Sync Failed");
+        setText("syncStatusSub", "Using last good snapshot");
+
+        const syncDot = document.getElementById("syncDot");
+        if (syncDot) syncDot.className = "sync-dot sync-bad";
       }
     }
-    return {
-      stageIndex: STAGES.length,
-      target: STAGES[STAGES.length - 1],
-      nextTarget: STAGES[STAGES.length - 1]
-    };
-  }
 
-  function updatePillar(key, income, target, nextTarget) {
-    const percentRaw = target > 0 ? (income / target) * 100 : 0;
-    const percent = Math.min(percentRaw, 100);
-    const gap = Math.max(target - income, 0);
-    const nextStageGap = Math.max(nextTarget - income, 0);
+    async function loadShareCounts() {
+      const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
 
-    document.getElementById(`${key}Income`).innerText = `£${formatMoney(income)}`;
-    document.getElementById(`${key}Gap`).innerText = `£${formatMoney(gap)}`;
-    document.getElementById(`${key}Remaining`).innerText = `£${formatMoney(nextStageGap)}`;
-    document.getElementById(`${key}ProgressText`).innerText = `${Math.round(percentRaw)}%`;
-    document.getElementById(`${key}Bar`).style.width = `${percent}%`;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
 
-    const signal = document.getElementById(`${key}Signal`);
-    signal.classList.remove("green", "amber", "red");
+        data.forEach(row => {
+          const ticker = normaliseTicker(row.ticker);
+          const key = getKeyFromTicker(ticker);
+          if (!key) return;
 
-    if (percentRaw < 60) {
-      signal.innerText = "GREEN";
-      signal.classList.add("green");
-    } else if (percentRaw < 90) {
-      signal.innerText = "AMBER";
-      signal.classList.add("amber");
-    } else {
-      signal.innerText = "RED";
-      signal.classList.add("red");
+          const shares = parseNumber(row.shares);
+
+          if (Number.isFinite(shares) && shares > 0) {
+            const input = document.getElementById(`${key}Shares`);
+            if (input) input.value = shares;
+          }
+        });
+
+        updateAll();
+      } catch (err) {
+        console.error("Share count sync failed", err);
+      }
     }
-  }
 
-  function getPillarData() {
-    const incomes = {
-      lng: getIncome("lngShares", "lngDps"),
-      mng: getIncome("mngShares", "mngDps"),
-      sdlf: getIncome("sdlfShares", "sdlfDps"),
-      supr: getIncome("suprShares", "suprDps")
-    };
+    function loadSavedValues() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return;
 
-    const stage = getCurrentStage(incomes);
+      try {
+        const parsed = JSON.parse(saved);
+        ids.forEach(id => {
+          if (parsed[id] !== undefined && document.getElementById(id)) {
+            document.getElementById(id).value = parsed[id];
+          }
+        });
+      } catch (e) {
+        console.error("Could not load saved values.", e);
+      }
+    }
 
-    return {
-      incomes,
-      stage
-    };
-  }
+    function saveValues() {
+      const data = {};
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) data[id] = el.value;
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
 
-  function getLivePriceForKey(key) {
-    return Number(livePrices[key] || 0);
-  }
+    function getIncome(sharesId, dpsId) {
+      const shares = parseFloat(document.getElementById(sharesId)?.value) || 0;
+      const dps = parseFloat(document.getElementById(dpsId)?.value) || 0;
+      return shares * dps;
+    }
 
-  function getCurrentYieldPct(key) {
-    const dps = parseFloat(document.getElementById(`${key}Dps`)?.value) || 0;
-    const livePrice = getLivePriceForKey(key);
-    if (!livePrice || !dps) return 0;
-    return (dps / livePrice) * 100;
-  }
-
-  function calculateIncomeFromAmount(key, amount) {
-    const dps = parseFloat(document.getElementById(`${key}Dps`)?.value) || 0;
-    const price = getLivePriceForKey(key);
-
-    if (!price || !dps || !amount) return 0;
-
-    return amount * (dps / price);
-  }
-
-  function updateMasterIncomeGoal(totalIncomeImpact = 0) {
-    const { incomes } = getPillarData();
-
-    const currentAnnual = incomes.lng + incomes.mng + incomes.sdlf + incomes.supr;
-    const projectedAnnual = currentAnnual + totalIncomeImpact;
-
-    const projectedMonthly = projectedAnnual / 12;
-    const targetMonthly = 2000;
-    const remainingMonthly = Math.max(targetMonthly - projectedMonthly, 0);
-
-    document.getElementById("goalIncomeCurrent").innerText =
-      `£${formatMoney(projectedMonthly)}/month`;
-
-    document.getElementById("goalIncomeRemaining").innerText =
-      `£${formatMoney(remainingMonthly)}/month still needed to reach £2,000/month`;
-  }
-
-  function getSmartRanking() {
-    const { incomes, stage } = getPillarData();
-
-    return Object.keys(incomes).map(key => {
-      const income = incomes[key] || 0;
-      const gap = Math.max(stage.target - income, 0);
-      const dps = parseFloat(document.getElementById(`${key}Dps`).value) || 0;
-      const livePrice = getLivePriceForKey(key);
-      const yieldPct = livePrice > 0 ? (dps / livePrice) * 100 : 0;
-      const gapScore = stage.target > 0 ? gap / stage.target : 0;
-      const yieldScore = yieldPct / 100;
-
-      let opportunityBoost = 0;
-
-      if (yieldPct >= 7.0 && gap > 0) opportunityBoost += 0.10;
-      if (yieldPct >= 7.2) opportunityBoost += 0.10;
-      if (yieldPct >= 8.0) opportunityBoost += 0.05;
-
-      if (key === "mng") opportunityBoost += 0.20;
-      if (key === "lng") opportunityBoost += 0.06;
-      if (key === "supr") opportunityBoost -= 0.10;
-
-      const totalScore = (gapScore * 0.55) + (yieldScore * 0.20) + opportunityBoost;
+    function getCurrentStage(incomes) {
+      for (let i = 0; i < STAGES.length; i++) {
+        const stage = STAGES[i];
+        const allReached = Object.values(incomes).every(v => v >= stage);
+        if (!allReached) {
+          return {
+            stageIndex: i + 1,
+            target: stage,
+            nextTarget: STAGES[i + 1] || stage
+          };
+        }
+      }
 
       return {
-        key,
-        name: names[key],
-        income,
-        gap,
-        dps,
-        livePrice,
-        yieldPct,
-        totalScore
+        stageIndex: STAGES.length,
+        target: STAGES[STAGES.length - 1],
+        nextTarget: STAGES[STAGES.length - 1]
       };
-    }).sort((a, b) => {
-      if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
-      if (b.gap !== a.gap) return b.gap - a.gap;
-      return b.yieldPct - a.yieldPct;
-    });
-  }
+    }
 
-  function updateDecision() {
-    const ranked = getSmartRanking();
+    function updatePillar(key, income, target, nextTarget) {
+      const percentRaw = target > 0 ? (income / target) * 100 : 0;
+      const percent = Math.min(percentRaw, 100);
+      const gap = Math.max(target - income, 0);
+      const nextStageGap = Math.max(nextTarget - income, 0);
 
-    if (!ranked || ranked.length < 4) return;
+      setText(`${key}Income`, `£${formatMoney(income)}`);
+      setText(`${key}Gap`, `£${formatMoney(gap)}`);
+      setText(`${key}Remaining`, `£${formatMoney(nextStageGap)}`);
+      setText(`${key}ProgressText`, `${Math.round(percentRaw)}%`);
 
-    const total = parseFloat(document.getElementById("paydayAmount")?.value) || 600;
-    const REINVEST_THRESHOLD = 2000;
+      const bar = document.getElementById(`${key}Bar`);
+      if (bar) bar.style.width = `${percent}%`;
 
-    let primaryAmt = 0;
-    let secondaryAmt = 0;
-    let supportAmt = 0;
-    let fourthAmt = 0;
-    let totalIncomeImpact = 0;
+      const signal = document.getElementById(`${key}Signal`);
+      if (!signal) return;
 
-    if (total < REINVEST_THRESHOLD) {
-      primaryAmt = Math.round(total * 0.5);
-      secondaryAmt = Math.round(total * 0.33);
-      supportAmt = total - primaryAmt - secondaryAmt;
+      signal.classList.remove("green", "amber", "red");
 
-      const maxPrimaryAmt = Math.round(total * MAX_PRIMARY_SHARE);
+      if (percentRaw < 60) {
+        signal.innerText = "GREEN";
+        signal.classList.add("green");
+      } else if (percentRaw < 90) {
+        signal.innerText = "AMBER";
+        signal.classList.add("amber");
+      } else {
+        signal.innerText = "RED";
+        signal.classList.add("red");
+      }
+    }
 
-      if (primaryAmt > maxPrimaryAmt) {
-        const excess = primaryAmt - maxPrimaryAmt;
-        primaryAmt = maxPrimaryAmt;
+    function getPillarData() {
+      const incomes = {
+        lng: getIncome("lngShares", "lngDps"),
+        mng: getIncome("mngShares", "mngDps"),
+        sdlf: getIncome("sdlfShares", "sdlfDps"),
+        supr: getIncome("suprShares", "suprDps")
+      };
 
-        const secondaryAdd = Math.round(excess * 0.65);
-        const supportAdd = excess - secondaryAdd;
+      const stage = getCurrentStage(incomes);
 
-        secondaryAmt += secondaryAdd;
-        supportAmt += supportAdd;
+      return { incomes, stage };
+    }
+
+    function getLivePriceForKey(key) {
+      return Number(livePrices[key] || 0);
+    }
+
+    function calculateIncomeFromAmount(key, amount) {
+      const dps = parseFloat(document.getElementById(`${key}Dps`)?.value) || 0;
+      const price = getLivePriceForKey(key);
+
+      if (!price || !dps || !amount) return 0;
+
+      return amount * (dps / price);
+    }
+
+    function updateMasterIncomeGoal(totalIncomeImpact = 0) {
+      const { incomes } = getPillarData();
+
+      const currentAnnual = incomes.lng + incomes.mng + incomes.sdlf + incomes.supr;
+      const projectedAnnual = currentAnnual + totalIncomeImpact;
+
+      const projectedMonthly = projectedAnnual / 12;
+      const targetMonthly = 2000;
+      const remainingMonthly = Math.max(targetMonthly - projectedMonthly, 0);
+
+      setText("goalIncomeCurrent", `£${formatMoney(projectedMonthly)}/month`);
+      setText("goalIncomeRemaining", `£${formatMoney(remainingMonthly)}/month still needed to reach £2,000/month`);
+    }
+
+    function getDynamicAllocationPlan(totalAmount = 800) {
+      const { incomes, stage } = getPillarData();
+
+      const pillars = Object.keys(incomes).map(key => {
+        const income = incomes[key] || 0;
+        const target = stage.target || 2000;
+        const progressPct = target > 0 ? (income / target) * 100 : 0;
+        const gap = Math.max(target - income, 0);
+
+        let weight = 1;
+
+        if (progressPct < 50) weight += 4;
+        else if (progressPct < 65) weight += 3;
+        else if (progressPct < 80) weight += 2;
+        else if (progressPct < 90) weight += 1;
+
+        if (gap > 1000) weight += 2;
+        else if (gap > 600) weight += 1;
+
+        if (progressPct >= 85) weight = Math.max(0.5, weight - 2);
+        if (progressPct >= 95) weight = 0.25;
+
+        return {
+          key,
+          name: names[key],
+          income,
+          target,
+          progressPct,
+          gap,
+          weight
+        };
+      });
+
+      pillars.sort((a, b) => {
+        if (a.progressPct !== b.progressPct) return a.progressPct - b.progressPct;
+        return b.gap - a.gap;
+      });
+
+      const totalWeight = pillars.reduce((sum, pillar) => sum + pillar.weight, 0);
+      let allocated = 0;
+
+      return pillars.map((pillar, index) => {
+        let amount = totalWeight > 0
+          ? Math.round((pillar.weight / totalWeight) * totalAmount)
+          : 0;
+
+        if (index === pillars.length - 1) {
+          amount = totalAmount - allocated;
+        }
+
+        allocated += amount;
+
+        const projectedIncomeAdd = calculateIncomeFromAmount(pillar.key, amount);
+
+        let mode = "Support";
+        if (pillar.progressPct < 50) mode = "Attack";
+        else if (pillar.progressPct < 70) mode = "Catch-up";
+        else if (pillar.progressPct < 80) mode = "Balance";
+        else mode = "Maintenance";
+
+        return {
+          ...pillar,
+          amount,
+          projectedIncomeAdd,
+          mode
+        };
+      });
+    }
+
+    function updateDecision() {
+      const total = parseFloat(document.getElementById("paydayAmount")?.value) || 800;
+      const plan = getDynamicAllocationPlan(total);
+
+      if (!plan || plan.length < 4) return;
+
+      const sorted = [...plan].sort((a, b) => b.amount - a.amount);
+      const boxes = document.querySelectorAll(".buy-box .amt");
+
+      setText("primaryBuy", sorted[0].name);
+      setText("secondaryBuy", sorted[1].name);
+      setText("supportBuy", sorted[2].name);
+      setText("fourthBuy", sorted[3].name);
+
+      if (boxes[0]) boxes[0].innerText = `£${sorted[0].amount}`;
+      if (boxes[1]) boxes[1].innerText = `£${sorted[1].amount}`;
+      if (boxes[2]) boxes[2].innerText = `£${sorted[2].amount}`;
+      if (boxes[3]) boxes[3].innerText = `£${sorted[3].amount}`;
+
+      setText("primaryReason", `${sorted[0].mode} • ${sorted[0].progressPct.toFixed(0)}% • +£${formatMoney(sorted[0].projectedIncomeAdd)}/yr`);
+      setText("secondaryReason", `${sorted[1].mode} • ${sorted[1].progressPct.toFixed(0)}% • +£${formatMoney(sorted[1].projectedIncomeAdd)}/yr`);
+      setText("supportReason", `${sorted[2].mode} • ${sorted[2].progressPct.toFixed(0)}% • +£${formatMoney(sorted[2].projectedIncomeAdd)}/yr`);
+      setText("fourthReason", `${sorted[3].mode} • ${sorted[3].progressPct.toFixed(0)}% • +£${formatMoney(sorted[3].projectedIncomeAdd)}/yr`);
+
+      const totalIncomeImpact = plan.reduce((sum, p) => sum + (p.projectedIncomeAdd || 0), 0);
+
+      setText("decisionIncomeAnnual", `+£${formatMoney(totalIncomeImpact)}/yr`);
+      setText("decisionIncomeMonthly", `+£${formatMoney(totalIncomeImpact / 12)}/month`);
+
+      updateMasterIncomeGoal(totalIncomeImpact);
+
+      const weakest = [...plan].sort((a, b) => a.progressPct - b.progressPct)[0];
+      setText("bestReinvestTarget", weakest.name);
+      setText("bestValueBuy", weakest.name);
+      setText("bestValueBuyMeta", `${weakest.progressPct.toFixed(0)}% progress • Gap £${formatMoney(weakest.gap)}`);
+    }
+
+    function getTargetDps(stockName) {
+      const fieldId = dpsFieldMap[stockName];
+      return parseFloat(document.getElementById(fieldId)?.value) || 0;
+    }
+
+    async function updateLogPreview() {
+      const into = document.getElementById("logInto")?.value;
+      const price = parseFloat(document.getElementById("logPrice")?.value);
+      const amount = parseFloat(document.getElementById("logAmount")?.value);
+      const dps = getTargetDps(into);
+
+      let yieldPct = 0;
+      let incomeAdded = 0;
+
+      if (!isNaN(price) && price > 0 && dps > 0) {
+        yieldPct = (dps / price) * 100;
       }
 
-      document.getElementById("primaryBuy").innerText = ranked[0].name;
-      document.getElementById("secondaryBuy").innerText = ranked[1].name;
-      document.getElementById("supportBuy").innerText = ranked[2].name;
+      if (!isNaN(amount) && amount > 0 && yieldPct > 0) {
+        incomeAdded = amount * (yieldPct / 100);
+      }
 
-      document.querySelectorAll(".buy-box .amt")[0].innerText = `£${primaryAmt}`;
-      document.querySelectorAll(".buy-box .amt")[1].innerText = `£${secondaryAmt}`;
-      document.querySelectorAll(".buy-box .amt")[2].innerText = `£${supportAmt}`;
+      const yieldEl = document.getElementById("logYieldAuto");
+      if (yieldEl) yieldEl.value = yieldPct > 0 ? yieldPct.toFixed(2) : "";
 
-      const incomePrimary = calculateIncomeFromAmount(ranked[0].key, primaryAmt);
-      const incomeSecondary = calculateIncomeFromAmount(ranked[1].key, secondaryAmt);
-      const incomeSupport = calculateIncomeFromAmount(ranked[2].key, supportAmt);
-
-      totalIncomeImpact = incomePrimary + incomeSecondary + incomeSupport;
-
-      document.getElementById("primaryReason").innerText =
-        `Attack Mode • +£${formatMoney(incomePrimary)}/yr • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
-
-      document.getElementById("secondaryReason").innerText =
-        `+£${formatMoney(incomeSecondary)}/yr • Yield ${ranked[1].yieldPct.toFixed(2)}%`;
-
-      document.getElementById("supportReason").innerText =
-        `+£${formatMoney(incomeSupport)}/yr • Yield ${ranked[2].yieldPct.toFixed(2)}%`;
-    } else {
-      primaryAmt = Math.round(total * 0.35);
-      secondaryAmt = Math.round(total * 0.30);
-      supportAmt = Math.round(total * 0.20);
-      fourthAmt = total - primaryAmt - secondaryAmt - supportAmt;
-
-      document.getElementById("primaryBuy").innerText = ranked[0].name;
-      document.getElementById("secondaryBuy").innerText = ranked[1].name;
-      document.getElementById("supportBuy").innerText = ranked[2].name;
-
-      document.querySelectorAll(".buy-box .amt")[0].innerText = `£${primaryAmt}`;
-      document.querySelectorAll(".buy-box .amt")[1].innerText = `£${secondaryAmt}`;
-      document.querySelectorAll(".buy-box .amt")[2].innerText = `£${supportAmt}`;
-
-      const incomePrimary = calculateIncomeFromAmount(ranked[0].key, primaryAmt);
-      const incomeSecondary = calculateIncomeFromAmount(ranked[1].key, secondaryAmt);
-      const incomeSupport = calculateIncomeFromAmount(ranked[2].key, supportAmt);
-      const incomeFourth = calculateIncomeFromAmount(ranked[3].key, fourthAmt);
-
-      totalIncomeImpact = incomePrimary + incomeSecondary + incomeSupport + incomeFourth;
-
-      document.getElementById("primaryReason").innerText =
-        `Reinvest Mode • +£${formatMoney(incomePrimary)}/yr • Yield ${ranked[0].yieldPct.toFixed(2)}%`;
-
-      document.getElementById("secondaryReason").innerText =
-        `+£${formatMoney(incomeSecondary)}/yr • Yield ${ranked[1].yieldPct.toFixed(2)}%`;
-
-      document.getElementById("supportReason").innerText =
-        `3rd: +£${formatMoney(incomeSupport)}/yr • 4th: ${ranked[3].name} +£${formatMoney(incomeFourth)}/yr`;
+      if (incomeAdded > 0) {
+        setText("logIncomePreview", `£${formatMoney(incomeAdded)}`);
+      } else {
+        const logs = await getStoredLogs();
+        const totalIncome = logs.reduce((sum, log) => sum + (Number(log.incomeAdded) || 0), 0);
+        setText("logIncomePreview", `£${formatMoney(totalIncome)}`);
+      }
     }
 
-    document.getElementById("decisionIncomeAnnual").innerText =
-      `+£${formatMoney(totalIncomeImpact)}/yr`;
-    document.getElementById("decisionIncomeMonthly").innerText =
-      `+£${formatMoney(totalIncomeImpact / 12)}/month`;
-
-    updateMasterIncomeGoal(totalIncomeImpact);
-
-    document.getElementById("bestReinvestTarget").innerText = ranked[0].name;
-    document.getElementById("bestValueBuy").innerText = ranked[0].name;
-    document.getElementById("bestValueBuyMeta").innerText =
-      `Yield ${ranked[0].yieldPct.toFixed(2)}% • Gap £${formatMoney(ranked[0].gap)}`;
-  }
-
-  function getTargetDps(stockName) {
-    const fieldId = dpsFieldMap[stockName];
-    return parseFloat(document.getElementById(fieldId)?.value) || 0;
-  }
-
-  async function updateLogPreview() {
-    const into = document.getElementById("logInto").value;
-    const price = parseFloat(document.getElementById("logPrice").value);
-    const amount = parseFloat(document.getElementById("logAmount").value);
-    const dps = getTargetDps(into);
-
-    let yieldPct = 0;
-    let incomeAdded = 0;
-
-    if (!isNaN(price) && price > 0 && dps > 0) {
-      yieldPct = (dps / price) * 100;
+    function updateSmartReinvestPanel() {
+      return;
     }
 
-    if (!isNaN(amount) && amount > 0 && yieldPct > 0) {
-      incomeAdded = amount * (yieldPct / 100);
+    async function getStoredLogs() {
+      try {
+        const res = await fetch(LOG_SHEET_URL);
+        const data = await res.json();
+
+        return data.map((row, index) => ({
+          id: row.id || `${row.date || "row"}-${row.amount || 0}-${row.into || "unknown"}-${index}`,
+          date: row.date || "",
+          source: row.source || "",
+          amount: Number(row.amount) || 0,
+          into: row.into || "",
+          yieldUsed: row.yield_used !== undefined && row.yield_used !== "" ? Number(row.yield_used) : null,
+          incomeAdded: Number(row.income_added) || 0
+        })).reverse();
+      } catch (err) {
+        console.error("Failed to load IncomeLog sheet", err);
+        return [];
+      }
     }
 
-    document.getElementById("logYieldAuto").value = yieldPct > 0 ? yieldPct.toFixed(2) : "";
+    function updateReinvestTotals(logs = []) {
+      const records = Array.isArray(logs) ? logs : [];
+      const total = records.reduce((sum, log) => sum + (Number(log.incomeAdded) || 0), 0);
 
-    if (incomeAdded > 0) {
-      document.getElementById("logIncomePreview").innerText = `£${formatMoney(incomeAdded)}`;
-    } else {
+      const currentYear = new Date().getFullYear();
+      const yearTotal = records.reduce((sum, log) => {
+        const logYear = String(log.date || "").slice(0, 4);
+        if (Number(logYear) === currentYear) {
+          return sum + (Number(log.incomeAdded) || 0);
+        }
+        return sum;
+      }, 0);
+
+      setText("reinvestTotal", `£${formatMoney(total)}`);
+      setText("reinvestYearTotal", `£${formatMoney(yearTotal)}`);
+    }
+
+    function migrateLegacyLogsIfNeeded() {
+      return;
+    }
+
+    function deleteLog(id) {
+      console.warn("Delete is disabled in sheet-read mode.", id);
+      alert("Delete is disabled right now because logs are being read from Google Sheets. To delete one, remove the row from the IncomeLog sheet.");
+    }
+
+    async function loadLogs() {
       const logs = await getStoredLogs();
-      const totalIncome = logs.reduce((sum, log) => sum + (Number(log.incomeAdded) || 0), 0);
-      document.getElementById("logIncomePreview").innerText = `£${formatMoney(totalIncome)}`;
+      const tbody = document.getElementById("logTableBody");
+      if (!tbody) return;
+
+      tbody.innerHTML = "";
+
+      logs.forEach(log => {
+        const row = document.createElement("tr");
+        const yieldDisplay = log.yieldUsed == null ? "—" : `${Number(log.yieldUsed).toFixed(2)}%`;
+
+        row.innerHTML = `
+          <td>${log.date}</td>
+          <td>${log.source}</td>
+          <td>£${formatMoney(log.amount)}</td>
+          <td>${log.into}</td>
+          <td>${yieldDisplay}</td>
+          <td>+£${formatMoney(log.incomeAdded)}/yr</td>
+          <td><button class="delete-btn" data-id="${log.id}">Delete</button></td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      tbody.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click", () => deleteLog(btn.dataset.id));
+      });
+
+      updateReinvestTotals(logs);
     }
-  }
 
-  function updateSmartReinvestPanel() {
-    return;
-  }
-
-  async function getStoredLogs() {
-    try {
-      const res = await fetch(LOG_SHEET_URL);
-      const data = await res.json();
-
-      return data.map((row, index) => ({
-        id: row.id || `${row.date || "row"}-${row.amount || 0}-${row.into || "unknown"}-${index}`,
-        date: row.date || "",
-        source: row.source || "",
-        amount: Number(row.amount) || 0,
-        into: row.into || "",
-        yieldUsed: row.yield_used !== undefined && row.yield_used !== "" ? Number(row.yield_used) : null,
-        incomeAdded: Number(row.income_added) || 0
-      })).reverse();
-    } catch (err) {
-      console.error("Failed to load IncomeLog sheet", err);
-      return [];
+    function addLog() {
+      alert("Add Log is still in sheet-read mode right now. The table is reading from Google Sheets, so to add synced entries you need to add a new row in the IncomeLog sheet.");
     }
-  }
 
-  function updateReinvestTotals(logs = []) {
-    const records = Array.isArray(logs) ? logs : [];
-    const total = records.reduce((sum, log) => sum + (Number(log.incomeAdded) || 0), 0);
+    function updateAll() {
+      const { incomes, stage } = getPillarData();
 
-    const currentYear = new Date().getFullYear();
-    const yearTotal = records.reduce((sum, log) => {
-      const logYear = String(log.date || "").slice(0, 4);
-      if (Number(logYear) === currentYear) {
-        return sum + (Number(log.incomeAdded) || 0);
+      setText("stageLabel", `${stage.stageIndex} / 8`);
+      setText("stageTargetLabel", `£${formatWhole(stage.target)}`);
+      setText("nextStageLabel", `£${formatWhole(stage.nextTarget)}`);
+      setText("targetHeading", formatWhole(stage.target));
+
+      updatePillar("lng", incomes.lng, stage.target, stage.nextTarget);
+      updatePillar("mng", incomes.mng, stage.target, stage.nextTarget);
+      updatePillar("sdlf", incomes.sdlf, stage.target, stage.nextTarget);
+      updatePillar("supr", incomes.supr, stage.target, stage.nextTarget);
+
+      const totalAnnual = incomes.lng + incomes.mng + incomes.sdlf + incomes.supr;
+      setText("totalAnnual", formatMoney(totalAnnual));
+      setText("totalMonthly", formatMoney(totalAnnual / 12));
+
+      updateDecision();
+      updateLogPreview();
+      updateSmartReinvestPanel();
+      saveValues();
+    }
+
+    migrateLegacyLogsIfNeeded();
+    loadSavedValues();
+    loadLogs();
+
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("input", updateAll);
+        el.addEventListener("change", updateAll);
       }
-      return sum;
-    }, 0);
-
-    document.getElementById("reinvestTotal").innerText = `£${formatMoney(total)}`;
-    document.getElementById("reinvestYearTotal").innerText = `£${formatMoney(yearTotal)}`;
-  }
-
-  function migrateLegacyLogsIfNeeded() {
-    return;
-  }
-
-  function deleteLog(id) {
-    console.warn("Delete is disabled in sheet-read mode.", id);
-    alert("Delete is disabled right now because logs are being read from Google Sheets. To delete one, remove the row from the IncomeLog sheet.");
-  }
-
-  async function loadLogs() {
-    const logs = await getStoredLogs();
-    const tbody = document.getElementById("logTableBody");
-    if (!tbody) return;
-
-    tbody.innerHTML = "";
-
-    logs.forEach(log => {
-      const row = document.createElement("tr");
-      const yieldDisplay = log.yieldUsed == null ? "—" : `${Number(log.yieldUsed).toFixed(2)}%`;
-
-      row.innerHTML = `
-        <td>${log.date}</td>
-        <td>${log.source}</td>
-        <td>£${formatMoney(log.amount)}</td>
-        <td>${log.into}</td>
-        <td>${yieldDisplay}</td>
-        <td>+£${formatMoney(log.incomeAdded)}/yr</td>
-        <td><button class="delete-btn" data-id="${log.id}">Delete</button></td>
-      `;
-      tbody.appendChild(row);
     });
 
-    tbody.querySelectorAll(".delete-btn").forEach(btn => {
-      btn.addEventListener("click", () => deleteLog(btn.dataset.id));
+    ["logInto", "logPrice", "logAmount"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("input", () => updateLogPreview());
+        el.addEventListener("change", () => updateLogPreview());
+      }
     });
 
-    updateReinvestTotals(logs);
-  }
+    const addLogBtn = document.getElementById("addLogBtn");
+    if (addLogBtn) addLogBtn.addEventListener("click", addLog);
 
-  function addLog() {
-    alert("Add Log is still in sheet-read mode right now. The table is reading from Google Sheets, so to add synced entries you need to add a new row in the IncomeLog sheet.");
-  }
+    const paydayAmount = document.getElementById("paydayAmount");
+    if (paydayAmount) paydayAmount.addEventListener("input", updateAll);
 
-  function updateAll() {
-    const { incomes, stage } = getPillarData();
+    setInterval(loadLivePrices, 30000);
+    setInterval(loadShareCounts, 30000);
 
-    document.getElementById("stageLabel").innerText = `${stage.stageIndex} / 8`;
-    document.getElementById("stageTargetLabel").innerText = `£${formatWhole(stage.target)}`;
-    document.getElementById("nextStageLabel").innerText = `£${formatWhole(stage.nextTarget)}`;
-    document.getElementById("targetHeading").innerText = formatWhole(stage.target);
-
-    updatePillar("lng", incomes.lng, stage.target, stage.nextTarget);
-    updatePillar("mng", incomes.mng, stage.target, stage.nextTarget);
-    updatePillar("sdlf", incomes.sdlf, stage.target, stage.nextTarget);
-    updatePillar("supr", incomes.supr, stage.target, stage.nextTarget);
-
-    const totalAnnual = incomes.lng + incomes.mng + incomes.sdlf + incomes.supr;
-    document.getElementById("totalAnnual").innerText = formatMoney(totalAnnual);
-    document.getElementById("totalMonthly").innerText = formatMoney(totalAnnual / 12);
-
-    updateDecision();
-    updateLogPreview();
-    updateSmartReinvestPanel();
-    saveValues();
-  }
-
-  migrateLegacyLogsIfNeeded();
-  loadSavedValues();
-  loadLogs();
-
-  ids.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener("input", updateAll);
-      el.addEventListener("change", updateAll);
-    }
-  });
-
-  ["logInto", "logPrice", "logAmount"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener("input", () => updateLogPreview());
-      el.addEventListener("change", () => updateLogPreview());
-    }
-  });
-
-  document.getElementById("addLogBtn").addEventListener("click", addLog);
-  document.getElementById("paydayAmount").addEventListener("input", updateAll);
-
-  updateAll();
-</script>
+    loadLivePrices();
+    loadShareCounts();
+    updateAll();
+  </script>
 </body>
 </html>
