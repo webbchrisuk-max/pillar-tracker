@@ -246,29 +246,6 @@
       transition: width 0.25s ease;
     }
 
-    .notes, .log {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-
-    th, td {
-      padding: 10px 8px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      text-align: left;
-    }
-
-    th {
-      color: var(--muted);
-      font-weight: 600;
-    }
-
     .footer {
       margin-top: 14px;
       color: var(--muted);
@@ -391,6 +368,70 @@
       color: var(--text);
     }
 
+    .allocator-strip {
+      margin-top: 12px;
+    }
+
+    .allocation-panel-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 12px;
+    }
+
+    .allocation-card {
+      background: linear-gradient(145deg, rgba(12, 24, 39, 0.96), rgba(7, 15, 25, 0.96));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .allocation-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .allocation-name {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .allocation-badge {
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.7px;
+      border: 1px solid currentColor;
+      white-space: nowrap;
+      color: var(--cyan);
+    }
+
+    .allocation-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 8px;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .quick-btn {
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
     @media (max-width: 720px) {
       .top-grid,
       .triple-grid,
@@ -399,7 +440,10 @@
       .pillar-stats,
       .inputs,
       .log-grid,
-      .log-preview {
+      .log-preview,
+      .allocation-panel-grid,
+      .allocation-stats,
+      .quick-actions {
         grid-template-columns: 1fr;
       }
 
@@ -466,18 +510,39 @@
         <div class="subv" id="goalIncomeRemaining">£0.00/month still needed to reach £2,000/month</div>
       </div>
 
-      <div class="mini" style="margin-top:12px;">
-        <div class="k">Total Income Impact</div>
-        <div class="v" id="decisionIncomeAnnual">+£0.00/yr</div>
-        <div class="subv" id="decisionIncomeMonthly">+£0.00/month</div>
+      <div class="grid triple-grid">
+        <div class="mini" style="margin-top:12px;">
+          <div class="k">Total Income Impact</div>
+          <div class="v" id="decisionIncomeAnnual">+£0.00/yr</div>
+          <div class="subv" id="decisionIncomeMonthly">+£0.00/month</div>
+        </div>
+
+        <div class="mini" style="margin-top:12px;">
+          <div class="k">Blended Yield</div>
+          <div class="v" id="decisionBlendedYield">0.00%</div>
+          <div class="subv">Current auto-split weighted yield</div>
+        </div>
+
+        <div class="mini" style="margin-top:12px;">
+          <div class="k">Next Stage ETA</div>
+          <div class="v" id="nextStageEta">--</div>
+          <div class="subv">At current monthly investing pace</div>
+        </div>
       </div>
 
-      <div class="input-box" style="margin-bottom:12px;">
+      <div class="input-box" style="margin-bottom:12px; margin-top:12px;">
         <label>Total Investment (£)</label>
         <input id="paydayAmount" type="number" value="600" />
       </div>
 
-      <div class="decision-plan">
+      <div class="quick-actions">
+        <button class="quick-btn" data-amt="300">Test £300</button>
+        <button class="quick-btn" data-amt="600">Test £600</button>
+        <button class="quick-btn" data-amt="800">Test £800</button>
+        <button class="quick-btn" data-amt="1000">Test £1000</button>
+      </div>
+
+      <div class="decision-plan" style="margin-top:12px;">
         <div class="buy-box">
           <div class="stat-label">Primary Buy</div>
           <div class="amt">£0</div>
@@ -504,6 +569,65 @@
           <div class="amt">£0</div>
           <div class="name" id="fourthBuy">--</div>
           <div class="mini-note" id="fourthReason">--</div>
+        </div>
+      </div>
+
+      <div class="mini allocator-strip">
+        <div class="k">Why This Split</div>
+        <div class="v" id="allocatorModeLabel">Weakest First</div>
+        <div class="subv" id="allocatorWhyText">Waiting for live allocation logic…</div>
+      </div>
+    </section>
+
+    <section class="section card">
+      <h2>Allocation Control Panel</h2>
+      <div class="allocation-panel-grid">
+        <div class="allocation-card">
+          <div class="allocation-top">
+            <div class="allocation-name" id="alloc1Name">--</div>
+            <div class="allocation-badge" id="alloc1Mode">--</div>
+          </div>
+          <div class="allocation-stats">
+            <div class="mini"><div class="k">Amount</div><div class="v" id="alloc1Amount">£0</div></div>
+            <div class="mini"><div class="k">Progress</div><div class="v" id="alloc1Progress">0%</div></div>
+            <div class="mini"><div class="k">Income Added</div><div class="v" id="alloc1IncomeAdd">£0.00</div></div>
+          </div>
+        </div>
+
+        <div class="allocation-card">
+          <div class="allocation-top">
+            <div class="allocation-name" id="alloc2Name">--</div>
+            <div class="allocation-badge" id="alloc2Mode">--</div>
+          </div>
+          <div class="allocation-stats">
+            <div class="mini"><div class="k">Amount</div><div class="v" id="alloc2Amount">£0</div></div>
+            <div class="mini"><div class="k">Progress</div><div class="v" id="alloc2Progress">0%</div></div>
+            <div class="mini"><div class="k">Income Added</div><div class="v" id="alloc2IncomeAdd">£0.00</div></div>
+          </div>
+        </div>
+
+        <div class="allocation-card">
+          <div class="allocation-top">
+            <div class="allocation-name" id="alloc3Name">--</div>
+            <div class="allocation-badge" id="alloc3Mode">--</div>
+          </div>
+          <div class="allocation-stats">
+            <div class="mini"><div class="k">Amount</div><div class="v" id="alloc3Amount">£0</div></div>
+            <div class="mini"><div class="k">Progress</div><div class="v" id="alloc3Progress">0%</div></div>
+            <div class="mini"><div class="k">Income Added</div><div class="v" id="alloc3IncomeAdd">£0.00</div></div>
+          </div>
+        </div>
+
+        <div class="allocation-card">
+          <div class="allocation-top">
+            <div class="allocation-name" id="alloc4Name">--</div>
+            <div class="allocation-badge" id="alloc4Mode">--</div>
+          </div>
+          <div class="allocation-stats">
+            <div class="mini"><div class="k">Amount</div><div class="v" id="alloc4Amount">£0</div></div>
+            <div class="mini"><div class="k">Progress</div><div class="v" id="alloc4Progress">0%</div></div>
+            <div class="mini"><div class="k">Income Added</div><div class="v" id="alloc4IncomeAdd">£0.00</div></div>
+          </div>
         </div>
       </div>
     </section>
@@ -543,7 +667,7 @@
             <div class="mini"><div class="k">Current Income</div><div class="v" id="lngIncome">£0</div></div>
             <div class="mini"><div class="k">Gap to Target</div><div class="v" id="lngGap">£0</div></div>
             <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="lngRemaining">£0</div></div>
-            <div class="mini"><div class="k">Weight Role</div><div class="v">Anchor</div></div>
+            <div class="mini"><div class="k">Priority Rank</div><div class="v" id="lngPriority">#--</div></div>
           </div>
 
           <div class="progress-wrap">
@@ -584,7 +708,7 @@
             <div class="mini"><div class="k">Current Income</div><div class="v" id="mngIncome">£0</div></div>
             <div class="mini"><div class="k">Gap to Target</div><div class="v" id="mngGap">£0</div></div>
             <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="mngRemaining">£0</div></div>
-            <div class="mini"><div class="k">Weight Role</div><div class="v">Accelerator</div></div>
+            <div class="mini"><div class="k">Priority Rank</div><div class="v" id="mngPriority">#--</div></div>
           </div>
 
           <div class="progress-wrap">
@@ -625,7 +749,7 @@
             <div class="mini"><div class="k">Current Income</div><div class="v" id="sdlfIncome">£0</div></div>
             <div class="mini"><div class="k">Gap to Target</div><div class="v" id="sdlfGap">£0</div></div>
             <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="sdlfRemaining">£0</div></div>
-            <div class="mini"><div class="k">Weight Role</div><div class="v">Later Balance</div></div>
+            <div class="mini"><div class="k">Priority Rank</div><div class="v" id="sdlfPriority">#--</div></div>
           </div>
 
           <div class="progress-wrap">
@@ -666,7 +790,7 @@
             <div class="mini"><div class="k">Current Income</div><div class="v" id="suprIncome">£0</div></div>
             <div class="mini"><div class="k">Gap to Target</div><div class="v" id="suprGap">£0</div></div>
             <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="suprRemaining">£0</div></div>
-            <div class="mini"><div class="k">Weight Role</div><div class="v">Cashflow Stabiliser</div></div>
+            <div class="mini"><div class="k">Priority Rank</div><div class="v" id="suprPriority">#--</div></div>
           </div>
 
           <div class="progress-wrap">
@@ -775,18 +899,9 @@
 
   <script>
     const STORAGE_KEY = "pillarTrackerInputs_v2_safe";
-    const LEGACY_LOG_STORAGE_KEY_V4 = "pillarTrackerLogs_v4";
-    const LEGACY_LOG_STORAGE_KEY_V3 = "pillarTrackerLogs_v3";
-    const LEGACY_LOG_STORAGE_KEY_V2 = "pillarTrackerLogs_v2";
-
     const STAGES = [2000, 4000, 6000, 8000, 10000, 12000, 15000, 20000];
 
-    const ids = [
-      "lngDps",
-      "mngDps",
-      "sdlfDps",
-      "suprDps"
-    ];
+    const ids = ["lngDps", "mngDps", "sdlfDps", "suprDps"];
 
     const names = {
       lng: "Legal & General",
@@ -803,13 +918,7 @@
       "Supermarket REIT": "suprDps"
     };
 
-    const livePrices = {
-      lng: 0,
-      mng: 0,
-      sdlf: 0,
-      supr: 0
-    };
-
+    const livePrices = { lng: 0, mng: 0, sdlf: 0, supr: 0 };
     const lastGoodLiveData = {
       lng: { price: 0, value: 0, cost: 0, gain: 0 },
       mng: { price: 0, value: 0, cost: 0, gain: 0 },
@@ -834,12 +943,10 @@
 
     function getKeyFromTicker(ticker) {
       const t = normaliseTicker(ticker);
-
       if (["LON:LGEN", "LGEN", "LGEN.L"].includes(t)) return "lng";
       if (["LON:MNG", "MNG", "MNG.L"].includes(t)) return "mng";
       if (["LON:SDLF", "SDLF", "SDLF.L", "PHNX", "PHNX.L", "STANDARD LIFE"].includes(t)) return "sdlf";
       if (["LON:SUPR", "SUPR", "SUPR.L"].includes(t)) return "supr";
-
       return null;
     }
 
@@ -869,7 +976,6 @@
 
     async function loadLivePrices() {
       const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
-
       try {
         const res = await fetch(url);
         const data = await res.json();
@@ -880,14 +986,12 @@
         data.forEach(row => {
           const ticker = normaliseTicker(row.ticker);
           const key = getKeyFromTicker(ticker);
-
           if (!key) return;
 
           const shares = parseNumber(row.shares);
           const rawPrice = parseNumber(row.live_price);
           const annualDps = parseNumber(row.annual_dividend_per_share);
           const cost = parseNumber(row.book_cost);
-
           if (!Number.isFinite(shares) || shares <= 0) return;
 
           const price = normalisePrice(rawPrice);
@@ -898,12 +1002,7 @@
           const gain = value - safeCost;
 
           livePrices[key] = safePrice;
-          lastGoodLiveData[key] = {
-            price: safePrice,
-            value,
-            cost: safeCost,
-            gain
-          };
+          lastGoodLiveData[key] = { price: safePrice, value, cost: safeCost, gain };
 
           totalValue += value;
           totalCost += safeCost;
@@ -934,7 +1033,6 @@
 
         setText("syncStatusText", "Live Connected");
         setText("syncStatusSub", new Date().toLocaleTimeString());
-
         const syncDot = document.getElementById("syncDot");
         if (syncDot) syncDot.className = "sync-dot";
 
@@ -943,7 +1041,6 @@
         console.error("Sheet load failed", err);
         setText("syncStatusText", "Sync Failed");
         setText("syncStatusSub", "Using last good snapshot");
-
         const syncDot = document.getElementById("syncDot");
         if (syncDot) syncDot.className = "sync-dot sync-bad";
       }
@@ -951,7 +1048,6 @@
 
     async function loadShareCounts() {
       const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
-
       try {
         const res = await fetch(url);
         const data = await res.json();
@@ -962,7 +1058,6 @@
           if (!key) return;
 
           const shares = parseNumber(row.shares);
-
           if (Number.isFinite(shares) && shares > 0) {
             const input = document.getElementById(`${key}Shares`);
             if (input) input.value = shares;
@@ -978,7 +1073,6 @@
     function loadSavedValues() {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (!saved) return;
-
       try {
         const parsed = JSON.parse(saved);
         ids.forEach(id => {
@@ -1018,7 +1112,6 @@
           };
         }
       }
-
       return {
         stageIndex: STAGES.length,
         target: STAGES[STAGES.length - 1],
@@ -1044,7 +1137,6 @@
       if (!signal) return;
 
       signal.classList.remove("green", "amber", "red");
-
       if (percentRaw < 60) {
         signal.innerText = "GREEN";
         signal.classList.add("green");
@@ -1064,9 +1156,7 @@
         sdlf: getIncome("sdlfShares", "sdlfDps"),
         supr: getIncome("suprShares", "suprDps")
       };
-
       const stage = getCurrentStage(incomes);
-
       return { incomes, stage };
     }
 
@@ -1077,18 +1167,14 @@
     function calculateIncomeFromAmount(key, amount) {
       const dps = parseFloat(document.getElementById(`${key}Dps`)?.value) || 0;
       const price = getLivePriceForKey(key);
-
       if (!price || !dps || !amount) return 0;
-
       return amount * (dps / price);
     }
 
     function updateMasterIncomeGoal(totalIncomeImpact = 0) {
       const { incomes } = getPillarData();
-
       const currentAnnual = incomes.lng + incomes.mng + incomes.sdlf + incomes.supr;
       const projectedAnnual = currentAnnual + totalIncomeImpact;
-
       const projectedMonthly = projectedAnnual / 12;
       const targetMonthly = 2000;
       const remainingMonthly = Math.max(targetMonthly - projectedMonthly, 0);
@@ -1107,7 +1193,6 @@
         const gap = Math.max(target - income, 0);
 
         let weight = 1;
-
         if (progressPct < 50) weight += 4;
         else if (progressPct < 65) weight += 3;
         else if (progressPct < 80) weight += 2;
@@ -1119,15 +1204,7 @@
         if (progressPct >= 85) weight = Math.max(0.5, weight - 2);
         if (progressPct >= 95) weight = 0.25;
 
-        return {
-          key,
-          name: names[key],
-          income,
-          target,
-          progressPct,
-          gap,
-          weight
-        };
+        return { key, name: names[key], income, target, progressPct, gap, weight };
       });
 
       pillars.sort((a, b) => {
@@ -1157,12 +1234,50 @@
         else if (pillar.progressPct < 80) mode = "Balance";
         else mode = "Maintenance";
 
-        return {
-          ...pillar,
-          amount,
-          projectedIncomeAdd,
-          mode
-        };
+        return { ...pillar, amount, projectedIncomeAdd, mode };
+      });
+    }
+
+    function renderAllocationPanel(plan) {
+      if (!plan || plan.length < 4) return;
+
+      const sortedByAmount = [...plan].sort((a, b) => b.amount - a.amount);
+      const weakest = [...plan].sort((a, b) => a.progressPct - b.progressPct)[0];
+      const attacking = plan.filter(p => p.mode === "Attack").map(p => p.name);
+      const catching = plan.filter(p => p.mode === "Catch-up").map(p => p.name);
+      const balancing = plan.filter(p => p.mode === "Balance").map(p => p.name);
+      const maintenance = plan.filter(p => p.mode === "Maintenance").map(p => p.name);
+
+      sortedByAmount.forEach((pillar, index) => {
+        const n = index + 1;
+        setText(`alloc${n}Name`, pillar.name);
+        setText(`alloc${n}Mode`, pillar.mode);
+        setText(`alloc${n}Amount`, `£${pillar.amount}`);
+        setText(`alloc${n}Progress`, `${pillar.progressPct.toFixed(0)}%`);
+        setText(`alloc${n}IncomeAdd`, `£${formatMoney(pillar.projectedIncomeAdd)}`);
+
+        const badge = document.getElementById(`alloc${n}Mode`);
+        if (badge) {
+          badge.style.color =
+            pillar.mode === "Attack" ? "var(--green)" :
+            pillar.mode === "Catch-up" ? "var(--amber)" :
+            pillar.mode === "Balance" ? "var(--cyan)" :
+            "var(--muted)";
+        }
+      });
+
+      const parts = [];
+      if (attacking.length) parts.push(`${attacking.join(" + ")} in Attack`);
+      if (catching.length) parts.push(`${catching.join(" + ")} in Catch-up`);
+      if (balancing.length) parts.push(`${balancing.join(" + ")} in Balance`);
+      if (maintenance.length) parts.push(`${maintenance.join(" + ")} in Maintenance`);
+
+      setText("allocatorModeLabel", "Weakest First");
+      setText("allocatorWhyText", `${weakest.name} is currently the weakest pillar. ${parts.join(". ")}.`);
+
+      const rankedWeakest = [...plan].sort((a, b) => a.progressPct - b.progressPct);
+      rankedWeakest.forEach((pillar, index) => {
+        setText(`${pillar.key}Priority`, `#${index + 1}`);
       });
     }
 
@@ -1170,6 +1285,7 @@
       const total = parseFloat(document.getElementById("paydayAmount")?.value) || 800;
       const plan = getDynamicAllocationPlan(total);
 
+      renderAllocationPanel(plan);
       if (!plan || plan.length < 4) return;
 
       const sorted = [...plan].sort((a, b) => b.amount - a.amount);
@@ -1191,16 +1307,41 @@
       setText("fourthReason", `${sorted[3].mode} • ${sorted[3].progressPct.toFixed(0)}% • +£${formatMoney(sorted[3].projectedIncomeAdd)}/yr`);
 
       const totalIncomeImpact = plan.reduce((sum, p) => sum + (p.projectedIncomeAdd || 0), 0);
-
       setText("decisionIncomeAnnual", `+£${formatMoney(totalIncomeImpact)}/yr`);
       setText("decisionIncomeMonthly", `+£${formatMoney(totalIncomeImpact / 12)}/month`);
 
+      const blendedYield = total > 0 ? (totalIncomeImpact / total) * 100 : 0;
+      setText("decisionBlendedYield", `${blendedYield.toFixed(2)}%`);
+
       updateMasterIncomeGoal(totalIncomeImpact);
+      updateNextStageEta(totalIncomeImpact);
 
       const weakest = [...plan].sort((a, b) => a.progressPct - b.progressPct)[0];
       setText("bestReinvestTarget", weakest.name);
       setText("bestValueBuy", weakest.name);
       setText("bestValueBuyMeta", `${weakest.progressPct.toFixed(0)}% progress • Gap £${formatMoney(weakest.gap)}`);
+    }
+
+    function updateNextStageEta(totalIncomeImpact = 0) {
+      const total = parseFloat(document.getElementById("paydayAmount")?.value) || 0;
+      const annualFromOneMonth = totalIncomeImpact || 0;
+      const annualAtCurrentPace = annualFromOneMonth * 12;
+
+      const { incomes, stage } = getPillarData();
+      const currentFloor = Math.min(incomes.lng, incomes.mng, incomes.sdlf, incomes.supr);
+      const gap = Math.max(stage.target - currentFloor, 0);
+
+      if (!annualAtCurrentPace || annualAtCurrentPace <= 0 || gap <= 0) {
+        setText("nextStageEta", "--");
+        return;
+      }
+
+      const years = gap / annualAtCurrentPace;
+      if (years < 1) {
+        setText("nextStageEta", `${Math.max(1, Math.round(years * 12))} mo`);
+      } else {
+        setText("nextStageEta", `${years.toFixed(1)} yrs`);
+      }
     }
 
     function getTargetDps(stockName) {
@@ -1235,10 +1376,6 @@
         const totalIncome = logs.reduce((sum, log) => sum + (Number(log.incomeAdded) || 0), 0);
         setText("logIncomePreview", `£${formatMoney(totalIncome)}`);
       }
-    }
-
-    function updateSmartReinvestPanel() {
-      return;
     }
 
     async function getStoredLogs() {
@@ -1276,10 +1413,6 @@
 
       setText("reinvestTotal", `£${formatMoney(total)}`);
       setText("reinvestYearTotal", `£${formatMoney(yearTotal)}`);
-    }
-
-    function migrateLegacyLogsIfNeeded() {
-      return;
     }
 
     function deleteLog(id) {
@@ -1340,11 +1473,9 @@
 
       updateDecision();
       updateLogPreview();
-      updateSmartReinvestPanel();
       saveValues();
     }
 
-    migrateLegacyLogsIfNeeded();
     loadSavedValues();
     loadLogs();
 
@@ -1362,6 +1493,17 @@
         el.addEventListener("input", () => updateLogPreview());
         el.addEventListener("change", () => updateLogPreview());
       }
+    });
+
+    document.querySelectorAll(".quick-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const amt = btn.dataset.amt;
+        const input = document.getElementById("paydayAmount");
+        if (input) {
+          input.value = amt;
+          updateAll();
+        }
+      });
     });
 
     const addLogBtn = document.getElementById("addLogBtn");
