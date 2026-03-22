@@ -1,854 +1,894 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Aurora Dividend Calendar</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Dividend Intelligence</title>
 
-  <style>
-    :root {
-      --bg: #071018;
-      --bg2: #0c1624;
-      --panel: rgba(15, 27, 43, 0.88);
-      --panel-2: rgba(10, 20, 34, 0.9);
-      --line: rgba(101, 225, 255, 0.16);
-      --cyan: #62f3ff;
-      --cyan-2: #1ad1ff;
-      --blue: #6ea8ff;
-      --green: #50ff8f;
-      --amber: #ffc857;
-      --red: #ff6b8a;
-      --text: #e9f4ff;
-      --muted: #96abc5;
-      --glow: 0 0 22px rgba(26, 209, 255, 0.22);
-      --radius: 18px;
-    }
+<style>
+:root {
+  --bg: #071018;
+  --bg2: #0c1624;
+  --panel: rgba(15, 27, 43, 0.88);
+  --panel-2: rgba(10, 20, 34, 0.9);
+  --line: rgba(101, 225, 255, 0.16);
+  --cyan: #62f3ff;
+  --cyan-2: #1ad1ff;
+  --blue: #6ea8ff;
+  --green: #50ff8f;
+  --amber: #ffc857;
+  --red: #ff6b8a;
+  --text: #e9f4ff;
+  --muted: #96abc5;
+  --glow: 0 0 22px rgba(26, 209, 255, 0.22);
+  --radius: 18px;
+}
 
-    * { box-sizing: border-box; }
+* { box-sizing: border-box; }
 
-    html, body {
-      margin: 0;
-      background:
-        radial-gradient(circle at top right, rgba(26, 209, 255, 0.14), transparent 28%),
-        radial-gradient(circle at top left, rgba(110, 168, 255, 0.12), transparent 25%),
-        linear-gradient(180deg, var(--bg), #050b13 100%);
-      color: var(--text);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
+html, body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top right, rgba(26, 209, 255, 0.14), transparent 28%),
+    radial-gradient(circle at top left, rgba(110, 168, 255, 0.12), transparent 25%),
+    linear-gradient(180deg, var(--bg), #050b13 100%);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
 
-    body {
-      padding: 18px 14px 42px;
-    }
+body {
+  padding: 18px 14px 42px;
+}
 
-    .wrap {
-      max-width: 1100px;
-      margin: 0 auto;
-    }
+.wrap {
+  max-width: 980px;
+  margin: 0 auto;
+}
 
-    .hero {
-      background: linear-gradient(145deg, rgba(12, 22, 36, 0.95), rgba(6, 13, 23, 0.95));
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      padding: 18px;
-      box-shadow: var(--glow);
-      position: relative;
-      overflow: hidden;
-    }
+.hero {
+  background: linear-gradient(145deg, rgba(12, 22, 36, 0.95), rgba(6, 13, 23, 0.95));
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 18px;
+  box-shadow: var(--glow);
+  position: relative;
+  overflow: hidden;
+}
 
-    .hero:before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(98,243,255,0.08), transparent);
-      transform: translateX(-100%);
-      animation: scan 8s linear infinite;
-      pointer-events: none;
-    }
+.hero:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(98,243,255,0.08), transparent);
+  transform: translateX(-100%);
+  animation: scan 8s linear infinite;
+  pointer-events: none;
+}
 
-    @keyframes scan {
-      to { transform: translateX(100%); }
-    }
+@keyframes scan {
+  to { transform: translateX(100%); }
+}
 
-    h1 {
-      margin: 0;
-      font-size: 30px;
-      line-height: 1.05;
-      letter-spacing: 0.3px;
-    }
+h1 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.05;
+  letter-spacing: 0.3px;
+}
 
-    h2 {
-      margin: 0 0 10px;
-      font-size: 17px;
-      letter-spacing: 0.4px;
-    }
+.sub {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
 
-    .sub {
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 13px;
-    }
+.section {
+  margin-top: 14px;
+}
 
-    .grid {
-      display: grid;
-      gap: 14px;
-      margin-top: 14px;
-    }
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
 
-    .top-grid {
-      grid-template-columns: repeat(4, minmax(0,1fr));
-    }
+.grid {
+  display: grid;
+  gap: 12px;
+}
 
-    .triple-grid {
-      grid-template-columns: repeat(3, minmax(0,1fr));
-    }
+.top-grid {
+  grid-template-columns: repeat(2, minmax(0,1fr));
+}
 
-    .months-grid {
-      grid-template-columns: repeat(4, minmax(0,1fr));
-    }
+.triple-grid {
+  grid-template-columns: repeat(3, minmax(0,1fr));
+}
 
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 14px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-      backdrop-filter: blur(8px);
-    }
+.quad-grid {
+  grid-template-columns: repeat(4, minmax(0,1fr));
+}
 
-    .section {
-      margin-top: 14px;
-    }
+.stat-label {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
 
-    .stat-label {
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
+.stat {
+  margin-top: 6px;
+  font-size: 28px;
+  font-weight: 700;
+}
 
-    .stat {
-      margin-top: 6px;
-      font-size: 28px;
-      font-weight: 800;
-    }
+.stat small {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 500;
+}
 
-    .stat small {
-      font-size: 14px;
-      color: var(--muted);
-      font-weight: 500;
-    }
+.mini {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 10px;
+}
 
-    .mini {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 12px;
-      padding: 10px;
-    }
+.mini .k {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
 
-    .mini .k {
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-    }
+.mini .v {
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 700;
+}
 
-    .mini .v {
-      margin-top: 4px;
-      font-size: 18px;
-      font-weight: 700;
-    }
+.subv {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
 
-    .mini .subv {
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.4;
-    }
+.health-card {
+  background: linear-gradient(145deg, rgba(12, 24, 39, 0.96), rgba(7, 15, 25, 0.96));
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+}
 
-    .sync-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+.health-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
 
-    .sync-dot {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: var(--green);
-      box-shadow: 0 0 12px rgba(80,255,143,0.65);
-      flex: 0 0 auto;
-    }
+.health-name {
+  font-size: 18px;
+  font-weight: 700;
+}
 
-    .sync-dot.sync-warn {
-      background: var(--amber);
-      box-shadow: 0 0 12px rgba(255,200,87,0.65);
-    }
+.badge {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  border: 1px solid currentColor;
+}
 
-    .sync-dot.sync-bad {
-      background: var(--red);
-      box-shadow: 0 0 12px rgba(255,107,138,0.65);
-    }
+.safe {
+  color: var(--green);
+}
 
-    .payment-list {
-      display: grid;
-      gap: 12px;
-    }
+.watch {
+  color: var(--amber);
+}
 
-    .payment-card {
-      background: linear-gradient(145deg, rgba(12, 24, 39, 0.96), rgba(7, 15, 25, 0.96));
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 14px;
-    }
+.risk {
+  color: var(--red);
+}
 
-    .payment-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: flex-start;
-      margin-bottom: 10px;
-    }
+.timeline-list {
+  display: grid;
+  gap: 10px;
+}
 
-    .payment-name {
-      font-size: 18px;
-      font-weight: 800;
-      line-height: 1.2;
-    }
+.timeline-item {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 14px;
+  padding: 12px;
+}
 
-    .payment-ticker {
-      color: var(--cyan);
-      font-size: 12px;
-      margin-top: 4px;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-    }
+.timeline-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
 
-    .payment-amount {
-      font-size: 22px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
+.timeline-name {
+  font-size: 16px;
+  font-weight: 700;
+}
 
-    .payment-meta {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 8px;
-    }
+.timeline-date {
+  color: var(--cyan);
+  font-size: 13px;
+  font-weight: 700;
+}
 
-    .badge {
-      display: inline-block;
-      padding: 5px 10px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.7px;
-      border: 1px solid currentColor;
-      white-space: nowrap;
-    }
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 10px;
+}
 
-    .green { color: var(--green); }
-    .amber { color: var(--amber); }
-    .red { color: var(--red); }
-    .cyan { color: var(--cyan); }
+.month-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 14px;
+  padding: 12px;
+}
 
-    .month-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 14px;
-      padding: 12px;
-    }
+.month-card .month {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+}
 
-    .month-name {
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-    }
+.month-card .amt {
+  margin-top: 6px;
+  font-size: 22px;
+  font-weight: 800;
+}
 
-    .month-total {
-      margin-top: 8px;
-      font-size: 22px;
-      font-weight: 800;
-    }
+.month-card .note {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
 
-    .month-bar {
-      height: 10px;
-      border-radius: 999px;
-      overflow: hidden;
-      margin-top: 10px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.04);
-    }
+.table-wrap {
+  overflow-x: auto;
+}
 
-    .month-fill {
-      height: 100%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, var(--cyan-2), var(--cyan));
-      width: 0%;
-      transition: width 0.35s ease;
-    }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
 
-    .table-wrap {
-      overflow-x: auto;
-      border-radius: 12px;
-    }
+th, td {
+  padding: 10px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  text-align: left;
+}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      min-width: 920px;
-    }
+th {
+  color: var(--muted);
+  font-weight: 600;
+}
 
-    th, td {
-      padding: 11px 9px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      text-align: left;
-      vertical-align: top;
-    }
+.live-up {
+  color: var(--green);
+}
 
-    th {
-      color: var(--muted);
-      font-weight: 600;
-      letter-spacing: 0.3px;
-    }
+.live-down {
+  color: var(--red);
+}
 
-    .live-up {
-      color: var(--green);
-      text-shadow: 0 0 10px rgba(80,255,143,0.25);
-    }
+.footer {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
 
-    .live-down {
-      color: var(--red);
-      text-shadow: 0 0 10px rgba(255,107,138,0.25);
-    }
+@media (max-width: 720px) {
+  .top-grid,
+  .triple-grid,
+  .quad-grid,
+  .calendar-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .footer {
-      margin-top: 14px;
-      color: var(--muted);
-      font-size: 12px;
-      text-align: center;
-    }
-
-    .empty-state {
-      color: var(--muted);
-      font-size: 13px;
-      padding: 12px 0 2px;
-    }
-
-    @media (max-width: 860px) {
-      .top-grid,
-      .months-grid,
-      .triple-grid {
-        grid-template-columns: repeat(2, minmax(0,1fr));
-      }
-
-      .payment-meta {
-        grid-template-columns: repeat(2, minmax(0,1fr));
-      }
-    }
-
-    @media (max-width: 720px) {
-      .top-grid,
-      .months-grid,
-      .triple-grid,
-      .payment-meta {
-        grid-template-columns: 1fr;
-      }
-
-      .payment-top {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      h1 { font-size: 25px; }
-      .stat { font-size: 24px; }
-    }
-  </style>
+  h1 { font-size: 24px; }
+  .stat { font-size: 24px; }
+  .health-name { font-size: 16px; }
+}
+</style>
 </head>
 <body>
-  <div class="wrap">
+<div class="wrap">
 
-    <!-- ===================== HERO ===================== -->
-    <section class="hero">
-      <h1>Aurora Dividend Calendar</h1>
-      <div class="sub">
-        Cashflow runway dashboard for ex-dividend dates, pay dates, estimated payments, received dividends, and monthly income timing from your Dividend sheet.
+  <section class="hero">
+    <h1>Dividend Intelligence</h1>
+    <div class="sub">
+      Income dashboard for safety, next cash forecast, upcoming ex-dates, monthly dividend flow, and reinvestment tracking.
+    </div>
+
+    <div class="grid top-grid" style="margin-top:14px;">
+      <div class="card">
+        <div class="stat-label">Confirmed Annual Dividend Income</div>
+        <div class="stat">£<span id="totalAnnualIncome">0.00</span> <small>/ year</small></div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Average Monthly Dividend Income</div>
+        <div class="stat">£<span id="totalMonthlyIncome">0.00</span> <small>/ month</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section card">
+    <h2 style="margin:0 0 10px;">Dividend Command Layer</h2>
+
+    <div class="grid quad-grid">
+      <div class="mini">
+        <div class="k">Next Cash Due</div>
+        <div class="v" id="nextCashDue">£0.00</div>
+        <div class="subv" id="nextCashDueMeta">Waiting for upcoming payment…</div>
       </div>
 
-      <div class="grid top-grid">
-        <div class="card">
-          <div class="stat-label">Projected Annual Income</div>
-          <div class="stat">£<span id="annualIncome">0.00</span> <small>/ year</small></div>
-        </div>
-        <div class="card">
-          <div class="stat-label">Projected Monthly Average</div>
-          <div class="stat">£<span id="monthlyAverage">0.00</span> <small>/ month</small></div>
-        </div>
-        <div class="card">
-          <div class="stat-label">Next Payment</div>
-          <div class="stat"><span id="nextPaymentAmount">--</span></div>
-          <div class="sub" id="nextPaymentName">Waiting for data</div>
-        </div>
-        <div class="card">
-          <div class="stat-label">Live Sync</div>
-          <div class="stat sync-row">
-            <span class="sync-dot" id="syncDot"></span>
-            <span id="syncStatusText">Waiting…</span>
-          </div>
-          <div class="sub" id="syncStatusSub">No refresh yet</div>
-        </div>
+      <div class="mini">
+        <div class="k">Next Ex-Dividend</div>
+        <div class="v" id="nextExHolding">--</div>
+        <div class="subv" id="nextExDate">No upcoming ex-date loaded</div>
       </div>
-    </section>
 
-    <!-- ===================== SNAPSHOT ===================== -->
-    <section class="section card">
-      <h2>Runway Snapshot</h2>
-      <div class="grid top-grid">
-        <div class="mini">
-          <div class="k">Next Ex-Dividend</div>
-          <div class="v" id="nextExDate">--</div>
-          <div class="subv" id="nextExDateSub">No ex-date found</div>
-        </div>
-        <div class="mini">
-          <div class="k">Next Pay Date</div>
-          <div class="v" id="nextPayDate">--</div>
-          <div class="subv" id="nextPayDateSub">No pay-date found</div>
-        </div>
-        <div class="mini">
-          <div class="k">Next 30 Days</div>
-          <div class="v" id="next30Days">£0.00</div>
-          <div class="subv">Expected cash due</div>
-        </div>
-        <div class="mini">
-          <div class="k">Next 90 Days</div>
-          <div class="v" id="next90Days">£0.00</div>
-          <div class="subv">Expected cash due</div>
-        </div>
+      <div class="mini">
+        <div class="k">Next Payment</div>
+        <div class="v" id="nextPayHolding">--</div>
+        <div class="subv" id="nextPayDate">No upcoming pay-date loaded</div>
       </div>
-    </section>
 
-    <!-- ===================== UPCOMING PAYMENTS ===================== -->
-    <section class="section card">
-      <h2>Upcoming Payments</h2>
-      <div class="payment-list" id="upcomingPayments"></div>
-      <div class="empty-state" id="upcomingEmpty" style="display:none;">No upcoming payment dates found in the Dividend sheet yet.</div>
-    </section>
-
-    <!-- ===================== MONTHLY MAP ===================== -->
-    <section class="section card">
-      <h2>Monthly Income Map</h2>
-      <div class="grid months-grid" id="monthlyMap"></div>
-    </section>
-
-    <!-- ===================== HIGHLIGHTS ===================== -->
-    <section class="section card">
-      <h2>Calendar Highlights</h2>
-      <div class="grid triple-grid">
-        <div class="mini">
-          <div class="k">Strongest Month</div>
-          <div class="v" id="strongestMonth">--</div>
-          <div class="subv" id="strongestMonthSub">£0.00</div>
-        </div>
-        <div class="mini">
-          <div class="k">Weakest Month</div>
-          <div class="v" id="weakestMonth">--</div>
-          <div class="subv" id="weakestMonthSub">£0.00</div>
-        </div>
-        <div class="mini">
-          <div class="k">Tracked Entries</div>
-          <div class="v" id="trackedPayments">0</div>
-          <div class="subv">Dividend rows with usable data</div>
-        </div>
+      <div class="mini">
+        <div class="k">Dividend Concentration</div>
+        <div class="v" id="incomeConcentration">--</div>
+        <div class="subv" id="incomeConcentrationMeta">Top payer share of annual income</div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ===================== PAYMENT TABLE ===================== -->
-    <section class="section card">
-      <h2>Dividend Payment Table</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Account</th>
-              <th>Holding</th>
-              <th>Ticker</th>
-              <th>Ex-Dividend</th>
-              <th>Pay Date</th>
-              <th>DPS (£)</th>
-              <th>Shares @ Ex-Div</th>
-              <th>Total Dividend</th>
-              <th>Received</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="paymentTableBody"></tbody>
-        </table>
+  <section class="section card">
+    <h2 style="margin:0 0 10px;">Dividend Safety Status</h2>
+
+    <div class="grid quad-grid">
+      <div class="health-card">
+        <div class="health-top">
+          <div class="health-name">Legal &amp; General</div>
+          <div class="badge safe" id="lngSafetyBadge">SAFE</div>
+        </div>
+        <div class="grid top-grid">
+          <div class="mini"><div class="k">Annual Income</div><div class="v" id="lngAnnualIncome">£0.00</div></div>
+          <div class="mini"><div class="k">Yield</div><div class="v" id="lngYield">0.00%</div></div>
+        </div>
+        <div class="subv" id="lngSafetyNote">Reliable core income payer.</div>
       </div>
-    </section>
 
-    <div class="footer">
-      Aurora Dividend Calendar • Income Runway • Ex-Dates • Pay Dates
+      <div class="health-card">
+        <div class="health-top">
+          <div class="health-name">M&amp;G</div>
+          <div class="badge safe" id="mngSafetyBadge">SAFE</div>
+        </div>
+        <div class="grid top-grid">
+          <div class="mini"><div class="k">Annual Income</div><div class="v" id="mngAnnualIncome">£0.00</div></div>
+          <div class="mini"><div class="k">Yield</div><div class="v" id="mngYield">0.00%</div></div>
+        </div>
+        <div class="subv" id="mngSafetyNote">High-yield financials income engine.</div>
+      </div>
+
+      <div class="health-card">
+        <div class="health-top">
+          <div class="health-name">Standard Life</div>
+          <div class="badge watch" id="sdlfSafetyBadge">WATCH</div>
+        </div>
+        <div class="grid top-grid">
+          <div class="mini"><div class="k">Annual Income</div><div class="v" id="sdlfAnnualIncome">£0.00</div></div>
+          <div class="mini"><div class="k">Yield</div><div class="v" id="sdlfYield">0.00%</div></div>
+        </div>
+        <div class="subv" id="sdlfSafetyNote">Monitor payout strength and coverage.</div>
+      </div>
+
+      <div class="health-card">
+        <div class="health-top">
+          <div class="health-name">Supermarket REIT</div>
+          <div class="badge watch" id="suprSafetyBadge">WATCH</div>
+        </div>
+        <div class="grid top-grid">
+          <div class="mini"><div class="k">Annual Income</div><div class="v" id="suprAnnualIncome">£0.00</div></div>
+          <div class="mini"><div class="k">Yield</div><div class="v" id="suprYield">0.00%</div></div>
+        </div>
+        <div class="subv" id="suprSafetyNote">Steady cashflow payer with REIT watch factors.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section card">
+    <h2 style="margin:0 0 10px;">Upcoming Dividend Timeline</h2>
+    <div class="timeline-list" id="timelineList">
+      <div class="timeline-item">
+        <div class="timeline-top">
+          <div class="timeline-name">Loading upcoming dividends…</div>
+          <div class="timeline-date">--</div>
+        </div>
+        <div class="subv">Waiting for dividend schedule engine.</div>
+      </div>
+    </div>
+  </section>
+    <section class="section card">
+    <h2 style="margin:0 0 10px;">Monthly Dividend Calendar</h2>
+    <div class="calendar-grid" id="calendarGrid">
+
+      <div class="month-card"><div class="month">Jan</div><div class="amt" id="mJan">£0</div><div class="note" id="mJanNote">No flow</div></div>
+      <div class="month-card"><div class="month">Feb</div><div class="amt" id="mFeb">£0</div><div class="note" id="mFebNote">No flow</div></div>
+      <div class="month-card"><div class="month">Mar</div><div class="amt" id="mMar">£0</div><div class="note" id="mMarNote">No flow</div></div>
+      <div class="month-card"><div class="month">Apr</div><div class="amt" id="mApr">£0</div><div class="note" id="mAprNote">No flow</div></div>
+      <div class="month-card"><div class="month">May</div><div class="amt" id="mMay">£0</div><div class="note" id="mMayNote">No flow</div></div>
+      <div class="month-card"><div class="month">Jun</div><div class="amt" id="mJun">£0</div><div class="note" id="mJunNote">No flow</div></div>
+      <div class="month-card"><div class="month">Jul</div><div class="amt" id="mJul">£0</div><div class="note" id="mJulNote">No flow</div></div>
+      <div class="month-card"><div class="month">Aug</div><div class="amt" id="mAug">£0</div><div class="note" id="mAugNote">No flow</div></div>
+      <div class="month-card"><div class="month">Sep</div><div class="amt" id="mSep">£0</div><div class="note" id="mSepNote">No flow</div></div>
+      <div class="month-card"><div class="month">Oct</div><div class="amt" id="mOct">£0</div><div class="note" id="mOctNote">No flow</div></div>
+      <div class="month-card"><div class="month">Nov</div><div class="amt" id="mNov">£0</div><div class="note" id="mNovNote">No flow</div></div>
+      <div class="month-card"><div class="month">Dec</div><div class="amt" id="mDec">£0</div><div class="note" id="mDecNote">No flow</div></div>
+
+    </div>
+  </section>
+
+  <section class="section card">
+    <h2 style="margin:0 0 10px;">Holdings Dividend Breakdown</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Holding</th>
+            <th>Shares</th>
+            <th>Annual DPS</th>
+            <th>Annual Income</th>
+            <th>Current Yield</th>
+            <th>Yield on Cost</th>
+            <th>Next Ex-Date</th>
+            <th>Next Pay Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Legal &amp; General</td>
+            <td id="lngSharesCell">0</td>
+            <td id="lngDpsCell">£0.0000</td>
+            <td id="lngIncomeCell">£0.00</td>
+            <td id="lngYieldCell">0.00%</td>
+            <td id="lngYocCell">0.00%</td>
+            <td id="lngExCell">--</td>
+            <td id="lngPayCell">--</td>
+          </tr>
+          <tr>
+            <td>M&amp;G</td>
+            <td id="mngSharesCell">0</td>
+            <td id="mngDpsCell">£0.0000</td>
+            <td id="mngIncomeCell">£0.00</td>
+            <td id="mngYieldCell">0.00%</td>
+            <td id="mngYocCell">0.00%</td>
+            <td id="mngExCell">--</td>
+            <td id="mngPayCell">--</td>
+          </tr>
+          <tr>
+            <td>Standard Life</td>
+            <td id="sdlfSharesCell">0</td>
+            <td id="sdlfDpsCell">£0.0000</td>
+            <td id="sdlfIncomeCell">£0.00</td>
+            <td id="sdlfYieldCell">0.00%</td>
+            <td id="sdlfYocCell">0.00%</td>
+            <td id="sdlfExCell">--</td>
+            <td id="sdlfPayCell">--</td>
+          </tr>
+          <tr>
+            <td>Supermarket REIT</td>
+            <td id="suprSharesCell">0</td>
+            <td id="suprDpsCell">£0.0000</td>
+            <td id="suprIncomeCell">£0.00</td>
+            <td id="suprYieldCell">0.00%</td>
+            <td id="suprYocCell">0.00%</td>
+            <td id="suprExCell">--</td>
+            <td id="suprPayCell">--</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section card">
+  <h2 style="margin:0 0 10px;">Dividend Reinvestment Tracker</h2>
+
+  <div class="grid triple-grid">
+    <div class="mini">
+      <div class="k">Total Dividends Received</div>
+      <div class="v" id="totalDividendsReceived">£0.00</div>
+      <div class="subv">Tracked from Dividends sheet</div>
+    </div>
+
+    <div class="mini">
+      <div class="k">Extra Annual Income Created</div>
+      <div class="v" id="extraIncomeCreated">£0.00</div>
+      <div class="subv">From logged reinvestment activity</div>
+    </div>
+
+    <div class="mini">
+      <div class="k">Best Dividend Month</div>
+      <div class="v" id="bestDividendMonth">--</div>
+      <div class="subv" id="bestDividendMonthMeta">No data yet</div>
     </div>
   </div>
+</section>
 
-  <script>
-    // ===================== CONFIG =====================
-    const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
-    const SHEET_NAME = "Dividends";
+  <div class="footer">
+    Aurora Dividend Mode • Safety + Forecast + Calendar + Reinvestment Intelligence
+  </div>
+</div>
+<script>
+const DIV_SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
+const HOLDINGS_URL = `https://opensheet.elk.sh/${DIV_SHEET_ID}/Holdings`;
+const DIVIDENDS_URL = `https://opensheet.elk.sh/${DIV_SHEET_ID}/Dividends`;
+const INCOME_LOG_URL = `https://opensheet.elk.sh/${DIV_SHEET_ID}/IncomeLog`;
 
-    const MONTH_NAMES = [
-      "January","February","March","April","May","June",
-      "July","August","September","October","November","December"
-    ];
+const MONTH_KEYS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-    // ===================== HELPERS =====================
-    function setText(id, value) {
-      const el = document.getElementById(id);
-      if (el) el.innerText = value;
+const holdingsMap = {
+  lng: {
+    name: "Legal & General",
+    tickers: ["LON:LGEN", "LGEN", "LGEN.L"],
+    paymentsPerYear: 2,
+    defaultSafety: "safe",
+    defaultNote: "Reliable core income payer."
+  },
+  mng: {
+    name: "M&G",
+    tickers: ["LON:MNG", "MNG", "MNG.L"],
+    paymentsPerYear: 2,
+    defaultSafety: "safe",
+    defaultNote: "High-yield financials income engine."
+  },
+  sdlf: {
+    name: "Standard Life",
+    tickers: ["LON:SDLF", "SDLF", "SDLF.L", "PHNX", "PHNX.L", "STANDARD LIFE", "PHNX.GB"],
+    paymentsPerYear: 2,
+    defaultSafety: "watch",
+    defaultNote: "Monitor payout strength and coverage."
+  },
+  supr: {
+    name: "Supermarket REIT",
+    tickers: ["LON:SUPR", "SUPR", "SUPR.L"],
+    paymentsPerYear: 4,
+    defaultSafety: "watch",
+    defaultNote: "Steady cashflow payer with REIT watch factors."
+  }
+};
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = value;
+}
+
+function formatMoney(value) {
+  return Number(value || 0).toLocaleString("en-GB", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function formatDps(value) {
+  return `£${Number(value || 0).toFixed(4)}`;
+}
+
+function formatPct(value) {
+  return `${Number(value || 0).toFixed(2)}%`;
+}
+
+function parseNumber(value) {
+  const cleaned = String(value ?? "").replace(/[^0-9.-]+/g, "");
+  const parsed = parseFloat(cleaned);
+  return Number.isFinite(parsed) ? parsed : NaN;
+}
+
+function normaliseTicker(value) {
+  return String(value || "").trim().toUpperCase();
+}
+
+function getKeyFromTicker(ticker) {
+  const raw = normaliseTicker(ticker);
+  const t = raw.replace(".GB", "").replace(" GB", "").trim();
+
+  if (["LON:LGEN", "LGEN", "LGEN.L"].includes(t)) return "lng";
+  if (["LON:MNG", "MNG", "MNG.L"].includes(t)) return "mng";
+  if (
+    ["LON:SDLF", "SDLF", "SDLF.L", "PHNX", "PHNX.L", "STANDARD LIFE", "PHNX.GB"].includes(raw) ||
+    ["PHNX", "STANDARD LIFE"].includes(t)
+  ) return "sdlf";
+  if (["LON:SUPR", "SUPR", "SUPR.L"].includes(t)) return "supr";
+
+  return null;
+}
+
+function normalisePrice(rawPrice) {
+  if (!Number.isFinite(rawPrice) || rawPrice <= 0) return NaN;
+  return rawPrice > 20 ? rawPrice / 100 : rawPrice;
+}
+
+function todayIso() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const now = new Date(todayIso());
+  const then = new Date(dateStr);
+  if (isNaN(then.getTime())) return null;
+  return Math.ceil((then - now) / (1000 * 60 * 60 * 24));
+}
+
+function monthIndexFromDate(dateStr) {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  return d.getMonth();
+}
+
+async function loadDividendDashboard() {
+  try {
+    const [holdingsRes, dividendsRes, logRes] = await Promise.all([
+      fetch(HOLDINGS_URL),
+      fetch(DIVIDENDS_URL),
+      fetch(INCOME_LOG_URL)
+    ]);
+
+    const holdingsRows = await holdingsRes.json();
+    const dividendsRows = await dividendsRes.json();
+    const logRows = await logRes.json();
+
+    const live = {
+      lng: { shares: 0, dps: 0, livePrice: 0, bookCost: 0, annualIncome: 0, nextExDate: "", nextPayDate: "", safety: "safe", note: "" },
+      mng: { shares: 0, dps: 0, livePrice: 0, bookCost: 0, annualIncome: 0, nextExDate: "", nextPayDate: "", safety: "safe", note: "" },
+      sdlf: { shares: 0, dps: 0, livePrice: 0, bookCost: 0, annualIncome: 0, nextExDate: "", nextPayDate: "", safety: "watch", note: "" },
+      supr: { shares: 0, dps: 0, livePrice: 0, bookCost: 0, annualIncome: 0, nextExDate: "", nextPayDate: "", safety: "watch", note: "" }
+    };
+
+    holdingsRows.forEach(row => {
+      const key = getKeyFromTicker(row.ticker);
+      if (!key) return;
+
+      const cfg = holdingsMap[key];
+      const shares = parseNumber(row.shares);
+      const dps = parseNumber(row.annual_dividend_per_share);
+      const livePrice = normalisePrice(parseNumber(row.live_price));
+      const bookCost = parseNumber(row.book_cost);
+
+      live[key].shares = Number.isFinite(shares) ? shares : 0;
+      live[key].dps = Number.isFinite(dps) ? dps : 0;
+      live[key].livePrice = Number.isFinite(livePrice) ? livePrice : 0;
+      live[key].bookCost = Number.isFinite(bookCost) ? bookCost : 0;
+      live[key].annualIncome = live[key].shares * live[key].dps;
+      live[key].safety = cfg.defaultSafety;
+      live[key].note = cfg.defaultNote;
+    });
+
+    const dividendEvents = [];
+
+    dividendsRows.forEach(row => {
+      const key = getKeyFromTicker(row.ticker);
+      if (!key) return;
+
+      const exDate = String(row.ex_div_date || "").trim();
+      const payDate = String(row.pay_date || "").trim();
+      const totalDividend = Number(row.total_dividend) || 0;
+      const received = Number(row.dividend_received) || 0;
+      const status = String(row.status || "").trim().toLowerCase();
+      const name = String(row.name || holdingsMap[key].name).trim();
+
+      if (exDate) {
+        dividendEvents.push({
+          key,
+          holding: name,
+          type: "Ex-Date",
+          date: exDate,
+          cash: 0,
+          received: 0,
+          status
+        });
+      }
+
+      if (payDate) {
+        dividendEvents.push({
+          key,
+          holding: name,
+          type: "Pay Date",
+          date: payDate,
+          cash: totalDividend,
+          received: received,
+          status
+        });
+      }
+    });
+
+    Object.keys(live).forEach(key => {
+      const nextEx = dividendEvents
+        .filter(x => x.key === key && x.type === "Ex-Date" && x.date >= todayIso())
+        .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+
+      const nextPay = dividendEvents
+        .filter(x => x.key === key && x.type === "Pay Date" && x.date >= todayIso())
+        .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+
+      live[key].nextExDate = nextEx ? nextEx.date : "";
+      live[key].nextPayDate = nextPay ? nextPay.date : "";
+    });
+
+    const totalAnnual = Object.values(live).reduce((sum, item) => sum + item.annualIncome, 0);
+    const totalMonthly = totalAnnual / 12;
+
+    setText("totalAnnualIncome", formatMoney(totalAnnual));
+    setText("totalMonthlyIncome", formatMoney(totalMonthly));
+
+    Object.entries(live).forEach(([key, item]) => {
+      const yieldPct = item.livePrice > 0 ? (item.dps / item.livePrice) * 100 : 0;
+      const yoc = item.bookCost > 0 ? (item.annualIncome / item.bookCost) * 100 : 0;
+
+      setText(`${key}AnnualIncome`, `£${formatMoney(item.annualIncome)}`);
+      setText(`${key}Yield`, formatPct(yieldPct));
+      setText(`${key}SafetyNote`, item.note || holdingsMap[key].defaultNote);
+
+      setText(`${key}SharesCell`, item.shares.toLocaleString("en-GB"));
+      setText(`${key}DpsCell`, formatDps(item.dps));
+      setText(`${key}IncomeCell`, `£${formatMoney(item.annualIncome)}`);
+      setText(`${key}YieldCell`, formatPct(yieldPct));
+      setText(`${key}YocCell`, formatPct(yoc));
+
+      setText(`${key}ExCell`, item.nextExDate || "--");
+      setText(`${key}PayCell`, item.nextPayDate || "--");
+
+      const badge = document.getElementById(`${key}SafetyBadge`);
+      if (badge) {
+        const safeClass = ["safe", "watch", "risk"].includes(item.safety) ? item.safety : "watch";
+        badge.className = `badge ${safeClass}`;
+        badge.innerText = safeClass.toUpperCase();
+      }
+    });
+
+    const upcoming = dividendEvents
+      .filter(x => x.date && x.date >= todayIso())
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const timelineList = document.getElementById("timelineList");
+    if (timelineList) {
+      timelineList.innerHTML = "";
+
+      if (!upcoming.length) {
+        timelineList.innerHTML = `
+          <div class="timeline-item">
+            <div class="timeline-top">
+              <div class="timeline-name">No upcoming dividend dates found</div>
+              <div class="timeline-date">--</div>
+            </div>
+            <div class="subv">Check the Dividends sheet rows and dates.</div>
+          </div>
+        `;
+      } else {
+        upcoming.slice(0, 8).forEach(item => {
+          const days = daysUntil(item.date);
+          const cashText = item.received > 0
+            ? ` • Received £${formatMoney(item.received)}`
+            : item.cash > 0
+              ? ` • Expected £${formatMoney(item.cash)}`
+              : "";
+
+          const el = document.createElement("div");
+          el.className = "timeline-item";
+          el.innerHTML = `
+            <div class="timeline-top">
+              <div class="timeline-name">${item.holding} • ${item.type}</div>
+              <div class="timeline-date">${item.date}</div>
+            </div>
+            <div class="subv">${days != null ? `${days} days away` : "--"}${cashText}</div>
+          `;
+          timelineList.appendChild(el);
+        });
+      }
     }
 
-    function parseNumber(value) {
-      const cleaned = String(value ?? "").replace(/[^0-9.-]+/g, "");
-      const parsed = parseFloat(cleaned);
-      return Number.isFinite(parsed) ? parsed : 0;
+    const nextEx = upcoming.find(x => x.type === "Ex-Date");
+    const nextPay = upcoming.find(x => x.type === "Pay Date");
+
+    if (nextEx) {
+      const d = daysUntil(nextEx.date);
+      setText("nextExHolding", nextEx.holding);
+      setText("nextExDate", `${nextEx.date}${d != null ? ` • ${d} days` : ""}`);
     }
 
-    function formatMoney(value, decimals = 2) {
-      return Number(value || 0).toLocaleString("en-GB", {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals
+    if (nextPay) {
+      const d = daysUntil(nextPay.date);
+      setText("nextPayHolding", nextPay.holding);
+      setText("nextPayDate", `${nextPay.date}${d != null ? ` • ${d} days` : ""}`);
+      setText("nextCashDue", `£${formatMoney(nextPay.cash)}`);
+      setText("nextCashDueMeta", `${nextPay.holding} on ${nextPay.date}`);
+    }
+
+    const rankedIncome = Object.entries(live)
+      .map(([key, item]) => ({ name: holdingsMap[key].name, annualIncome: item.annualIncome }))
+      .sort((a, b) => b.annualIncome - a.annualIncome);
+
+    if (rankedIncome.length && totalAnnual > 0) {
+      const top = rankedIncome[0];
+      const pct = (top.annualIncome / totalAnnual) * 100;
+      setText("incomeConcentration", top.name);
+      setText("incomeConcentrationMeta", `${pct.toFixed(1)}% of annual dividend income`);
+    }
+
+    const monthTotals = Array(12).fill(0);
+
+    dividendEvents
+      .filter(x => x.type === "Pay Date" && x.date)
+      .forEach(item => {
+        const idx = monthIndexFromDate(item.date);
+        if (idx !== null) monthTotals[idx] += Number(item.cash || 0);
       });
+
+    MONTH_KEYS.forEach((m, idx) => {
+      setText(`m${m}`, `£${formatMoney(monthTotals[idx])}`);
+      setText(`m${m}Note`, monthTotals[idx] > 0 ? "Expected flow" : "No flow");
+    });
+
+    const bestMonthValue = Math.max(...monthTotals);
+    const bestMonthIndex = monthTotals.findIndex(v => v === bestMonthValue);
+    if (bestMonthIndex >= 0 && bestMonthValue > 0) {
+      setText("bestDividendMonth", MONTH_KEYS[bestMonthIndex]);
+      setText("bestDividendMonthMeta", `£${formatMoney(bestMonthValue)} expected`);
     }
 
-    function safeText(value, fallback = "—") {
-      const text = String(value ?? "").trim();
-      return text || fallback;
-    }
+    let totalDivsReceived = 0;
+    let extraIncomeCreated = 0;
 
-    function firstFilled(row, keys) {
-      for (const key of keys) {
-        if (row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== "") {
-          return row[key];
+    dividendsRows.forEach(row => {
+      const received = Number(row.dividend_received) || 0;
+      const payDate = String(row.pay_date || "").trim();
+      const status = String(row.status || "").toLowerCase();
+
+      if (received > 0) {
+        totalDivsReceived += received;
+      }
+
+      if ((status.includes("paid") || status.includes("received")) && received === 0) {
+        const total = Number(row.total_dividend) || 0;
+        const payYear = Number(payDate.slice(0, 4)) || 0;
+        if (payYear > 0) {
+          totalDivsReceived += total;
         }
       }
-      return "";
-    }
+    });
 
-    function parseDateValue(value) {
-      if (!value) return null;
+    logRows.forEach(row => {
+      const incomeAdded = Number(row.income_added) || 0;
+      extraIncomeCreated += incomeAdded;
+    });
 
-      const raw = String(value).trim();
-      if (!raw) return null;
+    setText("totalDividendsReceived", `£${formatMoney(totalDivsReceived)}`);
+    setText("extraIncomeCreated", `£${formatMoney(extraIncomeCreated)}`);
 
-      if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
-        const d = new Date(`${raw}T00:00:00`);
-        return isNaN(d.getTime()) ? null : d;
-      }
+  } catch (err) {
+    console.error("Dividend dashboard load failed", err);
+  }
+}
 
-      if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(raw)) {
-        const [dd, mm, yyyy] = raw.split("/").map(Number);
-        const d = new Date(yyyy, mm - 1, dd);
-        return isNaN(d.getTime()) ? null : d;
-      }
-
-      if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(raw)) {
-        const [dd, mm, yyyy] = raw.split("-").map(Number);
-        const d = new Date(yyyy, mm - 1, dd);
-        return isNaN(d.getTime()) ? null : d;
-      }
-
-      const fallback = new Date(raw);
-      return isNaN(fallback.getTime()) ? null : fallback;
-    }
-
-    function formatDate(date) {
-      if (!date) return "—";
-      return date.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric"
-      });
-    }
-
-    function daysUntil(date) {
-      if (!date) return null;
-
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      const diffMs = target - today;
-
-      return Math.round(diffMs / 86400000);
-    }
-
-    function estimateTotalDividend(row) {
-      const totalDividend = parseNumber(row.total_dividend);
-      if (totalDividend > 0) return totalDividend;
-
-      const dps = parseNumber(row.dividend_per_share);
-      const sharesAtExDiv = parseNumber(row.shares_at_exdiv);
-      const shares = parseNumber(row.shares);
-
-      return (sharesAtExDiv || shares) * dps;
-    }
-
-    function getStatusTone(status, payDate, received) {
-      const text = String(status || "").trim().toLowerCase();
-      if (received > 0 || text.includes("received")) return "green";
-      if (text.includes("missed") || text.includes("cancel")) return "red";
-      if (payDate && daysUntil(payDate) !== null && daysUntil(payDate) < 0) return "amber";
-      return "cyan";
-    }
-
-    function createStatusBadge(status, payDate, received) {
-      const tone = getStatusTone(status, payDate, received);
-      const label = safeText(status, received > 0 ? "Received" : "Upcoming");
-      return `<span class="badge ${tone}">${label}</span>`;
-    }
-
-    // ===================== RENDER =====================
-    function renderUpcomingPayments(items) {
-      const wrap = document.getElementById("upcomingPayments");
-      const empty = document.getElementById("upcomingEmpty");
-      if (!wrap) return;
-
-      wrap.innerHTML = "";
-
-      if (!items.length) {
-        if (empty) empty.style.display = "block";
-        return;
-      }
-
-      if (empty) empty.style.display = "none";
-
-      items.slice(0, 8).forEach(item => {
-        const exDays = daysUntil(item.exDate);
-        const payDays = daysUntil(item.payDate);
-
-        const card = document.createElement("div");
-        card.className = "payment-card";
-        card.innerHTML = `
-          <div class="payment-top">
-            <div>
-              <div class="payment-name">${safeText(item.name)}</div>
-              <div class="payment-ticker">${safeText(item.ticker)}</div>
-            </div>
-            <div class="payment-amount">£${formatMoney(item.totalDividend)}</div>
-          </div>
-
-          <div class="payment-meta">
-            <div class="mini">
-              <div class="k">Account</div>
-              <div class="v">${safeText(item.account)}</div>
-              <div class="subv">Payment source</div>
-            </div>
-            <div class="mini">
-              <div class="k">Ex-Dividend</div>
-              <div class="v">${formatDate(item.exDate)}</div>
-              <div class="subv">${exDays === null ? "No ex-date" : `${exDays >= 0 ? exDays : Math.abs(exDays)} day${Math.abs(exDays) === 1 ? "" : "s"} ${exDays >= 0 ? "away" : "ago"}`}</div>
-            </div>
-            <div class="mini">
-              <div class="k">Pay Date</div>
-              <div class="v">${formatDate(item.payDate)}</div>
-              <div class="subv">${payDays === null ? "No pay-date" : `${payDays >= 0 ? payDays : Math.abs(payDays)} day${Math.abs(payDays) === 1 ? "" : "s"} ${payDays >= 0 ? "away" : "ago"}`}</div>
-            </div>
-            <div class="mini">
-              <div class="k">Status</div>
-              <div class="v">${createStatusBadge(item.status, item.payDate, item.dividendReceived)}</div>
-              <div class="subv">Received £${formatMoney(item.dividendReceived)}</div>
-            </div>
-          </div>
-        `;
-        wrap.appendChild(card);
-      });
-    }
-
-    function renderMonthlyMap(monthTotals) {
-      const wrap = document.getElementById("monthlyMap");
-      if (!wrap) return;
-
-      wrap.innerHTML = "";
-
-      const maxTotal = Math.max(...monthTotals.map(x => x.total), 1);
-
-      monthTotals.forEach((item, index) => {
-        const pct = maxTotal > 0 ? (item.total / maxTotal) * 100 : 0;
-
-        const card = document.createElement("div");
-        card.className = "month-card";
-        card.innerHTML = `
-          <div class="month-name">${MONTH_NAMES[index]}</div>
-          <div class="month-total">£${formatMoney(item.total)}</div>
-          <div class="mini" style="margin-top:10px;">
-            <div class="k">Payments</div>
-            <div class="v">${item.count}</div>
-          </div>
-          <div class="month-bar">
-            <div class="month-fill" style="width:${pct}%"></div>
-          </div>
-        `;
-        wrap.appendChild(card);
-      });
-    }
-
-    function renderTable(items) {
-      const tbody = document.getElementById("paymentTableBody");
-      if (!tbody) return;
-
-      tbody.innerHTML = "";
-
-      items.forEach(item => {
-        const receivedClass = item.dividendReceived > 0 ? "live-up" : "";
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${safeText(item.account)}</td>
-          <td>${safeText(item.name)}</td>
-          <td>${safeText(item.ticker)}</td>
-          <td>${formatDate(item.exDate)}</td>
-          <td>${formatDate(item.payDate)}</td>
-          <td>${formatMoney(item.dividendPerShare, 4)}</td>
-          <td>${formatMoney(item.sharesAtExDiv, 0)}</td>
-          <td>£${formatMoney(item.totalDividend)}</td>
-          <td class="${receivedClass}">£${formatMoney(item.dividendReceived)}</td>
-          <td>${createStatusBadge(item.status, item.payDate, item.dividendReceived)}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // ===================== MAIN LOAD =====================
-    async function loadDividendCalendar() {
-      const url = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
-
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-
-        const rows = data
-          .map(row => {
-            const account = firstFilled(row, ["Account", "account"]);
-            const ticker = firstFilled(row, ["ticker", "Ticker"]);
-            const name = firstFilled(row, ["name", "Name"]);
-            const exRaw = firstFilled(row, ["ex_div_date", "ex_dividend_date", "ex date", "ex_date"]);
-            const payRaw = firstFilled(row, ["pay_date", "payment_date", "pay date", "payment date"]);
-            const dividendPerShare = parseNumber(firstFilled(row, ["dividend_per_share", "dps"]));
-            const shares = parseNumber(firstFilled(row, ["shares", "Shares"]));
-            const sharesAtExDiv = parseNumber(firstFilled(row, ["shares_at_exdiv", "shares_at_ex_div", "shares at exdiv"])) || shares;
-            const totalDividend = estimateTotalDividend(row);
-            const dividendReceived = parseNumber(firstFilled(row, ["dividend_received", "received"]));
-            const status = firstFilled(row, ["status", "Status"]);
-
-            return {
-              account,
-              ticker,
-              name,
-              exDate: parseDateValue(exRaw),
-              payDate: parseDateValue(payRaw),
-              dividendPerShare,
-              shares,
-              sharesAtExDiv,
-              totalDividend,
-              dividendReceived,
-              status
-            };
-          })
-          .filter(item =>
-            (item.ticker || item.name) &&
-            (item.totalDividend > 0 || item.dividendPerShare > 0 || item.dividendReceived > 0)
-          );
-
-        const annualIncome = rows.reduce((sum, item) => sum + item.totalDividend, 0);
-        const monthlyAverage = annualIncome / 12;
-
-        const futurePayRows = rows
-          .filter(item => item.payDate && daysUntil(item.payDate) !== null && daysUntil(item.payDate) >= 0)
-          .sort((a, b) => a.payDate - b.payDate);
-
-        const futureExRows = rows
-          .filter(item => item.exDate && daysUntil(item.exDate) !== null && daysUntil(item.exDate) >= 0)
-          .sort((a, b) => a.exDate - b.exDate);
-
-        const nextPayment = futurePayRows[0] || null;
-        const nextEx = futureExRows[0] || null;
-
-        const today = new Date();
-        const next30Limit = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 30);
-        const next90Limit = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 90);
-
-        const next30DaysTotal = futurePayRows
-          .filter(item => item.payDate <= next30Limit)
-          .reduce((sum, item) => sum + item.totalDividend, 0);
-
-        const next90DaysTotal = futurePayRows
-          .filter(item => item.payDate <= next90Limit)
-          .reduce((sum, item) => sum + item.totalDividend, 0);
-
-        const monthTotals = Array.from({ length: 12 }, () => ({ total: 0, count: 0 }));
-        rows.forEach(item => {
-          if (!item.payDate) return;
-          const m = item.payDate.getMonth();
-          monthTotals[m].total += item.totalDividend;
-          monthTotals[m].count += 1;
-        });
-
-        const strongestMonthIndex = monthTotals.reduce((bestIdx, item, idx, arr) =>
-          item.total > arr[bestIdx].total ? idx : bestIdx, 0);
-
-        const weakestMonthIndex = monthTotals.reduce((worstIdx, item, idx, arr) =>
-          item.total < arr[worstIdx].total ? idx : worstIdx, 0);
-
-        setText("annualIncome", formatMoney(annualIncome));
-        setText("monthlyAverage", formatMoney(monthlyAverage));
-
-        setText("nextPaymentAmount", nextPayment ? `£${formatMoney(nextPayment.totalDividend)}` : "--");
-        setText("nextPaymentName", nextPayment ? `${safeText(nextPayment.name)} • ${formatDate(nextPayment.payDate)}` : "No payment dates found");
-
-        setText("nextExDate", nextEx ? formatDate(nextEx.exDate) : "--");
-        setText("nextExDateSub", nextEx ? safeText(nextEx.name) : "No ex-date found");
-
-        setText("nextPayDate", nextPayment ? formatDate(nextPayment.payDate) : "--");
-        setText("nextPayDateSub", nextPayment ? safeText(nextPayment.name) : "No pay-date found");
-
-        setText("next30Days", `£${formatMoney(next30DaysTotal)}`);
-        setText("next90Days", `£${formatMoney(next90DaysTotal)}`);
-
-        setText("strongestMonth", MONTH_NAMES[strongestMonthIndex]);
-        setText("strongestMonthSub", `£${formatMoney(monthTotals[strongestMonthIndex].total)}`);
-
-        setText("weakestMonth", MONTH_NAMES[weakestMonthIndex]);
-        setText("weakestMonthSub", `£${formatMoney(monthTotals[weakestMonthIndex].total)}`);
-
-        setText("trackedPayments", rows.length);
-
-        renderUpcomingPayments(futurePayRows);
-        renderMonthlyMap(monthTotals);
-        renderTable(
-          [...rows].sort((a, b) => {
-            const aTime = a.payDate ? a.payDate.getTime() : Number.MAX_SAFE_INTEGER;
-            const bTime = b.payDate ? b.payDate.getTime() : Number.MAX_SAFE_INTEGER;
-            return aTime - bTime;
-          })
-        );
-
-        setText("syncStatusText", "Live Connected");
-        setText("syncStatusSub", new Date().toLocaleTimeString());
-        const syncDot = document.getElementById("syncDot");
-        if (syncDot) syncDot.className = "sync-dot";
-
-      } catch (err) {
-        console.error("Dividend calendar sync failed", err);
-        setText("syncStatusText", "Sync Failed");
-        setText("syncStatusSub", "Dividend sheet fetch error");
-        const syncDot = document.getElementById("syncDot");
-        if (syncDot) syncDot.className = "sync-dot sync-bad";
-      }
-    }
-
-    loadDividendCalendar();
-    setInterval(loadDividendCalendar, 60000);
-  </script>
+loadDividendDashboard();
+</script>
 </body>
 </html>
