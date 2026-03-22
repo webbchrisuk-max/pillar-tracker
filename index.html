@@ -1,933 +1,844 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Pillar Tracker v1</title>
-  <style>
-    :root {
-      --bg: #071018;
-      --bg2: #0c1624;
-      --panel: rgba(15, 27, 43, 0.88);
-      --panel-2: rgba(10, 20, 34, 0.9);
-      --line: rgba(101, 225, 255, 0.16);
-      --cyan: #62f3ff;
-      --cyan-2: #1ad1ff;
-      --blue: #6ea8ff;
-      --green: #50ff8f;
-      --amber: #ffc857;
-      --red: #ff6b8a;
-      --text: #e9f4ff;
-      --muted: #96abc5;
-      --glow: 0 0 22px rgba(26, 209, 255, 0.22);
-      --radius: 18px;
-    }
-
-    * { box-sizing: border-box; }
-
-    html, body {
-      margin: 0;
-      background:
-        radial-gradient(circle at top right, rgba(26, 209, 255, 0.14), transparent 28%),
-        radial-gradient(circle at top left, rgba(110, 168, 255, 0.12), transparent 25%),
-        linear-gradient(180deg, var(--bg), #050b13 100%);
-      color: var(--text);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    }
-
-    body { padding: 18px 14px 42px; }
-
-    .wrap { max-width: 900px; margin: 0 auto; }
-
-    .hero {
-      background: linear-gradient(145deg, rgba(12, 22, 36, 0.95), rgba(6, 13, 23, 0.95));
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      padding: 18px;
-      box-shadow: var(--glow);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero:before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(98,243,255,0.08), transparent);
-      transform: translateX(-100%);
-      animation: scan 8s linear infinite;
-      pointer-events: none;
-    }
-
-    @keyframes scan { to { transform: translateX(100%); } }
-
-    h1 {
-      margin: 0;
-      font-size: 28px;
-      line-height: 1.05;
-      letter-spacing: 0.3px;
-    }
-
-    .sub {
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .grid { display: grid; gap: 14px; margin-top: 14px; }
-    .top-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
-    .triple-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
-    .quad-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
-
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 14px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-      backdrop-filter: blur(8px);
-    }
-
-    .stat-label {
-      color: var(--muted);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .stat {
-      margin-top: 6px;
-      font-size: 28px;
-      font-weight: 700;
-    }
-
-    .stat small {
-      font-size: 14px;
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    .decision {
-      margin-top: 14px;
-      background: linear-gradient(145deg, rgba(10, 22, 33, 0.95), rgba(7, 14, 22, 0.95));
-      border: 1px solid rgba(80,255,143,0.2);
-      box-shadow: 0 0 0 1px rgba(80,255,143,0.06), 0 0 26px rgba(80,255,143,0.09);
-    }
-
-    .decision h2,
-    .section h2 {
-      margin: 0 0 10px;
-      font-size: 16px;
-      letter-spacing: 0.4px;
-    }
-
-    .decision-plan {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 10px;
-    }
-
-    .buy-box {
-      padding: 12px;
-      border-radius: 14px;
-      background: var(--panel-2);
-      border: 1px solid var(--line);
-    }
-
-    .buy-box .amt {
-      font-size: 24px;
-      font-weight: 800;
-      margin-top: 4px;
-    }
-
-    .buy-box .name {
-      color: var(--cyan);
-      font-size: 13px;
-    }
-
-    .buy-box .mini-note {
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.4;
-    }
-
-    .section { margin-top: 14px; }
-    .pillars { display: grid; gap: 12px; }
-
-    .pillar {
-      background: linear-gradient(145deg, rgba(12, 24, 39, 0.96), rgba(7, 15, 25, 0.96));
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 14px;
-    }
-
-    .pillar-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .pillar-name { font-size: 18px; font-weight: 700; }
-
-    .signal {
-      padding: 5px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0.8px;
-      border: 1px solid currentColor;
-    }
-
-    .green { color: var(--green); }
-    .amber { color: var(--amber); }
-    .red { color: var(--red); }
-
-    .pillar-stats {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .mini {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 12px;
-      padding: 10px;
-    }
-
-    .mini .k {
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-    }
-
-    .mini .v {
-      margin-top: 4px;
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .mini .subv {
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .progress-wrap { margin-top: 8px; }
-
-    .progress-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .bar {
-      height: 14px;
-      border-radius: 999px;
-      overflow: hidden;
-      margin-top: 8px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.04);
-    }
-
-    .fill {
-      height: 100%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, var(--cyan-2), var(--cyan));
-      box-shadow: 0 0 20px rgba(98,243,255,0.35);
-      width: 0;
-      transition: width 0.25s ease;
-    }
-
-    .footer {
-      margin-top: 14px;
-      color: var(--muted);
-      font-size: 12px;
-      text-align: center;
-    }
-
-    .inputs {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .input-box {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 12px;
-      padding: 10px;
-    }
-
-    .input-box label {
-      display: block;
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-bottom: 6px;
-    }
-
-    .input-box input,
-    .input-box select {
-      width: 100%;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: var(--text);
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 15px;
-      outline: none;
-    }
-        .log-grid {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0,1fr));
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .log-preview {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .log-btn,
-    #addLogBtn {
-      width: 100%;
-      background: linear-gradient(90deg, var(--cyan-2), var(--cyan));
-      color: #071018;
-      border: none;
-      border-radius: 12px;
-      padding: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 4px;
-    }
-
-    .delete-btn {
-      background: rgba(255, 107, 138, 0.12);
-      color: var(--red);
-      border: 1px solid rgba(255, 107, 138, 0.25);
-      border-radius: 8px;
-      padding: 6px 8px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .table-wrap { overflow-x: auto; }
-
-    .sync-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .sync-dot {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: var(--green);
-      box-shadow: 0 0 12px rgba(80,255,143,0.65);
-      flex: 0 0 auto;
-    }
-
-    .sync-dot.sync-warn {
-      background: var(--amber);
-      box-shadow: 0 0 12px rgba(255,200,87,0.65);
-    }
-
-    .sync-dot.sync-bad {
-      background: var(--red);
-      box-shadow: 0 0 12px rgba(255,107,138,0.65);
-    }
-
-    .live-up {
-      color: var(--green);
-      text-shadow: 0 0 10px rgba(80,255,143,0.25);
-    }
-
-    .live-down {
-      color: var(--red);
-      text-shadow: 0 0 10px rgba(255,107,138,0.25);
-    }
-
-    .live-neutral {
-      color: var(--text);
-    }
-
-    .allocator-strip {
-      margin-top: 12px;
-    }
-
-    .allocation-panel-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 12px;
-    }
-
-    .allocation-card {
-      background: linear-gradient(145deg, rgba(12, 24, 39, 0.96), rgba(7, 15, 25, 0.96));
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 12px;
-    }
-
-    .allocation-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .allocation-name {
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .allocation-badge {
-      padding: 5px 10px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.7px;
-      border: 1px solid currentColor;
-      white-space: nowrap;
-      color: var(--cyan);
-    }
-
-    .allocation-stats {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 8px;
-    }
-
-    .quick-actions {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .quick-btn {
-      background: rgba(255,255,255,0.04);
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 10px;
-      padding: 10px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .mode-switch-wrap {
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .mode-title {
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-bottom: 8px;
-    }
-
-    .mode-switch {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 8px;
-    }
-
-    .mode-btn {
-      background: rgba(255,255,255,0.04);
-      color: var(--text);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 10px;
-      padding: 10px;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 13px;
-    }
-
-    .mode-btn.active {
-      border-color: rgba(98,243,255,0.55);
-      box-shadow: 0 0 14px rgba(26, 209, 255, 0.18);
-      color: var(--cyan);
-    }
-
-    .mode-subtext {
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    @media (max-width: 720px) {
-      .top-grid,
-      .triple-grid,
-      .quad-grid,
-      .decision-plan,
-      .pillar-stats,
-      .inputs,
-      .log-grid,
-      .log-preview,
-      .allocation-panel-grid,
-      .allocation-stats,
-      .quick-actions,
-      .mode-switch {
-        grid-template-columns: 1fr;
-      }
-
-      h1 { font-size: 24px; }
-      .stat { font-size: 24px; }
-      .pillar-name { font-size: 16px; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Pillar Tracker v2 - AI Upgrade</title>
+
+<style>
+:root {
+  --bg: #071018;
+  --bg2: #0c1624;
+  --panel: rgba(15, 27, 43, 0.88);
+  --panel-2: rgba(10, 20, 34, 0.9);
+  --line: rgba(101, 225, 255, 0.16);
+  --cyan: #62f3ff;
+  --cyan-2: #1ad1ff;
+  --blue: #6ea8ff;
+  --green: #50ff8f;
+  --amber: #ffc857;
+  --red: #ff6b8a;
+  --text: #e9f4ff;
+  --muted: #96abc5;
+  --glow: 0 0 22px rgba(26, 209, 255, 0.22);
+  --radius: 18px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top right, rgba(26, 209, 255, 0.14), transparent 28%),
+    radial-gradient(circle at top left, rgba(110, 168, 255, 0.12), transparent 25%),
+    linear-gradient(180deg, var(--bg), #050b13 100%);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+body {
+  padding: 18px 14px 42px;
+}
+
+.wrap {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.stat {
+  margin-top: 6px;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+.top-grid {
+  grid-template-columns: repeat(2, minmax(0,1fr));
+}
+
+.triple-grid {
+  grid-template-columns: repeat(3, minmax(0,1fr));
+}
+
+.quad-grid {
+  grid-template-columns: repeat(4, minmax(0,1fr));
+}
+
+.mini {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.mini .k {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.mini .v {
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.subv {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.decision-plan {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 10px;
+}
+
+.buy-box {
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+}
+
+.buy-box .amt {
+  font-size: 22px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.buy-box .name {
+  color: var(--cyan);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.buy-box .mini-note {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+  margin-top: 6px;
+}
+
+.mode-btn,
+.learning-btn,
+.quick-btn,
+#addLogBtn {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mode-btn.active {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 14px rgba(98,243,255,0.14);
+}
+
+.learning-btn.active {
+  border-color: var(--green);
+  color: var(--green);
+  box-shadow: 0 0 14px rgba(80,255,143,0.12);
+}
+
+#addLogBtn {
+  width: 100%;
+  background: linear-gradient(90deg, var(--cyan-2), var(--cyan));
+  color: #071018;
+  border: none;
+}
+
+.pillars {
+  display: grid;
+  gap: 12px;
+}
+
+.pillar {
+  background: linear-gradient(145deg, rgba(12, 24, 39, 0.96), rgba(7, 15, 25, 0.96));
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.pillar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.pillar-name {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.signal {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  border: 1px solid currentColor;
+}
+
+.green {
+  color: var(--green);
+}
+
+.amber {
+  color: var(--amber);
+}
+
+.red {
+  color: var(--red);
+}
+
+.inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.input-box {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.input-box label {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 6px;
+}
+
+.input-box input,
+.input-box select {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 15px;
+  outline: none;
+}
+
+.bar {
+  height: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+.fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--cyan-2), var(--cyan));
+  box-shadow: 0 0 20px rgba(98,243,255,0.35);
+  width: 0;
+  transition: width 0.25s ease;
+}
+
+.allocation-name {
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.allocation-badge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--cyan);
+}
+
+.delete-btn {
+  background: rgba(255, 107, 138, 0.12);
+  color: var(--red);
+  border: 1px solid rgba(255, 107, 138, 0.25);
+  border-radius: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.live-up {
+  color: var(--green);
+  text-shadow: 0 0 10px rgba(80,255,143,0.25);
+}
+
+.live-down {
+  color: var(--red);
+  text-shadow: 0 0 10px rgba(255,107,138,0.25);
+}
+
+.live-neutral {
+  color: var(--text);
+}
+
+.crash-active {
+  border-color: rgba(255, 200, 87, 0.35) !important;
+  box-shadow: 0 0 18px rgba(255, 200, 87, 0.12);
+}
+
+.crash-danger {
+  border-color: rgba(255, 107, 138, 0.35) !important;
+  box-shadow: 0 0 18px rgba(255, 107, 138, 0.14);
+}
+
+#syncDot {
+  display: inline-block;
+  margin-right: 6px;
+  color: var(--green);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th, td {
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+@media (max-width: 720px) {
+  .top-grid,
+  .triple-grid,
+  .quad-grid,
+  .decision-plan,
+  .inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .pillars {
+    grid-template-columns: 1fr;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  .stat {
+    font-size: 24px;
+  }
+
+  .pillar-name {
+    font-size: 16px;
+  }
+
+  .grid[style*="repeat(6,1fr)"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
 </head>
 <body>
-  <div class="wrap">
+<div class="wrap">
 
-    <section class="hero">
-      <h1>Pillar Tracker v1</h1>
-      <div class="sub">Dark neon tracker for payday decisions, pillar milestones, dividend compounding, and live Aurora command data.</div>
+  <section class="hero">
+    <div class="stat-label">Pillar Tracker v2</div>
+    <div class="stat">AI Allocation Engine</div>
+    <div class="sub">
+      Live command layer for pillar progress, payday allocation, stress mode, and learning mode.
+    </div>
 
-      <div class="grid top-grid">
-        <div class="card">
-          <div class="stat-label">Confirmed Annual Income</div>
-          <div class="stat">£<span id="totalAnnual">0.00</span> <small>/ year</small></div>
-        </div>
-        <div class="card">
-          <div class="stat-label">Average Monthly Income</div>
-          <div class="stat">£<span id="totalMonthly">0.00</span> <small>/ month</small></div>
-        </div>
+    <div class="grid top-grid" style="margin-top:14px;">
+      <div class="card">
+        <div class="stat-label">Confirmed Annual Income</div>
+        <div class="stat">£<span id="totalAnnual">0.00</span></div>
       </div>
-    </section>
+      <div class="card">
+        <div class="stat-label">Average Monthly Income</div>
+        <div class="stat">£<span id="totalMonthly">0.00</span></div>
+      </div>
+    </div>
+  </section>
 
+  <section class="section card">
+    <h2>Aurora Command Layer</h2>
+    <div class="grid quad-grid">
+      <div class="mini">
+        <div class="k">Live Portfolio Value</div>
+        <div class="v" id="livePortfolioValue">£0.00</div>
+        <div class="subv" id="livePortfolioValueSub">Using Holdings tab live prices</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Live Gain / Loss</div>
+        <div class="v" id="livePortfolioGain">£0.00</div>
+        <div class="subv" id="livePortfolioGainPct">0.00%</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Best Value Buy</div>
+        <div class="v" id="bestValueBuy">--</div>
+        <div class="subv" id="bestValueBuyMeta">Yield + dip</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Live Sync Status</div>
+        <div class="v sync-row">
+          <span class="sync-dot" id="syncDot"></span>
+          <span id="syncStatusText">Waiting…</span>
+        </div>
+        <div class="subv" id="syncStatusSub">No refresh yet</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card decision">
+    <h2>Payday Decision Box</h2>
+
+    <div class="mini" style="margin-top:12px;">
+      <div class="k">Master Income Goal</div>
+      <div class="v" id="goalIncomeCurrent">£0.00/month</div>
+      <div class="subv" id="goalIncomeRemaining">£0.00/month still needed to reach £2,000/month</div>
+    </div>
+
+    <div class="grid triple-grid" style="margin-top:12px;">
+      <div class="mini">
+        <div class="k">Total Income Impact</div>
+        <div class="v" id="decisionIncomeAnnual">+£0.00/yr</div>
+        <div class="subv" id="decisionIncomeMonthly">+£0.00/month</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Blended Yield</div>
+        <div class="v" id="decisionBlendedYield">0.00%</div>
+        <div class="subv">Current weighted split yield</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Next Stage ETA</div>
+        <div class="v" id="nextStageEta">--</div>
+        <div class="subv">At current monthly investing pace</div>
+      </div>
+    </div>
+
+    <div class="input-box" style="margin-top:12px; margin-bottom:12px;">
+      <label for="paydayAmount">Total Investment (£)</label>
+      <input id="paydayAmount" type="number" value="600" />
+    </div>
+
+    <div class="quick-actions">
+      <button class="quick-btn" data-amt="300">Test £300</button>
+      <button class="quick-btn" data-amt="600">Test £600</button>
+      <button class="quick-btn" data-amt="800">Test £800</button>
+      <button class="quick-btn" data-amt="1000">Test £1000</button>
+    </div>
+
+    <div class="mode-switch-wrap">
+      <div class="mode-title">Allocator Mode</div>
+      <div class="mode-switch">
+        <button class="mode-btn" data-mode="balanced">Balanced</button>
+        <button class="mode-btn" data-mode="hybrid">Hybrid</button>
+        <button class="mode-btn" data-mode="income">Income Max</button>
+        <button class="mode-btn active" data-mode="auto">Auto</button>
+      </div>
+      <div class="mode-subtext">
+        Active Mode: <span id="activeModeLabel">Hybrid</span>
+      </div>
+    </div>
+
+    <div class="mode-switch-wrap" style="margin-top:12px;">
+      <div class="mode-title">Learning Mode</div>
+      <div class="mode-switch learning-switch">
+        <button class="learning-btn active" data-learning="off">Off</button>
+        <button class="learning-btn" data-learning="conservative">Conservative</button>
+        <button class="learning-btn" data-learning="advanced">Advanced</button>
+      </div>
+      <div class="mode-subtext">
+        Current Learning: <span id="activeLearningLabel">Off</span>
+      </div>
+    </div>
+
+    <div class="mini allocator-strip" id="crashModeBox">
+      <div class="k">Market Stress Mode</div>
+      <div class="v" id="crashModeLabel">Normal</div>
+      <div class="subv" id="crashModeText">No broad selloff detected.</div>
+    </div>
+
+    <div class="mini allocator-strip" id="learningBox">
+      <div class="k">Learning Engine</div>
+      <div class="v" id="learningBiasLabel">Static Rules</div>
+      <div class="subv" id="learningBiasText">Learning is off. Allocation uses fixed rule weights.</div>
+    </div>
+
+    <div class="decision-plan" style="margin-top:12px;">
+      <div class="buy-box">
+        <div class="stat-label">Primary Buy</div>
+        <div class="amt">£0</div>
+        <div class="name" id="primaryBuy">--</div>
+        <div class="mini-note" id="primaryReason">--</div>
+      </div>
+
+      <div class="buy-box">
+        <div class="stat-label">Secondary Buy</div>
+        <div class="amt">£0</div>
+        <div class="name" id="secondaryBuy">--</div>
+        <div class="mini-note" id="secondaryReason">--</div>
+      </div>
+
+      <div class="buy-box">
+        <div class="stat-label">Support Buy</div>
+        <div class="amt">£0</div>
+        <div class="name" id="supportBuy">--</div>
+        <div class="mini-note" id="supportReason">--</div>
+      </div>
+
+      <div class="buy-box">
+        <div class="stat-label">Maintenance Buy</div>
+        <div class="amt">£0</div>
+        <div class="name" id="fourthBuy">--</div>
+        <div class="mini-note" id="fourthReason">--</div>
+      </div>
+    </div>
+
+    <div class="mini allocator-strip">
+      <div class="k">Why This Split</div>
+      <div class="v" id="allocatorModeLabel">Weakest First</div>
+      <div class="subv" id="allocatorWhyText">Waiting for live allocation logic…</div>
+    </div>
+  </section>
     <section class="section card">
-      <h2>Aurora Command Layer</h2>
-      <div class="grid quad-grid">
-        <div class="mini">
-          <div class="k">Live Portfolio Value</div>
-          <div class="v" id="livePortfolioValue">£0.00</div>
-          <div class="subv" id="livePortfolioValueSub">Using Holdings tab live prices</div>
+    <h2>Allocation Control Panel</h2>
+
+    <div class="allocation-panel-grid">
+      <div class="allocation-card">
+        <div class="allocation-top">
+          <div class="allocation-name" id="alloc1Name">--</div>
+          <div class="allocation-badge" id="alloc1Mode">--</div>
         </div>
-        <div class="mini">
-          <div class="k">Live Gain / Loss</div>
-          <div class="v" id="livePortfolioGain">£0.00</div>
-          <div class="subv" id="livePortfolioGainPct">0.00%</div>
+        <div class="allocation-stats">
+          <div class="mini"><div class="k">Amount</div><div class="v" id="alloc1Amount">£0</div></div>
+          <div class="mini"><div class="k">Progress</div><div class="v" id="alloc1Progress">0%</div></div>
+          <div class="mini"><div class="k">Income Added</div><div class="v" id="alloc1IncomeAdd">£0.00</div></div>
         </div>
-        <div class="mini">
-          <div class="k">Best Value Buy</div>
-          <div class="v" id="bestValueBuy">--</div>
-          <div class="subv" id="bestValueBuyMeta">Yield + target gap</div>
+      </div>
+
+      <div class="allocation-card">
+        <div class="allocation-top">
+          <div class="allocation-name" id="alloc2Name">--</div>
+          <div class="allocation-badge" id="alloc2Mode">--</div>
         </div>
-        <div class="mini">
-          <div class="k">Live Sync Status</div>
-          <div class="v sync-row">
-            <span class="sync-dot" id="syncDot"></span>
-            <span id="syncStatusText">Waiting…</span>
+        <div class="allocation-stats">
+          <div class="mini"><div class="k">Amount</div><div class="v" id="alloc2Amount">£0</div></div>
+          <div class="mini"><div class="k">Progress</div><div class="v" id="alloc2Progress">0%</div></div>
+          <div class="mini"><div class="k">Income Added</div><div class="v" id="alloc2IncomeAdd">£0.00</div></div>
+        </div>
+      </div>
+
+      <div class="allocation-card">
+        <div class="allocation-top">
+          <div class="allocation-name" id="alloc3Name">--</div>
+          <div class="allocation-badge" id="alloc3Mode">--</div>
+        </div>
+        <div class="allocation-stats">
+          <div class="mini"><div class="k">Amount</div><div class="v" id="alloc3Amount">£0</div></div>
+          <div class="mini"><div class="k">Progress</div><div class="v" id="alloc3Progress">0%</div></div>
+          <div class="mini"><div class="k">Income Added</div><div class="v" id="alloc3IncomeAdd">£0.00</div></div>
+        </div>
+      </div>
+
+      <div class="allocation-card">
+        <div class="allocation-top">
+          <div class="allocation-name" id="alloc4Name">--</div>
+          <div class="allocation-badge" id="alloc4Mode">--</div>
+        </div>
+        <div class="allocation-stats">
+          <div class="mini"><div class="k">Amount</div><div class="v" id="alloc4Amount">£0</div></div>
+          <div class="mini"><div class="k">Progress</div><div class="v" id="alloc4Progress">0%</div></div>
+          <div class="mini"><div class="k">Income Added</div><div class="v" id="alloc4IncomeAdd">£0.00</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section card">
+    <h2>Stage Tracker</h2>
+    <div class="pillar-stats">
+      <div class="mini"><div class="k">Current Stage</div><div class="v" id="stageLabel">1 / 8</div></div>
+      <div class="mini"><div class="k">Stage Target</div><div class="v" id="stageTargetLabel">£2,000</div></div>
+      <div class="mini"><div class="k">Next Stage</div><div class="v" id="nextStageLabel">£4,000</div></div>
+      <div class="mini"><div class="k">System Mode</div><div class="v" id="systemModeLabel">Dynamic</div></div>
+    </div>
+  </section>
+
+  <section class="section card">
+    <h2>Pillar Progress to £<span id="targetHeading">2,000</span> / year</h2>
+
+    <div class="pillars">
+
+      <div class="pillar" data-key="lng">
+        <div class="pillar-top">
+          <div class="pillar-name">Legal &amp; General</div>
+          <div class="signal amber" id="lngSignal">AMBER</div>
+        </div>
+
+        <div class="inputs">
+          <div class="input-box">
+            <label for="lngShares">Share Count</label>
+            <input id="lngShares" type="number" step="1" value="7762" />
           </div>
-          <div class="subv" id="syncStatusSub">No refresh yet</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="card decision">
-      <h2>Payday Decision Box</h2>
-
-      <div class="mini" style="margin-top:12px;">
-        <div class="k">Master Income Goal</div>
-        <div class="v" id="goalIncomeCurrent">£0.00/month</div>
-        <div class="subv" id="goalIncomeRemaining">£0.00/month still needed to reach £2,000/month</div>
-      </div>
-
-      <div class="grid triple-grid">
-        <div class="mini" style="margin-top:12px;">
-          <div class="k">Total Income Impact</div>
-          <div class="v" id="decisionIncomeAnnual">+£0.00/yr</div>
-          <div class="subv" id="decisionIncomeMonthly">+£0.00/month</div>
+          <div class="input-box">
+            <label for="lngDps">Annual Dividend / Share (£)</label>
+            <input id="lngDps" type="number" step="0.0001" value="0.2179" />
+          </div>
         </div>
 
-        <div class="mini" style="margin-top:12px;">
-          <div class="k">Blended Yield</div>
-          <div class="v" id="decisionBlendedYield">0.00%</div>
-          <div class="subv">Current auto-split weighted yield</div>
+        <div class="pillar-stats">
+          <div class="mini"><div class="k">Current Income</div><div class="v" id="lngIncome">£0</div></div>
+          <div class="mini"><div class="k">Gap to Target</div><div class="v" id="lngGap">£0</div></div>
+          <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="lngRemaining">£0</div></div>
+          <div class="mini"><div class="k">Priority Rank</div><div class="v" id="lngPriority">#--</div></div>
         </div>
 
-        <div class="mini" style="margin-top:12px;">
-          <div class="k">Next Stage ETA</div>
-          <div class="v" id="nextStageEta">--</div>
-          <div class="subv">At current monthly investing pace</div>
+        <div class="progress-wrap">
+          <div class="progress-top">
+            <span>Progress</span>
+            <span id="lngProgressText">0%</span>
+          </div>
+          <div class="bar"><div class="fill" id="lngBar"></div></div>
+        </div>
+
+        <div class="grid top-grid">
+          <div class="mini"><div class="k">Live Price</div><div class="v" id="lngLivePrice">--</div></div>
+          <div class="mini"><div class="k">Live Value</div><div class="v" id="lngLiveValue">£0.00</div></div>
         </div>
       </div>
 
-      <div class="input-box" style="margin-bottom:12px; margin-top:12px;">
-        <label>Total Investment (£)</label>
-        <input id="paydayAmount" type="number" value="600" />
-      </div>
-
-      <div class="quick-actions">
-        <button class="quick-btn" data-amt="300">Test £300</button>
-        <button class="quick-btn" data-amt="600">Test £600</button>
-        <button class="quick-btn" data-amt="800">Test £800</button>
-        <button class="quick-btn" data-amt="1000">Test £1000</button>
-      </div>
-
-      <div class="mode-switch-wrap">
-        <div class="mode-title">Allocator Mode</div>
-        <div class="mode-switch">
-          <button class="mode-btn" data-mode="balanced">Balanced</button>
-          <button class="mode-btn" data-mode="hybrid">Hybrid</button>
-          <button class="mode-btn" data-mode="income">Income Max</button>
-          <button class="mode-btn active" data-mode="auto">Auto</button>
+      <div class="pillar" data-key="mng">
+        <div class="pillar-top">
+          <div class="pillar-name">M&amp;G</div>
+          <div class="signal amber" id="mngSignal">AMBER</div>
         </div>
-        <div class="mode-subtext">
-          Active Mode:
-          <span id="activeModeLabel">Hybrid</span>
+
+        <div class="inputs">
+          <div class="input-box">
+            <label for="mngShares">Share Count</label>
+            <input id="mngShares" type="number" step="1" value="5555" />
+          </div>
+          <div class="input-box">
+            <label for="mngDps">Annual Dividend / Share (£)</label>
+            <input id="mngDps" type="number" step="0.0001" value="0.2048" />
+          </div>
+        </div>
+
+        <div class="pillar-stats">
+          <div class="mini"><div class="k">Current Income</div><div class="v" id="mngIncome">£0</div></div>
+          <div class="mini"><div class="k">Gap to Target</div><div class="v" id="mngGap">£0</div></div>
+          <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="mngRemaining">£0</div></div>
+          <div class="mini"><div class="k">Priority Rank</div><div class="v" id="mngPriority">#--</div></div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-top">
+            <span>Progress</span>
+            <span id="mngProgressText">0%</span>
+          </div>
+          <div class="bar"><div class="fill" id="mngBar"></div></div>
+        </div>
+
+        <div class="grid top-grid">
+          <div class="mini"><div class="k">Live Price</div><div class="v" id="mngLivePrice">--</div></div>
+          <div class="mini"><div class="k">Live Value</div><div class="v" id="mngLiveValue">£0.00</div></div>
         </div>
       </div>
-      <!-- ===================== SECTION: DECISION PLAN ===================== -->
 
-<div class="decision-plan" style="margin-top:12px;">
-  <div class="buy-box">
-    <div class="stat-label">Primary Buy</div>
-    <div class="amt">£0</div>
-    <div class="name" id="primaryBuy">--</div>
-    <div class="mini-note" id="primaryReason">--</div>
-  </div>
+      <div class="pillar" data-key="sdlf">
+        <div class="pillar-top">
+          <div class="pillar-name">Standard Life</div>
+          <div class="signal amber" id="sdlfSignal">AMBER</div>
+        </div>
 
-  <div class="buy-box">
-    <div class="stat-label">Secondary Buy</div>
-    <div class="amt">£0</div>
-    <div class="name" id="secondaryBuy">--</div>
-    <div class="mini-note" id="secondaryReason">--</div>
-  </div>
+        <div class="inputs">
+          <div class="input-box">
+            <label for="sdlfShares">Share Count</label>
+            <input id="sdlfShares" type="number" step="1" value="1643" />
+          </div>
+          <div class="input-box">
+            <label for="sdlfDps">Annual Dividend / Share (£)</label>
+            <input id="sdlfDps" type="number" step="0.0001" value="0.5539" />
+          </div>
+        </div>
 
-  <div class="buy-box">
-    <div class="stat-label">Support Buy</div>
-    <div class="amt">£0</div>
-    <div class="name" id="supportBuy">--</div>
-    <div class="mini-note" id="supportReason">--</div>
-  </div>
+        <div class="pillar-stats">
+          <div class="mini"><div class="k">Current Income</div><div class="v" id="sdlfIncome">£0</div></div>
+          <div class="mini"><div class="k">Gap to Target</div><div class="v" id="sdlfGap">£0</div></div>
+          <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="sdlfRemaining">£0</div></div>
+          <div class="mini"><div class="k">Priority Rank</div><div class="v" id="sdlfPriority">#--</div></div>
+        </div>
 
-  <div class="buy-box">
-    <div class="stat-label">Maintenance Buy</div>
-    <div class="amt">£0</div>
-    <div class="name" id="fourthBuy">--</div>
-    <div class="mini-note" id="fourthReason">--</div>
+        <div class="progress-wrap">
+          <div class="progress-top">
+            <span>Progress</span>
+            <span id="sdlfProgressText">0%</span>
+          </div>
+          <div class="bar"><div class="fill" id="sdlfBar"></div></div>
+        </div>
+
+        <div class="grid top-grid">
+          <div class="mini"><div class="k">Live Price</div><div class="v" id="sdlfLivePrice">--</div></div>
+          <div class="mini"><div class="k">Live Value</div><div class="v" id="sdlfLiveValue">£0.00</div></div>
+        </div>
+      </div>
+
+      <div class="pillar" data-key="supr">
+        <div class="pillar-top">
+          <div class="pillar-name">Supermarket REIT</div>
+          <div class="signal green" id="suprSignal">GREEN</div>
+        </div>
+
+        <div class="inputs">
+          <div class="input-box">
+            <label for="suprShares">Share Count</label>
+            <input id="suprShares" type="number" step="1" value="12690" />
+          </div>
+          <div class="input-box">
+            <label for="suprDps">Annual Dividend / Share (£)</label>
+            <input id="suprDps" type="number" step="0.0001" value="0.0618" />
+          </div>
+        </div>
+
+        <div class="pillar-stats">
+          <div class="mini"><div class="k">Current Income</div><div class="v" id="suprIncome">£0</div></div>
+          <div class="mini"><div class="k">Gap to Target</div><div class="v" id="suprGap">£0</div></div>
+          <div class="mini"><div class="k">Next Stage Gap</div><div class="v" id="suprRemaining">£0</div></div>
+          <div class="mini"><div class="k">Priority Rank</div><div class="v" id="suprPriority">#--</div></div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-top">
+            <span>Progress</span>
+            <span id="suprProgressText">0%</span>
+          </div>
+          <div class="bar"><div class="fill" id="suprBar"></div></div>
+        </div>
+
+        <div class="grid top-grid">
+          <div class="mini"><div class="k">Live Price</div><div class="v" id="suprLivePrice">--</div></div>
+          <div class="mini"><div class="k">Live Value</div><div class="v" id="suprLiveValue">£0.00</div></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="section card">
+    <h2>Income Build Log</h2>
+
+    <div class="log-grid">
+      <div class="input-box">
+        <label>Date</label>
+        <input id="logDate" type="date" />
+      </div>
+      <div class="input-box">
+        <label>Source</label>
+        <input id="logSource" type="text" placeholder="Dividend / Tesco / Bonus" />
+      </div>
+      <div class="input-box">
+        <label>Amount (£)</label>
+        <input id="logAmount" type="number" />
+      </div>
+      <div class="input-box">
+        <label>Into</label>
+        <select id="logInto">
+          <option>M&amp;G</option>
+          <option>Legal &amp; General</option>
+          <option>Standard Life</option>
+          <option>Supermarket REIT</option>
+        </select>
+      </div>
+      <div class="input-box">
+        <label>Buy Price</label>
+        <input id="logPrice" type="number" />
+      </div>
+      <div class="input-box">
+        <label>Yield</label>
+        <input id="logYieldAuto" disabled />
+      </div>
+    </div>
+
+    <div class="log-preview">
+      <div class="mini"><div class="k">Income Added</div><div class="v" id="logIncomePreview">£0.00</div></div>
+      <div class="mini"><div class="k">Total Reinvested</div><div class="v" id="reinvestTotal">£0.00</div></div>
+      <div class="mini"><div class="k">This Year</div><div class="v" id="reinvestYearTotal">£0.00</div></div>
+      <div class="mini"><div class="k">Best Target</div><div class="v" id="bestReinvestTarget">--</div></div>
+    </div>
+
+    <button class="log-btn" id="addLogBtn">Add Income Build</button>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Source</th>
+            <th>Amount</th>
+            <th>Into</th>
+            <th>Yield</th>
+            <th>Income Added</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="logTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="footer">
+    Aurora Mode Active • Live Sheet + Smart Allocation + Learning Engine
   </div>
 </div>
-
-<div class="mini allocator-strip">
-  <div class="k">Why This Split</div>
-  <div class="v" id="allocatorModeLabel">Weakest First</div>
-  <div class="subv" id="allocatorWhyText">
-    Allocation reasoning will appear here based on pillar strength, yield, and price movements.
-  </div>
-</div>
-<!-- ===================== SECTION: ALLOCATION CONTROL PANEL ===================== -->
-<section class="section card">
-  <h2>Allocation Control Panel</h2>
-
-  <div class="allocation-panel-grid">
-    <div class="allocation-card">
-      <div class="allocation-top">
-        <div class="allocation-name" id="alloc1Name">--</div>
-        <div class="allocation-badge" id="alloc1Mode">--</div>
-      </div>
-      <div class="allocation-stats">
-        <div class="mini"><div class="k">Amount</div><div class="v" id="alloc1Amount">£0</div></div>
-        <div class="mini"><div class="k">Progress</div><div class="v" id="alloc1Progress">0%</div></div>
-        <div class="mini"><div class="k">Income Added</div><div class="v" id="alloc1IncomeAdd">£0.00</div></div>
-      </div>
-    </div>
-
-    <div class="allocation-card">
-      <div class="allocation-top">
-        <div class="allocation-name" id="alloc2Name">--</div>
-        <div class="allocation-badge" id="alloc2Mode">--</div>
-      </div>
-      <div class="allocation-stats">
-        <div class="mini"><div class="k">Amount</div><div class="v" id="alloc2Amount">£0</div></div>
-        <div class="mini"><div class="k">Progress</div><div class="v" id="alloc2Progress">0%</div></div>
-        <div class="mini"><div class="k">Income Added</div><div class="v" id="alloc2IncomeAdd">£0.00</div></div>
-      </div>
-    </div>
-
-    <div class="allocation-card">
-      <div class="allocation-top">
-        <div class="allocation-name" id="alloc3Name">--</div>
-        <div class="allocation-badge" id="alloc3Mode">--</div>
-      </div>
-      <div class="allocation-stats">
-        <div class="mini"><div class="k">Amount</div><div class="v" id="alloc3Amount">£0</div></div>
-        <div class="mini"><div class="k">Progress</div><div class="v" id="alloc3Progress">0%</div></div>
-        <div class="mini"><div class="k">Income Added</div><div class="v" id="alloc3IncomeAdd">£0.00</div></div>
-      </div>
-    </div>
-
-    <div class="allocation-card">
-      <div class="allocation-top">
-        <div class="allocation-name" id="alloc4Name">--</div>
-        <div class="allocation-badge" id="alloc4Mode">--</div>
-      </div>
-      <div class="allocation-stats">
-        <div class="mini"><div class="k">Amount</div><div class="v" id="alloc4Amount">£0</div></div>
-        <div class="mini"><div class="k">Progress</div><div class="v" id="alloc4Progress">0%</div></div>
-        <div class="mini"><div class="k">Income Added</div><div class="v" id="alloc4IncomeAdd">£0.00</div></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== SECTION: STAGE TRACKER ===================== -->
-<section class="section card">
-  <h2>Stage Tracker</h2>
-  <div class="pillar-stats">
-    <div class="mini"><div class="k">Current Stage</div><div class="v" id="stageLabel">1 / 8</div></div>
-    <div class="mini"><div class="k">Stage Target</div><div class="v" id="stageTargetLabel">£2,000</div></div>
-    <div class="mini"><div class="k">Next Stage</div><div class="v" id="nextStageLabel">£4,000</div></div>
-    <div class="mini"><div class="k">System Mode</div><div class="v" id="systemModeLabel">Dynamic</div></div>
-  </div>
-</section>
-
-<!-- ===================== SECTION: PILLAR PROGRESS ===================== -->
-<section class="section card">
-  <h2>Pillar Progress to £<span id="targetHeading">2,000</span> / year</h2>
-
-  <div class="pillars">
-
-    <!-- LNG -->
-    <div class="pillar" data-key="lng">
-      <div class="pillar-top">
-        <div class="pillar-name">Legal &amp; General</div>
-        <div class="signal amber" id="lngSignal">AMBER</div>
-      </div>
-
-      <div class="inputs">
-        <div class="input-box">
-          <label>Share Count</label>
-          <input id="lngShares" type="number" value="7762" />
-        </div>
-        <div class="input-box">
-          <label>Dividend / Share (£)</label>
-          <input id="lngDps" type="number" step="0.0001" value="0.2179" />
-        </div>
-      </div>
-
-      <div class="pillar-stats">
-        <div class="mini"><div class="k">Income</div><div class="v" id="lngIncome">£0</div></div>
-        <div class="mini"><div class="k">Gap</div><div class="v" id="lngGap">£0</div></div>
-        <div class="mini"><div class="k">Next Gap</div><div class="v" id="lngRemaining">£0</div></div>
-        <div class="mini"><div class="k">Rank</div><div class="v" id="lngPriority">#--</div></div>
-      </div>
-
-      <div class="progress-wrap">
-        <div class="progress-top"><span>Progress</span><span id="lngProgressText">0%</span></div>
-        <div class="bar"><div class="fill" id="lngBar"></div></div>
-      </div>
-
-      <div class="grid top-grid">
-        <div class="mini"><div class="k">Live Price</div><div class="v" id="lngLivePrice">--</div></div>
-        <div class="mini"><div class="k">Value</div><div class="v" id="lngLiveValue">£0.00</div></div>
-      </div>
-    </div>
-
-    <!-- MNG -->
-    <div class="pillar" data-key="mng">
-      <div class="pillar-top">
-        <div class="pillar-name">M&amp;G</div>
-        <div class="signal amber" id="mngSignal">AMBER</div>
-      </div>
-
-      <div class="inputs">
-        <div class="input-box">
-          <label>Share Count</label>
-          <input id="mngShares" type="number" value="3916" />
-        </div>
-        <div class="input-box">
-          <label>Dividend / Share (£)</label>
-          <input id="mngDps" type="number" step="0.0001" value="0.198" />
-        </div>
-      </div>
-
-      <div class="pillar-stats">
-        <div class="mini"><div class="k">Income</div><div class="v" id="mngIncome">£0</div></div>
-        <div class="mini"><div class="k">Gap</div><div class="v" id="mngGap">£0</div></div>
-        <div class="mini"><div class="k">Next Gap</div><div class="v" id="mngRemaining">£0</div></div>
-        <div class="mini"><div class="k">Rank</div><div class="v" id="mngPriority">#--</div></div>
-      </div>
-
-      <div class="progress-wrap">
-        <div class="progress-top"><span>Progress</span><span id="mngProgressText">0%</span></div>
-        <div class="bar"><div class="fill" id="mngBar"></div></div>
-      </div>
-
-      <div class="grid top-grid">
-        <div class="mini"><div class="k">Live Price</div><div class="v" id="mngLivePrice">--</div></div>
-        <div class="mini"><div class="k">Value</div><div class="v" id="mngLiveValue">£0.00</div></div>
-      </div>
-    </div>
-
-    <!-- SDLF -->
-    <div class="pillar" data-key="sdlf">
-      <div class="pillar-top">
-        <div class="pillar-name">Standard Life</div>
-        <div class="signal amber" id="sdlfSignal">AMBER</div>
-      </div>
-
-      <div class="inputs">
-        <div class="input-box">
-          <label>Share Count</label>
-          <input id="sdlfShares" type="number" value="1467" />
-        </div>
-        <div class="input-box">
-          <label>Dividend / Share (£)</label>
-          <input id="sdlfDps" type="number" step="0.0001" value="0.54" />
-        </div>
-      </div>
-
-      <div class="pillar-stats">
-        <div class="mini"><div class="k">Income</div><div class="v" id="sdlfIncome">£0</div></div>
-        <div class="mini"><div class="k">Gap</div><div class="v" id="sdlfGap">£0</div></div>
-        <div class="mini"><div class="k">Next Gap</div><div class="v" id="sdlfRemaining">£0</div></div>
-        <div class="mini"><div class="k">Rank</div><div class="v" id="sdlfPriority">#--</div></div>
-      </div>
-
-      <div class="progress-wrap">
-        <div class="progress-top"><span>Progress</span><span id="sdlfProgressText">0%</span></div>
-        <div class="bar"><div class="fill" id="sdlfBar"></div></div>
-      </div>
-
-      <div class="grid top-grid">
-        <div class="mini"><div class="k">Live Price</div><div class="v" id="sdlfLivePrice">--</div></div>
-        <div class="mini"><div class="k">Value</div><div class="v" id="sdlfLiveValue">£0.00</div></div>
-      </div>
-    </div>
-
-    <!-- SUPR -->
-    <div class="pillar" data-key="supr">
-      <div class="pillar-top">
-        <div class="pillar-name">Supermarket REIT</div>
-        <div class="signal amber" id="suprSignal">AMBER</div>
-      </div>
-
-      <div class="inputs">
-        <div class="input-box">
-          <label>Share Count</label>
-          <input id="suprShares" type="number" value="924" />
-        </div>
-        <div class="input-box">
-          <label>Dividend / Share (£)</label>
-          <input id="suprDps" type="number" step="0.0001" value="0.06" />
-        </div>
-      </div>
-
-      <div class="pillar-stats">
-        <div class="mini"><div class="k">Income</div><div class="v" id="suprIncome">£0</div></div>
-        <div class="mini"><div class="k">Gap</div><div class="v" id="suprGap">£0</div></div>
-        <div class="mini"><div class="k">Next Gap</div><div class="v" id="suprRemaining">£0</div></div>
-        <div class="mini"><div class="k">Rank</div><div class="v" id="suprPriority">#--</div></div>
-      </div>
-
-      <div class="progress-wrap">
-        <div class="progress-top"><span>Progress</span><span id="suprProgressText">0%</span></div>
-        <div class="bar"><div class="fill" id="suprBar"></div></div>
-      </div>
-
-      <div class="grid top-grid">
-        <div class="mini"><div class="k">Live Price</div><div class="v" id="suprLivePrice">--</div></div>
-        <div class="mini"><div class="k">Value</div><div class="v" id="suprLiveValue">£0.00</div></div>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<!-- ===================== SECTION: INCOME LOG ===================== -->
-<section class="section card">
-  <h2>Income Build Log</h2>
-
-  <div class="log-grid">
-    <div class="input-box">
-      <label>Date</label>
-      <input id="logDate" type="date" />
-    </div>
-    <div class="input-box">
-      <label>Source</label>
-      <input id="logSource" type="text" placeholder="Dividend / Tesco / Bonus" />
-    </div>
-    <div class="input-box">
-      <label>Amount (£)</label>
-      <input id="logAmount" type="number" />
-    </div>
-    <div class="input-box">
-      <label>Into</label>
-      <select id="logInto">
-        <option>M&G</option>
-        <option>Legal & General</option>
-        <option>Standard Life</option>
-        <option>Supermarket REIT</option>
-      </select>
-    </div>
-    <div class="input-box">
-      <label>Buy Price</label>
-      <input id="logPrice" type="number" />
-    </div>
-    <div class="input-box">
-      <label>Yield</label>
-      <input id="logYieldAuto" disabled />
-    </div>
-  </div>
-
-  <div class="log-preview">
-    <div class="mini"><div class="k">Income Added</div><div class="v" id="logIncomePreview">£0.00</div></div>
-    <div class="mini"><div class="k">Total Reinvested</div><div class="v" id="reinvestTotal">£0.00</div></div>
-    <div class="mini"><div class="k">This Year</div><div class="v" id="reinvestYearTotal">£0.00</div></div>
-    <div class="mini"><div class="k">Best Target</div><div class="v" id="bestReinvestTarget">--</div></div>
-  </div>
-
-  <button id="addLogBtn">Add Income Build</button>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Source</th>
-        <th>Amount</th>
-        <th>Into</th>
-        <th>Yield</th>
-        <th>Income Added</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody id="logTableBody"></tbody>
-  </table>
-</section>
-
-<div class="footer">
-  Aurora Mode Active • Live Sheet + Smart Allocation + Dividend Engine
-</div>
-</div>
-
 <script>
 const STORAGE_KEY = "pillarTrackerInputs_v2_safe";
 const PRICE_MEMORY_KEY = "pillarTrackerPriceMemory_v1";
 const MODE_KEY = "pillarTrackerMode";
+const LEARNING_MODE_KEY = "pillarTrackerLearningMode";
+const LEARNING_MEMORY_KEY = "pillarTrackerLearningMemory_v1";
 const STAGES = [2000, 4000, 6000, 8000, 10000, 12000, 15000, 20000];
 
 const ids = ["lngDps", "mngDps", "sdlfDps", "suprDps"];
@@ -948,6 +859,7 @@ const dpsFieldMap = {
 };
 
 const livePrices = { lng: 0, mng: 0, sdlf: 0, supr: 0 };
+
 const lastGoodLiveData = {
   lng: { price: 0, value: 0, cost: 0, gain: 0 },
   mng: { price: 0, value: 0, cost: 0, gain: 0 },
@@ -1020,18 +932,134 @@ function setSelectedMode(mode) {
   updateAll();
 }
 
-function getActiveMode() {
-  const selected = getSelectedMode();
-  const { incomes, stage } = getPillarData();
-  const allReached = Object.values(incomes).every(v => v >= stage.target);
-  if (selected !== "auto") return selected;
-  return allReached ? "income" : "hybrid";
-}
-
 function updateModeButtons() {
   document.querySelectorAll(".mode-btn").forEach(btn => {
     btn.classList.toggle("active", btn.dataset.mode === getSelectedMode());
   });
+}
+
+function getLearningMode() {
+  return localStorage.getItem(LEARNING_MODE_KEY) || "off";
+}
+
+function setLearningMode(mode) {
+  localStorage.setItem(LEARNING_MODE_KEY, mode);
+  updateLearningButtons();
+  updateAll();
+}
+
+function updateLearningButtons() {
+  document.querySelectorAll(".learning-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.learning === getLearningMode());
+  });
+}
+
+function getLearningMemory() {
+  try {
+    return JSON.parse(localStorage.getItem(LEARNING_MEMORY_KEY) || "{}");
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveLearningMemory(memory) {
+  localStorage.setItem(LEARNING_MEMORY_KEY, JSON.stringify(memory));
+}
+
+function getLearningAdjustments() {
+  const mode = getLearningMode();
+  if (mode === "off") {
+    return { yieldBoost: 0, dipBoost: 0, progressPenalty: 0 };
+  }
+
+  const memory = getLearningMemory();
+  const avgYieldWin = Number(memory.avgYieldWin || 0);
+  const avgDipWin = Number(memory.avgDipWin || 0);
+  const avgProgressWin = Number(memory.avgProgressWin || 0);
+
+  const strength = mode === "advanced" ? 1 : 0.4;
+
+  return {
+    yieldBoost: avgYieldWin * 0.05 * strength,
+    dipBoost: avgDipWin * 0.05 * strength,
+    progressPenalty: avgProgressWin * 0.03 * strength
+  };
+}
+
+function updateLearningDisplay() {
+  const mode = getLearningMode();
+  const memory = getLearningMemory();
+
+  const label =
+    mode === "advanced" ? "Advanced" :
+    mode === "conservative" ? "Conservative" :
+    "Off";
+
+  setText("activeLearningLabel", label);
+
+  if (mode === "off") {
+    setText("learningBiasLabel", "Static Rules");
+    setText("learningBiasText", "Learning is off. Allocation uses fixed rule weights.");
+    return;
+  }
+
+  const yieldWin = Number(memory.avgYieldWin || 0).toFixed(2);
+  const dipWin = Number(memory.avgDipWin || 0).toFixed(2);
+  const progressWin = Number(memory.avgProgressWin || 0).toFixed(2);
+
+  setText("learningBiasLabel", `${label} Learning Active`);
+  setText(
+    "learningBiasText",
+    `Yield signal ${yieldWin} • Dip signal ${dipWin} • Progress signal ${progressWin}`
+  );
+}
+
+function getAverageDropPct() {
+  const keys = ["lng", "mng", "sdlf", "supr"];
+  const drops = keys.map(key => getPriceDropPct(key)).filter(v => Number.isFinite(v));
+  if (!drops.length) return 0;
+  return drops.reduce((a, b) => a + b, 0) / drops.length;
+}
+
+function getCrashModeState() {
+  const avgDrop = getAverageDropPct();
+
+  if (avgDrop >= 15) {
+    return {
+      active: true,
+      level: "severe",
+      label: "Crash Mode Active",
+      text: `Severe selloff detected. Average pillar drop ${avgDrop.toFixed(1)}%.`
+    };
+  }
+
+  if (avgDrop >= 8) {
+    return {
+      active: true,
+      level: "moderate",
+      label: "Stress Mode Active",
+      text: `Broad dip detected. Average pillar drop ${avgDrop.toFixed(1)}%.`
+    };
+  }
+
+  return {
+    active: false,
+    level: "normal",
+    label: "Normal",
+    text: "No broad selloff detected."
+  };
+}
+
+function getActiveMode() {
+  const selected = getSelectedMode();
+  const { incomes, stage } = getPillarData();
+  const allReached = Object.values(incomes).every(v => v >= stage.target);
+  const crashState = getCrashModeState();
+
+  if (selected !== "auto") return selected;
+  if (crashState.active) return "income";
+  if (allReached) return "income";
+  return "hybrid";
 }
 
 function updateModeDisplay() {
@@ -1040,8 +1068,23 @@ function updateModeDisplay() {
     mode === "income" ? "Income Max" :
     mode === "balanced" ? "Balanced" :
     "Hybrid";
-  setText("activeModeLabel", label);
+
+  const suffix = getSelectedMode() === "auto" ? " (Auto)" : " (Manual)";
+  setText("activeModeLabel", `${label}${suffix}`);
   setText("systemModeLabel", label);
+}
+
+function updateCrashModeDisplay() {
+  const state = getCrashModeState();
+  const box = document.getElementById("crashModeBox");
+
+  setText("crashModeLabel", state.label);
+  setText("crashModeText", state.text);
+
+  if (!box) return;
+  box.classList.remove("crash-active", "crash-danger");
+  if (state.level === "moderate") box.classList.add("crash-active");
+  if (state.level === "severe") box.classList.add("crash-danger");
 }
 
 function loadPriceMemory() {
@@ -1069,9 +1112,11 @@ function savePriceMemory() {
 function updatePriceMemory(key, currentPrice) {
   if (!Number.isFinite(currentPrice) || currentPrice <= 0) return;
   const memory = priceMemory[key];
+
   if (!memory.anchorPrice || currentPrice > memory.anchorPrice) {
     memory.anchorPrice = currentPrice;
   }
+
   memory.lastSeenPrice = currentPrice;
 }
 
@@ -1154,7 +1199,7 @@ async function loadLivePrices() {
     setText("syncStatusSub", new Date().toLocaleTimeString());
 
     const syncDot = document.getElementById("syncDot");
-    if (syncDot) syncDot.className = "sync-dot";
+    if (syncDot) syncDot.style.color = "var(--green)";
 
     updateAll();
   } catch (err) {
@@ -1163,7 +1208,7 @@ async function loadLivePrices() {
     setText("syncStatusSub", "Using last good snapshot");
 
     const syncDot = document.getElementById("syncDot");
-    if (syncDot) syncDot.className = "sync-dot sync-bad";
+    if (syncDot) syncDot.style.color = "var(--red)";
   }
 }
 
@@ -1307,6 +1352,7 @@ function updateMasterIncomeGoal(totalIncomeImpact = 0) {
 function getDynamicAllocationPlan(totalAmount = 800) {
   const { incomes, stage } = getPillarData();
   const mode = getActiveMode();
+  const learning = getLearningAdjustments();
 
   const MIN_ALLOC_PCT = 0.10;
   const MAX_ALLOC_PCT = 0.40;
@@ -1328,30 +1374,28 @@ function getDynamicAllocationPlan(totalAmount = 800) {
 
     if (mode === "balanced") {
       score =
-        (progressWeakness * 0.50) +
+        (progressWeakness * (0.50 - learning.progressPenalty)) +
         (gapScore * 0.30) +
-        (yieldScore * 0.15) +
-        (dipScore * 0.05);
+        (yieldScore * (0.15 + learning.yieldBoost)) +
+        (dipScore * (0.05 + learning.dipBoost));
     } else if (mode === "income") {
       score =
-        (progressWeakness * 0.15) +
+        (progressWeakness * (0.15 - learning.progressPenalty)) +
         (gapScore * 0.10) +
-        (yieldScore * 0.50) +
-        (dipScore * 0.25);
+        (yieldScore * (0.50 + learning.yieldBoost)) +
+        (dipScore * (0.25 + learning.dipBoost));
     } else {
       score =
-        (progressWeakness * 0.30) +
+        (progressWeakness * (0.30 - learning.progressPenalty)) +
         (gapScore * 0.20) +
-        (yieldScore * 0.35) +
-        (dipScore * 0.15);
+        (yieldScore * (0.35 + learning.yieldBoost)) +
+        (dipScore * (0.15 + learning.dipBoost));
     }
 
     if (yieldPct >= 8.0) score += 0.08;
     if (yieldPct >= 9.0) score += 0.10;
-
     if (priceDropPct >= 5) score += 0.08;
     if (priceDropPct >= 10) score += 0.12;
-
     if (progressPct >= 85) score -= 0.20;
     if (progressPct >= 95) score -= 0.35;
 
@@ -1442,16 +1486,6 @@ function renderAllocationPanel(plan) {
     setText(`alloc${n}Amount`, `£${pillar.amount}`);
     setText(`alloc${n}Progress`, `${pillar.progressPct.toFixed(0)}%`);
     setText(`alloc${n}IncomeAdd`, `£${formatMoney(pillar.projectedIncomeAdd)}`);
-
-    const badge = document.getElementById(`alloc${n}Mode`);
-    if (badge) {
-      badge.style.color =
-        pillar.mode === "Opportunity" ? "var(--blue)" :
-        pillar.mode === "Attack" ? "var(--green)" :
-        pillar.mode === "Catch-up" ? "var(--amber)" :
-        pillar.mode === "Balance" ? "var(--cyan)" :
-        "var(--muted)";
-    }
   });
 
   const activeMode = getActiveMode();
@@ -1474,6 +1508,22 @@ function renderAllocationPanel(plan) {
   rankedWeakest.forEach((pillar, index) => {
     setText(`${pillar.key}Priority`, `#${index + 1}`);
   });
+}
+
+function recordLearningSnapshot(plan) {
+  const mode = getLearningMode();
+  if (mode === "off" || !plan || !plan.length) return;
+
+  const memory = getLearningMemory();
+  const avgYield = plan.reduce((sum, p) => sum + p.yieldPct, 0) / plan.length;
+  const avgDip = plan.reduce((sum, p) => sum + p.priceDropPct, 0) / plan.length;
+  const avgProgressWeakness = plan.reduce((sum, p) => sum + (100 - p.progressPct), 0) / plan.length;
+
+  memory.avgYieldWin = ((Number(memory.avgYieldWin || 0) * 4) + avgYield) / 5;
+  memory.avgDipWin = ((Number(memory.avgDipWin || 0) * 4) + avgDip) / 5;
+  memory.avgProgressWin = ((Number(memory.avgProgressWin || 0) * 4) + avgProgressWeakness / 100) / 5;
+
+  saveLearningMemory(memory);
 }
 
 function updateDecision() {
@@ -1525,6 +1575,8 @@ function updateDecision() {
   setText("bestReinvestTarget", sorted[0].name);
   setText("bestValueBuy", bestByValue.name);
   setText("bestValueBuyMeta", `Yield ${bestByValue.yieldPct.toFixed(2)}% • Dip ${bestByValue.priceDropPct.toFixed(1)}%`);
+
+  recordLearningSnapshot(plan);
 }
 
 function updateNextStageEta(totalIncomeImpact = 0) {
@@ -1662,6 +1714,8 @@ function updateAll() {
   const { incomes, stage } = getPillarData();
 
   updateModeDisplay();
+  updateCrashModeDisplay();
+  updateLearningDisplay();
 
   setText("stageLabel", `${stage.stageIndex} / 8`);
   setText("stageTargetLabel", `£${formatWhole(stage.target)}`);
@@ -1685,6 +1739,7 @@ function updateAll() {
 loadPriceMemory();
 loadSavedValues();
 updateModeButtons();
+updateLearningButtons();
 loadLogs();
 
 ids.forEach(id => {
@@ -1715,8 +1770,16 @@ document.querySelectorAll(".quick-btn").forEach(btn => {
 });
 
 document.querySelectorAll(".mode-btn").forEach(btn => {
+  if (btn.dataset.mode) {
+    btn.addEventListener("click", () => {
+      setSelectedMode(btn.dataset.mode);
+    });
+  }
+});
+
+document.querySelectorAll(".learning-btn").forEach(btn => {
   btn.addEventListener("click", () => {
-    setSelectedMode(btn.dataset.mode);
+    setLearningMode(btn.dataset.learning);
   });
 });
 
