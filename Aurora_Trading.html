@@ -641,6 +641,7 @@ h2, h3 {
       <div class="grid top-grid">
         <div class="mini"><div class="k">Price</div><div class="v" id="lngCurrentPrice">--</div></div>
         <div class="mini"><div class="k">7D Dip</div><div class="v" id="lngDip">--</div></div>
+        <div class="mini"><div class="k">30D Dip</div><div class="v" id="lngDip30">--</div></div>
         <div class="mini"><div class="k">Vs Avg</div><div class="v" id="lngVsAvg">--</div></div>
         <div class="mini"><div class="k">Score</div><div class="v" id="lngScore">--</div></div>
       </div>
@@ -657,6 +658,7 @@ h2, h3 {
       <div class="grid top-grid">
         <div class="mini"><div class="k">Price</div><div class="v" id="mngCurrentPrice">--</div></div>
         <div class="mini"><div class="k">7D Dip</div><div class="v" id="mngDip">--</div></div>
+        <div class="mini"><div class="k">30D Dip</div><div class="v" id="mngDip30">--</div></div>
         <div class="mini"><div class="k">Vs Avg</div><div class="v" id="mngVsAvg">--</div></div>
         <div class="mini"><div class="k">Score</div><div class="v" id="mngScore">--</div></div>
       </div>
@@ -673,6 +675,7 @@ h2, h3 {
       <div class="grid top-grid">
         <div class="mini"><div class="k">Price</div><div class="v" id="sdlfCurrentPrice">--</div></div>
         <div class="mini"><div class="k">7D Dip</div><div class="v" id="sdlfDip">--</div></div>
+        <div class="mini"><div class="k">30D Dip</div><div class="v" id="sdlfDip30">--</div></div>
         <div class="mini"><div class="k">Vs Avg</div><div class="v" id="sdlfVsAvg">--</div></div>
         <div class="mini"><div class="k">Score</div><div class="v" id="sdlfScore">--</div></div>
       </div>
@@ -689,6 +692,7 @@ h2, h3 {
       <div class="grid top-grid">
         <div class="mini"><div class="k">Price</div><div class="v" id="suprCurrentPrice">--</div></div>
         <div class="mini"><div class="k">7D Dip</div><div class="v" id="suprDip">--</div></div>
+        <div class="mini"><div class="k">30D Dip</div><div class="v" id="suprDip30">--</div></div>
         <div class="mini"><div class="k">Vs Avg</div><div class="v" id="suprVsAvg">--</div></div>
         <div class="mini"><div class="k">Score</div><div class="v" id="suprScore">--</div></div>
       </div>
@@ -740,14 +744,13 @@ h2, h3 {
 </div>
 
 </div>
-
 <!-- ===================== SECTION: SCRIPT ===================== -->
 <script>
 const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
 const HOLDINGS_URL = `https://opensheet.elk.sh/${SHEET_ID}/Holdings`;
 const DIVIDENDS_URL = `https://opensheet.elk.sh/${SHEET_ID}/Dividends`;
 
-const PRICE_MEMORY_KEY = "aurora_prices_v5";
+const PRICE_MEMORY_KEY = "aurora_prices_v6";
 const MODE_KEY = "aurora_mode_v5";
 const RESERVE_KEY = "aurora_reserve_v2";
 
@@ -935,7 +938,27 @@ function updateRollingPriceMemory(memory, key, price) {
   memory[key] = memory[key]
     .filter(entry => entry && entry.date && Number.isFinite(Number(entry.price)))
     .sort((a, b) => new Date(a.date) - new Date(b.date))
-    .slice(-7);
+    .slice(-30);
+}
+
+function getHistoricalPrice(memory, key, daysBack, fallbackPrice) {
+  const history = Array.isArray(memory[key]) ? memory[key] : [];
+  if (!history.length) return fallbackPrice || 0;
+
+  const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const target = new Date();
+  target.setDate(target.getDate() - daysBack);
+
+  let chosen = null;
+
+  for (const entry of sorted) {
+    const entryDate = new Date(entry.date);
+    if (entryDate <= target) {
+      chosen = Number(entry.price);
+    }
+  }
+
+  return chosen || Number(sorted[0]?.price) || fallbackPrice || 0;
 }
 
 function getRollingHigh(memory, key, fallbackPrice) {
@@ -987,11 +1010,16 @@ function getExecutionSignal(stocks) {
 function getTopPickReason(stock, pillarWeight) {
   const reasons = [];
   if (stock.dipPct <= -5) reasons.push(`7d dip ${formatPct(stock.dipPct)}`);
-  else if (stock.dipPct < 0) reasons.push(`mild dip ${formatPct(stock.dipPct)}`);
+  else if (stock.dipPct < 0) reasons.push(`7d weakness ${formatPct(stock.dipPct)}`);
+
+  if (stock.dip30Pct <= -10) reasons.push(`30d dip ${formatPct(stock.dip30Pct)}`);
+  else if (stock.dip30Pct < 0) reasons.push(`30d soft ${formatPct(stock.dip30Pct)}`);
+
   if (stock.vsAvgPct < 0) reasons.push(`below avg cost ${formatPct(stock.vsAvgPct)}`);
   if (stock.yieldPct >= 8) reasons.push(`yield ${formatPct(stock.yieldPct)}`);
   if (pillarWeight < 15) reasons.push(`underweight pillar`);
   if (pillarWeight > 35) reasons.push(`won despite overweight penalty`);
+
   return reasons.length ? reasons.join(" • ") : "Best overall live score";
 }
 
@@ -1095,10 +1123,11 @@ function chooseAutoMode(preStocks) {
   const richCount = preStocks.filter(s => s.vsAvgPct > 5).length;
 
   if (strongDipCount >= 1) return getBaseModeConfig("dip");
-  if (lowScoreCount >= 3 || richCount >= 2) return getBaseModeConfig("defensive");
+  if (lowScoreCount >= 3 || richCount >=2) return getBaseModeConfig("defensive");
   if (highYieldCount >= 2 && strongDipCount === 0) return getBaseModeConfig("income");
   return getBaseModeConfig("balance");
 }
+
 async function runBrain() {
   try {
     updateModeButtons();
@@ -1259,10 +1288,12 @@ async function runBrain() {
       const current = item.price || 0;
       const avg = item.shares > 0 ? (item.book / item.shares) : 0;
       const yieldPct = current > 0 ? (item.dps / current) * 100 : 0;
-      const rollingHigh = getRollingHigh(memory, key, current);
-      const dipPct = rollingHigh > 0 ? ((current - rollingHigh) / rollingHigh) * 100 : 0;
+      const high7 = getRollingHigh(memory, key, current);
+      const price30 = getHistoricalPrice(memory, key, 30, current);
+      const dipPct = high7 > 0 ? ((current - high7) / high7) * 100 : 0;
+      const dip30Pct = price30 > 0 ? ((current - price30) / price30) * 100 : 0;
       const vsAvgPct = avg > 0 ? ((current - avg) / avg) * 100 : 0;
-      return { key, current, avg, yieldPct, dipPct, vsAvgPct, score: 0 };
+      return { key, current, avg, yieldPct, dipPct, dip30Pct, vsAvgPct, score: 0 };
     });
 
     const selectedMode = getMode();
@@ -1281,8 +1312,12 @@ async function runBrain() {
       const current = item.price || 0;
       const avg = item.shares > 0 ? (item.book / item.shares) : 0;
       const yieldPct = current > 0 ? (item.dps / current) * 100 : 0;
-      const rollingHigh = getRollingHigh(memory, key, current);
-      const dipPct = rollingHigh > 0 ? ((current - rollingHigh) / rollingHigh) * 100 : 0;
+
+      const high7 = getRollingHigh(memory, key, current);
+      const price30 = getHistoricalPrice(memory, key, 30, current);
+
+      const dipPct = high7 > 0 ? ((current - high7) / high7) * 100 : 0;
+      const dip30Pct = price30 > 0 ? ((current - price30) / price30) * 100 : 0;
       const vsAvgPct = avg > 0 ? ((current - avg) / avg) * 100 : 0;
 
       let score = 0;
@@ -1291,6 +1326,12 @@ async function runBrain() {
       else if (dipPct <= -5) score += 30;
       else if (dipPct <= -3) score += 20;
       else if (dipPct < 0) score += 10;
+
+      if (dip30Pct <= -15) score += 22;
+      else if (dip30Pct <= -10) score += 16;
+      else if (dip30Pct <= -5) score += 10;
+      else if (dip30Pct < 0) score += 5;
+      else if (dip30Pct > 8) score -= 8;
 
       if (vsAvgPct <= -5) score += 25 * modeConfig.valueMult;
       else if (vsAvgPct <= -2) score += 15 * modeConfig.valueMult;
@@ -1308,6 +1349,7 @@ async function runBrain() {
       else if (weight < 15) score += 10;
 
       score += Math.abs(Math.min(dipPct, 0)) * dipWeight;
+      score += Math.abs(Math.min(dip30Pct, 0)) * 0.6;
       score = Math.max(0, Math.min(100, score));
 
       return {
@@ -1317,6 +1359,7 @@ async function runBrain() {
         avg,
         yieldPct,
         dipPct,
+        dip30Pct,
         vsAvgPct,
         score,
         incomeWeight: weight
@@ -1380,7 +1423,8 @@ async function runBrain() {
         return { ...stock, allocPct: stock.allocPct * 0.35 };
       });
     }
-        const MIN_ALLOC_PCT = 0.00;
+
+    const MIN_ALLOC_PCT = 0.00;
     const MAX_ALLOC_PCT = singleOpportunity ? 0.75 : 0.45;
 
     rawAllocations = rawAllocations.map(stock => ({
@@ -1410,7 +1454,7 @@ async function runBrain() {
       setText(`alloc${i + 1}Name`, p.name);
       setText(
         `alloc${i + 1}Note`,
-        `Dip ${formatPct(p.dipPct)} • Score ${Math.round(p.score)} • Yield ${formatPct(p.yieldPct)}`
+        `7D ${formatPct(p.dipPct)} • 30D ${formatPct(p.dip30Pct)} • Score ${Math.round(p.score)} • Yield ${formatPct(p.yieldPct)}`
       );
     }
 
@@ -1447,6 +1491,7 @@ async function runBrain() {
     stocks.forEach(stock => {
       setText(`${stock.key}CurrentPrice`, stock.current > 0 ? `£${stock.current.toFixed(3)}` : "--");
       setText(`${stock.key}Dip`, formatPct(stock.dipPct));
+      setText(`${stock.key}Dip30`, formatPct(stock.dip30Pct));
       setText(`${stock.key}VsAvg`, formatPct(stock.vsAvgPct));
       setText(`${stock.key}Score`, Math.round(stock.score));
 
@@ -1465,7 +1510,7 @@ async function runBrain() {
       setBadge(`${stock.key}Status`, status.label, status.cls);
       setText(
         `${stock.key}BrainNote`,
-        `${status.label} • Yield ${formatPct(stock.yieldPct)} • Income weight ${stock.incomeWeight.toFixed(1)}%`
+        `${status.label} • 7D ${formatPct(stock.dipPct)} • 30D ${formatPct(stock.dip30Pct)} • Yield ${formatPct(stock.yieldPct)} • Income weight ${stock.incomeWeight.toFixed(1)}%`
       );
       setText(`${stock.key}DecisionText`, getDecisionText(stock));
 
