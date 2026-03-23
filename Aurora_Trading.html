@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Aurora Trading Brain</title>
+
+<style>
+:root {
+  --bg: #071018;
+  --bg2: #0c1624;
+  --panel: rgba(15, 27, 43, 0.88);
+  --panel-2: rgba(10, 20, 34, 0.9);
+  --line: rgba(101, 225, 255, 0.16);
+  --cyan: #62f3ff;
+  --cyan-2: #1ad1ff;
+  --blue: #6ea8ff;
+  --green: #50ff8f;
+  --amber: #ffc857;
+  --red: #ff6b8a;
+  --text: #e9f4ff;
+  --muted: #96abc5;
+  --glow: 0 0 22px rgba(26, 209, 255, 0.22);
+  --radius: 18px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top right, rgba(26, 209, 255, 0.14), transparent 28%),
+    radial-gradient(circle at top left, rgba(110, 168, 255, 0.12), transparent 25%),
+    linear-gradient(180deg, var(--bg), #050b13 100%);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+body {
+  padding: 18px 14px 42px;
+}
+
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.hero {
+  background: linear-gradient(145deg, rgba(12, 22, 36, 0.95), rgba(6, 13, 23, 0.95));
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 18px;
+  box-shadow: var(--glow);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(98,243,255,0.08), transparent);
+  transform: translateX(-100%);
+  animation: scan 8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scan {
+  to { transform: translateX(100%); }
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.05;
+  letter-spacing: 0.3px;
+}
+
+h2, h3 {
+  margin: 0 0 10px;
+}
+
+.sub {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.section {
+  margin-top: 14px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+.top-grid {
+  grid-template-columns: repeat(4, minmax(0,1fr));
+}
+
+.triple-grid {
+  grid-template-columns: repeat(3, minmax(0,1fr));
+}
+
+.quad-grid {
+  grid-template-columns: repeat(4, minmax(0,1fr));
+}
+
+.five-grid {
+  grid-template-columns: repeat(5, minmax(0,1fr));
+}
+
+.two-grid {
+  grid-template-columns: repeat(2, minmax(0,1fr));
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.stat {
+  margin-top: 6px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.stat small {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.mini {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.mini .k {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.mini .v {
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.subv {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.alloc-box,
+.pillar-card {
+  background: linear-gradient(145deg, rgba(12, 24, 39, 0.96), rgba(7, 15, 25, 0.96));
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.pillar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.pillar-name {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.badge {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  border: 1px solid currentColor;
+}
+
+.safe { color: var(--green); }
+.watch { color: var(--amber); }
+.risk { color: var(--red); }
+.good { color: var(--green); }
+.aggressive { color: var(--blue); }
+.hold { color: var(--muted); }
+.overweight { color: var(--amber); }
+.too-heavy { color: var(--red); }
+.avoid { color: var(--red); }
+.neutral { color: var(--muted); }
+
+.bar {
+  height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+.fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--cyan-2), var(--cyan));
+  box-shadow: 0 0 20px rgba(98,243,255,0.35);
+  width: 0;
+  transition: width 0.25s ease;
+}
+
+.input-box {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.input-box label {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+}
+
+.input-box input {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 15px;
+  outline: none;
+}
+
+.quick-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.quick-btn {
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.alloc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 10px;
+}
+
+.alloc-amt {
+  font-size: 24px;
+  font-weight: 900;
+  margin-top: 4px;
+}
+
+.alloc-name {
+  color: var(--cyan);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.alloc-note {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+}
+
+.warning-box {
+  border-radius: 14px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+}
+
+.warning-box strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.footer {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+@media (max-width: 920px) {
+  .top-grid,
+  .triple-grid,
+  .quad-grid,
+  .five-grid,
+  .alloc-grid,
+  .pillar-grid,
+  .quick-row,
+  .two-grid {
+    grid-template-columns: 1fr;
+  }
+
+  h1 { font-size: 24px; }
+  .stat { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===================== SECTION: HERO ===================== -->
+  <section class="hero">
+    <h1>Aurora Trading Brain</h1>
+    <div class="sub">Dividend intelligence, concentration control, dip detection, buy signals, auto mode, reserve tracking, and trade execution helper in one system.</div>
+
+    <div class="grid top-grid" style="margin-top:14px;">
+      <div class="card">
+        <div class="stat-label">Confirmed Annual Income</div>
+        <div class="stat">£<span id="totalAnnualIncome">0.00</span> <small>/ year</small></div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Average Monthly Income</div>
+        <div class="stat">£<span id="totalMonthlyIncome">0.00</span> <small>/ month</small></div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Top Buy</div>
+        <div class="stat" id="topBuyName">--</div>
+        <div class="subv" id="topBuyMeta">Waiting for signals</div>
+      </div>
+      <div class="card">
+        <div class="stat-label">System View</div>
+        <div class="stat" id="systemViewLabel">Neutral</div>
+        <div class="subv" id="systemViewMeta">No strong buy cluster detected</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SECTION: COMMAND LAYER ===================== -->
+  <section class="section card">
+    <h2>Command Layer</h2>
+
+    <div class="grid quad-grid">
+      <div class="mini">
+        <div class="k">Next Cash Due</div>
+        <div class="v" id="nextCashDue">£0.00</div>
+        <div class="subv" id="nextCashDueMeta">Waiting for upcoming payment…</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Next Ex-Dividend</div>
+        <div class="v" id="nextExHolding">--</div>
+        <div class="subv" id="nextExDate">No upcoming ex-date loaded</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Next Payment</div>
+        <div class="v" id="nextPayHolding">--</div>
+        <div class="subv" id="nextPayDate">No upcoming pay-date loaded</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Income Concentration</div>
+        <div class="v" id="incomeConcentration">--</div>
+        <div class="subv" id="incomeConcentrationMeta">Top payer share of annual income</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SECTION: PAYDAY AUTO ALLOCATOR ===================== -->
+<section class="section card">
+  <h2>Payday Auto Allocator</h2>
+
+  <div class="grid triple-grid" style="margin-bottom:12px;">
+    <div class="mini">
+      <div class="k">Execution Signal</div>
+      <div class="v" id="executionSignal">HOLD</div>
+      <div class="subv" id="executionSignalMeta">Waiting for live setup…</div>
+    </div>
+
+    <div class="mini">
+      <div class="k">Active Mode</div>
+      <div class="v" id="activeModeLabel">Balance</div>
+      <div class="subv" id="activeModeMeta">Default allocator mode</div>
+    </div>
+
+    <div class="mini">
+      <div class="k">Why Top Pick Won</div>
+      <div class="v" id="topPickWhy">--</div>
+      <div class="subv" id="topPickWhyMeta">Waiting for ranking breakdown…</div>
+    </div>
+  </div>
+
+  <div class="warning-box" id="marketWarningBox" style="margin-bottom:12px;">
+    <strong id="marketWarningTitle">Market setup normal</strong>
+    <div class="subv" id="marketWarningText">Allocator will use standard deployment.</div>
+  </div>
+
+  <div class="grid quad-grid" style="margin-top:12px;">
+    <div class="mini">
+      <div class="k">Reserve Carried</div>
+      <div class="v" id="reserveCarried">£0</div>
+      <div class="subv">Unused hold-back from prior month / period</div>
+    </div>
+
+    <div class="mini">
+      <div class="k">New Money</div>
+      <div class="v" id="newMoneyAmount">£0</div>
+      <div class="subv">Current planned contribution</div>
+    </div>
+
+    <div class="mini">
+      <div class="k">Total Deployable</div>
+      <div class="v" id="totalDeployable">£0</div>
+      <div class="subv">New money + carried reserve</div>
+    </div>
+
+    <div class="mini">
+      <div class="k">Suggested Reserve</div>
+      <div class="v" id="suggestedReserve">£0</div>
+      <div class="subv">Cash to keep back after buys</div>
+    </div>
+  </div>
+
+  <div class="grid two-grid" style="margin-top:12px;">
+    <button class="quick-btn" id="saveReserveBtn">Save Suggested Reserve</button>
+    <button class="quick-btn" id="resetReserveBtn">Reset Reserve</button>
+  </div>
+
+  <div class="grid five-grid" style="margin-bottom:12px; margin-top:12px;">
+    <button class="quick-btn mode-btn" data-mode="auto">Auto</button>
+    <button class="quick-btn mode-btn" data-mode="income">Income</button>
+    <button class="quick-btn mode-btn" data-mode="balance">Balance</button>
+    <button class="quick-btn mode-btn" data-mode="dip">Dip Hunter</button>
+    <button class="quick-btn mode-btn" data-mode="defensive">Defensive</button>
+  </div>
+
+  <div class="grid two-grid">
+    <div class="input-box">
+      <label for="totalInvestment">Investment Amount (£)</label>
+      <input id="totalInvestment" type="number" value="800" step="1" />
+    </div>
+    <div class="input-box">
+      <label for="dipWeight">Dip Aggression</label>
+      <input id="dipWeight" type="number" value="1.2" step="0.1" min="0.5" max="2.0" />
+    </div>
+  </div>
+
+  <div class="quick-row">
+    <button class="quick-btn" data-amt="200">£200</button>
+    <button class="quick-btn" data-amt="400">£400</button>
+    <button class="quick-btn" data-amt="600">£600</button>
+    <button class="quick-btn" data-amt="800">£800</button>
+  </div>
+
+  <div class="grid two-grid" style="margin-top:12px;">
+    <div class="mini">
+      <div class="k">Buy Now</div>
+      <div class="v" id="buyNowAmount">£0</div>
+      <div class="subv" id="buyNowMeta">Primary execution amount</div>
+    </div>
+
+    <div class="mini">
+      <div class="k">Hold Back</div>
+      <div class="v" id="holdBackAmount">£0</div>
+      <div class="subv" id="holdBackMeta">Reserve for deeper dip / next session</div>
+    </div>
+  </div>
+
+  <div class="alloc-grid" style="margin-top:12px;">
+    <div class="alloc-box">
+      <div class="k">Primary Buy</div>
+      <div class="alloc-amt" id="alloc1Amt">£0</div>
+      <div class="alloc-name" id="alloc1Name">--</div>
+      <div class="alloc-note" id="alloc1Note">--</div>
+    </div>
+    <div class="alloc-box">
+      <div class="k">Secondary Buy</div>
+      <div class="alloc-amt" id="alloc2Amt">£0</div>
+      <div class="alloc-name" id="alloc2Name">--</div>
+      <div class="alloc-note" id="alloc2Note">--</div>
+    </div>
+    <div class="alloc-box">
+      <div class="k">Support Buy</div>
+      <div class="alloc-amt" id="alloc3Amt">£0</div>
+      <div class="alloc-name" id="alloc3Name">--</div>
+      <div class="alloc-note" id="alloc3Note">--</div>
+    </div>
+    <div class="alloc-box">
+      <div class="k">Maintenance Buy</div>
+      <div class="alloc-amt" id="alloc4Amt">£0</div>
+      <div class="alloc-name" id="alloc4Name">--</div>
+      <div class="alloc-note" id="alloc4Note">--</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <h3>Trade Entry Helper</h3>
+
+    <div class="grid quad-grid" style="margin-bottom:12px;">
+      <button class="quick-btn trade-preset-btn" data-slot="1">Use Primary Buy</button>
+      <button class="quick-btn trade-preset-btn" data-slot="2">Use Secondary Buy</button>
+      <button class="quick-btn trade-preset-btn" data-slot="3">Use Support Buy</button>
+      <button class="quick-btn trade-preset-btn" data-slot="4">Use Maintenance Buy</button>
+    </div>
+
+    <div class="grid quad-grid">
+      <div class="input-box">
+        <label for="tradeTicker">Ticker</label>
+        <input id="tradeTicker" type="text" placeholder="LGEN / MNG / PHNX / SUPR" />
+      </div>
+
+      <div class="input-box">
+        <label for="tradeAmount">Cash Invested (£)</label>
+        <input id="tradeAmount" type="number" step="0.01" placeholder="300" />
+      </div>
+
+      <div class="input-box">
+        <label for="tradePrice">Executed Price (£)</label>
+        <input id="tradePrice" type="number" step="0.0001" placeholder="2.5000" />
+      </div>
+
+      <div class="input-box">
+        <label for="tradeStampable">Stamp Duty Applies?</label>
+        <input id="tradeStampable" type="text" value="Yes" />
+      </div>
+    </div>
+
+    <div class="grid quad-grid" style="margin-top:12px;">
+      <div class="mini">
+        <div class="k">Estimated Shares</div>
+        <div class="v" id="tradeShares">0.0000</div>
+        <div class="subv">Cash ÷ executed price</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Stamp Duty</div>
+        <div class="v" id="tradeStampDuty">£0.00</div>
+        <div class="subv">0.5% rounded up to nearest £1</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Total Cost</div>
+        <div class="v" id="tradeTotalCost">£0.00</div>
+        <div class="subv">Cash invested + stamp duty</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">New Avg Cost</div>
+        <div class="v" id="tradeNewAvgCost">£0.0000</div>
+        <div class="subv">Based on current Holdings row</div>
+      </div>
+    </div>
+
+    <div class="mini" style="margin-top:12px;">
+      <div class="k">Update Holdings Sheet</div>
+      <div class="v" id="tradeUpdateTitle">Waiting for trade inputs…</div>
+      <div class="subv" id="tradeUpdateText">Enter ticker, amount and executed price to see the exact Holdings update.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <h3>Post-Buy Workflow</h3>
+
+    <div class="grid quad-grid">
+      <div class="mini">
+        <div class="k">Step 1</div>
+        <div class="v">Fund IG</div>
+        <div class="subv">Move your planned capital into the account</div>
+      </div>
+      <div class="mini">
+        <div class="k">Step 2</div>
+        <div class="v">Run Brain</div>
+        <div class="subv">Check Auto / Balance / Income / Dip / Defensive</div>
+      </div>
+      <div class="mini">
+        <div class="k">Step 3</div>
+        <div class="v">Execute Buys</div>
+        <div class="subv">Use Trade Helper for exact Holdings update</div>
+      </div>
+      <div class="mini">
+        <div class="k">Step 4</div>
+        <div class="v">Save Reserve</div>
+        <div class="subv">Carry any unused cash into next cycle</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SECTION: PILLAR ANALYSIS ===================== -->
+<section class="section card">
+  <h2>Pillar Intelligence</h2>
+
+  <div class="warning-box" id="singleOpportunityBox" style="margin-bottom:12px;">
+    <strong id="singleOpportunityTitle">No single-pillar opportunity detected</strong>
+    <div class="subv" id="singleOpportunityText">Allocator will use normal distribution unless one pillar clearly stands out.</div>
+  </div>
+
+  <div class="pillar-grid">
+
+    <div class="pillar-card">
+      <div class="pillar-top">
+        <div class="pillar-name">Legal &amp; General</div>
+        <div class="badge" id="lngStatus">--</div>
+      </div>
+      <div class="subv" id="lngBrainNote">--</div>
+      <div class="bar"><div class="fill" id="lngBar"></div></div>
+      <div class="grid top-grid">
+        <div class="mini"><div class="k">Price</div><div class="v" id="lngCurrentPrice">--</div></div>
+        <div class="mini"><div class="k">7D Dip</div><div class="v" id="lngDip">--</div></div>
+        <div class="mini"><div class="k">Vs Avg</div><div class="v" id="lngVsAvg">--</div></div>
+        <div class="mini"><div class="k">Score</div><div class="v" id="lngScore">--</div></div>
+      </div>
+      <div class="subv" id="lngDecisionText">Waiting for live decision…</div>
+    </div>
+
+    <div class="pillar-card">
+      <div class="pillar-top">
+        <div class="pillar-name">M&amp;G</div>
+        <div class="badge" id="mngStatus">--</div>
+      </div>
+      <div class="subv" id="mngBrainNote">--</div>
+      <div class="bar"><div class="fill" id="mngBar"></div></div>
+      <div class="grid top-grid">
+        <div class="mini"><div class="k">Price</div><div class="v" id="mngCurrentPrice">--</div></div>
+        <div class="mini"><div class="k">7D Dip</div><div class="v" id="mngDip">--</div></div>
+        <div class="mini"><div class="k">Vs Avg</div><div class="v" id="mngVsAvg">--</div></div>
+        <div class="mini"><div class="k">Score</div><div class="v" id="mngScore">--</div></div>
+      </div>
+      <div class="subv" id="mngDecisionText">Waiting for live decision…</div>
+    </div>
+
+    <div class="pillar-card">
+      <div class="pillar-top">
+        <div class="pillar-name">Standard Life</div>
+        <div class="badge" id="sdlfStatus">--</div>
+      </div>
+      <div class="subv" id="sdlfBrainNote">--</div>
+      <div class="bar"><div class="fill" id="sdlfBar"></div></div>
+      <div class="grid top-grid">
+        <div class="mini"><div class="k">Price</div><div class="v" id="sdlfCurrentPrice">--</div></div>
+        <div class="mini"><div class="k">7D Dip</div><div class="v" id="sdlfDip">--</div></div>
+        <div class="mini"><div class="k">Vs Avg</div><div class="v" id="sdlfVsAvg">--</div></div>
+        <div class="mini"><div class="k">Score</div><div class="v" id="sdlfScore">--</div></div>
+      </div>
+      <div class="subv" id="sdlfDecisionText">Waiting for live decision…</div>
+    </div>
+
+    <div class="pillar-card">
+      <div class="pillar-top">
+        <div class="pillar-name">Supermarket REIT</div>
+        <div class="badge" id="suprStatus">--</div>
+      </div>
+      <div class="subv" id="suprBrainNote">--</div>
+      <div class="bar"><div class="fill" id="suprBar"></div></div>
+      <div class="grid top-grid">
+        <div class="mini"><div class="k">Price</div><div class="v" id="suprCurrentPrice">--</div></div>
+        <div class="mini"><div class="k">7D Dip</div><div class="v" id="suprDip">--</div></div>
+        <div class="mini"><div class="k">Vs Avg</div><div class="v" id="suprVsAvg">--</div></div>
+        <div class="mini"><div class="k">Score</div><div class="v" id="suprScore">--</div></div>
+      </div>
+      <div class="subv" id="suprDecisionText">Waiting for live decision…</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================== SECTION: MONTHLY DIVIDEND FORECAST ===================== -->
+<section class="section card">
+  <h2>Monthly Dividend Forecast</h2>
+
+  <div class="grid quad-grid" id="forecastGrid">
+    <div class="mini"><div class="k">Jan</div><div class="v" id="forecastJan">£0.00</div><div class="subv" id="forecastJanMeta">No flow</div></div>
+    <div class="mini"><div class="k">Feb</div><div class="v" id="forecastFeb">£0.00</div><div class="subv" id="forecastFebMeta">No flow</div></div>
+    <div class="mini"><div class="k">Mar</div><div class="v" id="forecastMar">£0.00</div><div class="subv" id="forecastMarMeta">No flow</div></div>
+    <div class="mini"><div class="k">Apr</div><div class="v" id="forecastApr">£0.00</div><div class="subv" id="forecastAprMeta">No flow</div></div>
+    <div class="mini"><div class="k">May</div><div class="v" id="forecastMay">£0.00</div><div class="subv" id="forecastMayMeta">No flow</div></div>
+    <div class="mini"><div class="k">Jun</div><div class="v" id="forecastJun">£0.00</div><div class="subv" id="forecastJunMeta">No flow</div></div>
+    <div class="mini"><div class="k">Jul</div><div class="v" id="forecastJul">£0.00</div><div class="subv" id="forecastJulMeta">No flow</div></div>
+    <div class="mini"><div class="k">Aug</div><div class="v" id="forecastAug">£0.00</div><div class="subv" id="forecastAugMeta">No flow</div></div>
+    <div class="mini"><div class="k">Sep</div><div class="v" id="forecastSep">£0.00</div><div class="subv" id="forecastSepMeta">No flow</div></div>
+    <div class="mini"><div class="k">Oct</div><div class="v" id="forecastOct">£0.00</div><div class="subv" id="forecastOctMeta">No flow</div></div>
+    <div class="mini"><div class="k">Nov</div><div class="v" id="forecastNov">£0.00</div><div class="subv" id="forecastNovMeta">No flow</div></div>
+    <div class="mini"><div class="k">Dec</div><div class="v" id="forecastDec">£0.00</div><div class="subv" id="forecastDecMeta">No flow</div></div>
+  </div>
+
+  <div class="grid triple-grid" style="margin-top:12px;">
+    <div class="mini">
+      <div class="k">Best Dividend Month</div>
+      <div class="v" id="bestForecastMonth">--</div>
+      <div class="subv" id="bestForecastMonthMeta">No data</div>
+    </div>
+    <div class="mini">
+      <div class="k">Weakest Dividend Month</div>
+      <div class="v" id="worstForecastMonth">--</div>
+      <div class="subv" id="worstForecastMonthMeta">No data</div>
+    </div>
+    <div class="mini">
+      <div class="k">Next 3 Payments</div>
+      <div class="v" id="next3PaymentsTitle">--</div>
+      <div class="subv" id="next3PaymentsMeta">No upcoming payments</div>
+    </div>
+  </div>
+</section>
+<div class="footer">
+  Aurora Trading Brain • Allocation + Timing + Risk Control
+</div>
+
+</div>
+
+<!-- ===================== SECTION: SCRIPT ===================== -->
+<script>
+const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
+const HOLDINGS_URL = `https://opensheet.elk.sh/${SHEET_ID}/Holdings`;
+const DIVIDENDS_URL = `https://opensheet.elk.sh/${SHEET_ID}/Dividends`;
+
+const PRICE_MEMORY_KEY = "aurora_prices_v5";
+const MODE_KEY = "aurora_mode_v5";
+const RESERVE_KEY = "aurora_reserve_v2";
+
+const MONTH_KEYS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+const TICKER_MAP = {
+  LGEN: "lng",
+  "LGEN.L": "lng",
+  "LON:LGEN": "lng",
+  MNG: "mng",
+  "MNG.L": "mng",
+  "LON:MNG": "mng",
+  PHNX: "sdlf",
+  "PHNX.L": "sdlf",
+  "PHNX.GB": "sdlf",
+  SDLF: "sdlf",
+  "SDLF.L": "sdlf",
+  "LON:SDLF": "sdlf",
+  "STANDARD LIFE": "sdlf",
+  SUPR: "supr",
+  "SUPR.L": "supr",
+  "SUPR.GB": "supr",
+  "LON:SUPR": "supr"
+};
+
+const NAMES = {
+  lng: "Legal & General",
+  mng: "M&G",
+  sdlf: "Standard Life",
+  supr: "Supermarket REIT"
+};
+
+let latestLiveData = {
+  lng: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
+  mng: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
+  sdlf: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
+  supr: { shares: 0, price: 0, dps: 0, book: 0, income: 0 }
+};
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = value;
+}
+
+function formatMoney(v) {
+  return Number(v || 0).toLocaleString("en-GB", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function formatMoney0(v) {
+  return Number(v || 0).toLocaleString("en-GB", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  });
+}
+
+function formatPct(v) {
+  return `${Number(v || 0).toFixed(2)}%`;
+}
+
+function parseNum(v) {
+  const n = parseFloat(String(v ?? "").replace(/[^0-9.-]/g, ""));
+  return Number.isFinite(n) ? n : 0;
+}
+
+function normaliseTicker(v) {
+  return String(v || "").trim().toUpperCase().replace(/\s+/g, " ");
+}
+
+function mapTickerToKey(v) {
+  const raw = normaliseTicker(v);
+  const stripped = raw.replace(".GB", "").replace(" GB", "");
+  return TICKER_MAP[raw] || TICKER_MAP[stripped] || null;
+}
+
+function getMode() {
+  return localStorage.getItem(MODE_KEY) || "auto";
+}
+
+function setMode(mode) {
+  localStorage.setItem(MODE_KEY, mode);
+}
+
+function getBaseModeConfig(mode) {
+  if (mode === "income") {
+    return {
+      mode,
+      label: "Income",
+      meta: "Favors higher live yield and income build",
+      dipMult: 1.0,
+      yieldMult: 1.35,
+      valueMult: 1.0,
+      holdPct: 0.10
+    };
+  }
+
+  if (mode === "dip") {
+    return {
+      mode,
+      label: "Dip Hunter",
+      meta: "Favors deeper pullbacks and discounts",
+      dipMult: 1.45,
+      yieldMult: 1.0,
+      valueMult: 1.0,
+      holdPct: 0.25
+    };
+  }
+
+  if (mode === "defensive") {
+    return {
+      mode,
+      label: "Defensive",
+      meta: "Keeps more cash back and softens aggression",
+      dipMult: 0.9,
+      yieldMult: 0.9,
+      valueMult: 1.1,
+      holdPct: 0.35
+    };
+  }
+
+  return {
+    mode: "balance",
+    label: "Balance",
+    meta: "Balanced between dip, value, and yield",
+    dipMult: 1.1,
+    yieldMult: 1.0,
+    valueMult: 1.0,
+    holdPct: 0.20
+  };
+}
+
+function updateModeButtons() {
+  const mode = getMode();
+  document.querySelectorAll(".mode-btn").forEach(btn => {
+    const active = btn.dataset.mode === mode;
+    btn.style.borderColor = active ? "rgba(98,243,255,0.55)" : "rgba(255,255,255,0.08)";
+    btn.style.color = active ? "var(--cyan)" : "var(--text)";
+    btn.style.boxShadow = active ? "0 0 14px rgba(26,209,255,0.18)" : "none";
+  });
+}
+
+function getMemory() {
+  try {
+    return JSON.parse(localStorage.getItem(PRICE_MEMORY_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function saveMemory(memory) {
+  localStorage.setItem(PRICE_MEMORY_KEY, JSON.stringify(memory));
+}
+
+function getReserve() {
+  const value = Number(localStorage.getItem(RESERVE_KEY) || "0");
+  return Number.isFinite(value) ? value : 0;
+}
+
+function setReserve(value) {
+  localStorage.setItem(RESERVE_KEY, String(Number(value || 0)));
+}
+
+function todayIso() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function updateRollingPriceMemory(memory, key, price) {
+  if (!Number.isFinite(price) || price <= 0) return;
+
+  if (!memory[key] || !Array.isArray(memory[key])) {
+    memory[key] = [];
+  }
+
+  const today = todayIso();
+  const existingIndex = memory[key].findIndex(entry => entry.date === today);
+
+  if (existingIndex >= 0) {
+    memory[key][existingIndex].price = price;
+  } else {
+    memory[key].push({ date: today, price });
+  }
+
+  memory[key] = memory[key]
+    .filter(entry => entry && entry.date && Number.isFinite(Number(entry.price)))
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .slice(-7);
+}
+
+function getRollingHigh(memory, key, fallbackPrice) {
+  const history = Array.isArray(memory[key]) ? memory[key] : [];
+  const prices = history
+    .map(entry => Number(entry.price))
+    .filter(price => Number.isFinite(price) && price > 0);
+
+  if (!prices.length) return fallbackPrice || 0;
+  return Math.max(...prices);
+}
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const now = new Date(todayIso());
+  const then = new Date(dateStr);
+  if (isNaN(then.getTime())) return null;
+  return Math.ceil((then - now) / (1000 * 60 * 60 * 24));
+}
+
+function monthIndexFromDate(dateStr) {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  return d.getMonth();
+}
+
+function monthKeyFromIndex(index) {
+  return MONTH_KEYS[index] || "";
+}
+
+function setBadge(id, text, cls) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = `badge ${cls}`;
+  el.innerText = text;
+}
+
+function getExecutionSignal(stocks) {
+  const strong = stocks.some(s => s.dipPct <= -5 && s.score >= 65);
+  const decent = stocks.some(s => s.dipPct <= -3 && s.score >= 55);
+  const rich = stocks.filter(s => s.vsAvgPct > 5).length >= 2;
+
+  if (strong) return { label: "BUY NOW", meta: "Strong dip and score detected." };
+  if (decent) return { label: "ACCUMULATE", meta: "Reasonable weakness detected." };
+  if (rich) return { label: "WAIT", meta: "Several pillars look rich versus average cost." };
+  return { label: "HOLD", meta: "Normal conditions. Steady accumulation is fine." };
+}
+
+function getTopPickReason(stock, pillarWeight) {
+  const reasons = [];
+  if (stock.dipPct <= -5) reasons.push(`7d dip ${formatPct(stock.dipPct)}`);
+  else if (stock.dipPct < 0) reasons.push(`mild dip ${formatPct(stock.dipPct)}`);
+  if (stock.vsAvgPct < 0) reasons.push(`below avg cost ${formatPct(stock.vsAvgPct)}`);
+  if (stock.yieldPct >= 8) reasons.push(`yield ${formatPct(stock.yieldPct)}`);
+  if (pillarWeight < 15) reasons.push(`underweight pillar`);
+  if (pillarWeight > 35) reasons.push(`won despite overweight penalty`);
+  return reasons.length ? reasons.join(" • ") : "Best overall live score";
+}
+
+function getStatusFromScore(score, dipPct, vsAvgPct) {
+  if (dipPct <= -8 && vsAvgPct <= -3 && score >= 80) return { label: "AGGRESSIVE BUY", cls: "aggressive" };
+  if (dipPct <= -5 && score >= 65) return { label: "GOOD BUY", cls: "good" };
+  if (dipPct <= -3 || vsAvgPct <= -1) return { label: "WATCH", cls: "watch" };
+  if (vsAvgPct > 5) return { label: "RISK", cls: "risk" };
+  return { label: "HOLD", cls: "hold" };
+}
+
+function getDecisionText(stock) {
+  if (stock.score >= 70) return "Strong setup. This is a proper buy opportunity.";
+  if (stock.score >= 50) return "Decent setup. Good for controlled accumulation.";
+  if (stock.score >= 30) return "Mixed setup. Only light buying if needed.";
+  return "Do not force this buy right now.";
+}
+
+function calculateStampDuty(cashAmount, stampApplies) {
+  if (!stampApplies || cashAmount <= 0) return 0;
+  const raw = cashAmount * 0.005;
+  return raw > 0 ? Math.ceil(raw) : 0;
+}
+
+function presetTradeFromPlan(slot) {
+  const planned = window.latestPlan || [];
+  const pick = planned[slot - 1];
+  if (!pick) return;
+
+  const tickerMap = {
+    lng: "LGEN",
+    mng: "MNG",
+    sdlf: "PHNX",
+    supr: "SUPR"
+  };
+
+  const tickerEl = document.getElementById("tradeTicker");
+  const amountEl = document.getElementById("tradeAmount");
+
+  if (tickerEl) tickerEl.value = tickerMap[pick.key] || "";
+  if (amountEl) amountEl.value = pick.amount || 0;
+
+  updateTradeHelper();
+}
+
+function saveSuggestedReserve() {
+  const text = String(document.getElementById("suggestedReserve")?.innerText || "0");
+  const value = parseNum(text);
+  setReserve(value);
+  runBrain();
+}
+
+function resetReserve() {
+  setReserve(0);
+  runBrain();
+}
+
+function updateTradeHelper() {
+  const tickerRaw = document.getElementById("tradeTicker")?.value || "";
+  const amount = Number(document.getElementById("tradeAmount")?.value || 0);
+  const price = Number(document.getElementById("tradePrice")?.value || 0);
+  const stampableText = String(document.getElementById("tradeStampable")?.value || "Yes").trim().toLowerCase();
+
+  const stampApplies = !["no", "n", "false", "0"].includes(stampableText);
+  const key = mapTickerToKey(tickerRaw);
+
+  if (!key || amount <= 0 || price <= 0) {
+    setText("tradeShares", "0.0000");
+    setText("tradeStampDuty", "£0.00");
+    setText("tradeTotalCost", "£0.00");
+    setText("tradeNewAvgCost", "£0.0000");
+    setText("tradeUpdateTitle", "Waiting for trade inputs…");
+    setText("tradeUpdateText", "Enter ticker, amount and executed price to see the exact Holdings update.");
+    return;
+  }
+
+  const current = latestLiveData[key] || { shares: 0, book: 0 };
+  const sharesBought = amount / price;
+  const stampDuty = calculateStampDuty(amount, stampApplies);
+  const totalCost = amount + stampDuty;
+  const newShares = Number(current.shares || 0) + sharesBought;
+  const newBook = Number(current.book || 0) + totalCost;
+  const newAvg = newShares > 0 ? newBook / newShares : 0;
+
+  setText("tradeShares", sharesBought.toFixed(4));
+  setText("tradeStampDuty", `£${formatMoney(stampDuty)}`);
+  setText("tradeTotalCost", `£${formatMoney(totalCost)}`);
+  setText("tradeNewAvgCost", `£${newAvg.toFixed(4)}`);
+
+  setText("tradeUpdateTitle", `${NAMES[key]} Holdings update`);
+  setText(
+    "tradeUpdateText",
+    `Add ${sharesBought.toFixed(4)} shares. New total shares: ${newShares.toFixed(4)}. Add £${formatMoney(totalCost)} to book cost. New total book cost: £${formatMoney(newBook)}. New average cost: £${newAvg.toFixed(4)}.`
+  );
+}
+
+function chooseAutoMode(preStocks) {
+  const lowScoreCount = preStocks.filter(s => s.score < 30).length;
+  const strongDipCount = preStocks.filter(s => s.dipPct <= -5 && s.score >= 60).length;
+  const highYieldCount = preStocks.filter(s => s.yieldPct >= 8 && s.score >= 35).length;
+  const richCount = preStocks.filter(s => s.vsAvgPct > 5).length;
+
+  if (strongDipCount >= 1) return getBaseModeConfig("dip");
+  if (lowScoreCount >= 3 || richCount >= 2) return getBaseModeConfig("defensive");
+  if (highYieldCount >= 2 && strongDipCount === 0) return getBaseModeConfig("income");
+  return getBaseModeConfig("balance");
+}
+async function runBrain() {
+  try {
+    updateModeButtons();
+
+    const [holdingsRes, dividendsRes] = await Promise.all([
+      fetch(HOLDINGS_URL),
+      fetch(DIVIDENDS_URL)
+    ]);
+
+    const holdings = await holdingsRes.json();
+    const dividends = await dividendsRes.json();
+
+    const live = {
+      lng: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
+      mng: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
+      sdlf: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
+      supr: { shares: 0, price: 0, dps: 0, book: 0, income: 0 }
+    };
+
+    holdings.forEach(row => {
+      const key = mapTickerToKey(row.ticker);
+      if (!key) return;
+
+      const shares = parseNum(row.shares);
+      const rawPrice = parseNum(row.live_price);
+      const price = rawPrice > 20 ? rawPrice / 100 : rawPrice;
+      const dps = parseNum(row.annual_dividend_per_share);
+      const book = parseNum(row.book_cost);
+
+      live[key] = {
+        shares,
+        price,
+        dps,
+        book,
+        income: shares * dps
+      };
+    });
+
+    latestLiveData = live;
+
+    const totalAnnual = Object.values(live).reduce((sum, item) => sum + item.income, 0);
+    const totalMonthly = totalAnnual / 12;
+
+    setText("totalAnnualIncome", formatMoney(totalAnnual));
+    setText("totalMonthlyIncome", formatMoney(totalMonthly));
+
+    const pillarIncomeWeights = {};
+    Object.keys(live).forEach(key => {
+      pillarIncomeWeights[key] = totalAnnual > 0 ? (live[key].income / totalAnnual) * 100 : 0;
+    });
+
+    const concentration = Object.entries(pillarIncomeWeights).sort((a, b) => b[1] - a[1])[0];
+    if (concentration) {
+      setText("incomeConcentration", NAMES[concentration[0]]);
+      setText("incomeConcentrationMeta", `${concentration[1].toFixed(1)}% of annual income`);
+    } else {
+      setText("incomeConcentration", "--");
+      setText("incomeConcentrationMeta", "No income data");
+    }
+
+    const upcomingEvents = [];
+    const monthTotals = Array(12).fill(0);
+    const monthBreakdown = Array(12).fill(null).map(() => ({}));
+
+    dividends.forEach(row => {
+      const key = mapTickerToKey(row.ticker);
+      if (!key) return;
+
+      const holding = row.name ? String(row.name).trim() : NAMES[key];
+      const exDate = String(row.ex_div_date || "").trim();
+      const payDate = String(row.pay_date || "").trim();
+      const totalDividend = parseNum(row.total_dividend);
+
+      if (exDate) {
+        upcomingEvents.push({ key, holding, type: "Ex-Date", date: exDate, cash: 0 });
+      }
+
+      if (payDate) {
+        upcomingEvents.push({ key, holding, type: "Pay Date", date: payDate, cash: totalDividend });
+
+        const monthIndex = monthIndexFromDate(payDate);
+        if (monthIndex !== null) {
+          monthTotals[monthIndex] += totalDividend;
+          if (!monthBreakdown[monthIndex][holding]) monthBreakdown[monthIndex][holding] = 0;
+          monthBreakdown[monthIndex][holding] += totalDividend;
+        }
+      }
+    });
+
+    const futureEvents = upcomingEvents
+      .filter(event => event.date && event.date >= todayIso())
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const nextEx = futureEvents.find(event => event.type === "Ex-Date");
+    const nextPay = futureEvents.find(event => event.type === "Pay Date");
+
+    if (nextEx) {
+      const d = daysUntil(nextEx.date);
+      setText("nextExHolding", nextEx.holding);
+      setText("nextExDate", `${nextEx.date}${d != null ? ` • ${d} days` : ""}`);
+    } else {
+      setText("nextExHolding", "--");
+      setText("nextExDate", "No upcoming ex-date");
+    }
+
+    if (nextPay) {
+      const d = daysUntil(nextPay.date);
+      setText("nextPayHolding", nextPay.holding);
+      setText("nextPayDate", `${nextPay.date}${d != null ? ` • ${d} days` : ""}`);
+      setText("nextCashDue", `£${formatMoney(nextPay.cash)}`);
+      setText("nextCashDueMeta", `${nextPay.holding} on ${nextPay.date}`);
+    } else {
+      setText("nextPayHolding", "--");
+      setText("nextPayDate", "No upcoming pay-date");
+      setText("nextCashDue", "£0.00");
+      setText("nextCashDueMeta", "Waiting for upcoming payment…");
+    }
+
+    MONTH_KEYS.forEach((monthName, index) => {
+      setText(`forecast${monthName}`, `£${formatMoney(monthTotals[index])}`);
+
+      if (monthTotals[index] <= 0) {
+        setText(`forecast${monthName}Meta`, "No flow");
+      } else {
+        const biggest = Object.entries(monthBreakdown[index]).sort((a, b) => b[1] - a[1])[0];
+        const sharePct = biggest ? (biggest[1] / monthTotals[index]) * 100 : 0;
+        setText(`forecast${monthName}Meta`, `${biggest[0]} ${sharePct.toFixed(0)}%`);
+      }
+    });
+
+    const bestMonthValue = Math.max(...monthTotals);
+    const worstMonthValue = Math.min(...monthTotals);
+    const bestMonthIndex = monthTotals.findIndex(v => v === bestMonthValue);
+    const worstMonthIndex = monthTotals.findIndex(v => v === worstMonthValue);
+
+    setText("bestForecastMonth", monthKeyFromIndex(bestMonthIndex));
+    setText("bestForecastMonthMeta", `£${formatMoney(bestMonthValue)} expected`);
+    setText("worstForecastMonth", monthKeyFromIndex(worstMonthIndex));
+    setText("worstForecastMonthMeta", `£${formatMoney(worstMonthValue)} expected`);
+
+    const next3 = futureEvents.filter(event => event.type === "Pay Date").slice(0, 3);
+    if (next3.length) {
+      setText("next3PaymentsTitle", `${next3.length} queued`);
+      setText("next3PaymentsMeta", next3.map(event => `${event.holding} ${event.date} £${formatMoney(event.cash)}`).join(" • "));
+    } else {
+      setText("next3PaymentsTitle", "--");
+      setText("next3PaymentsMeta", "No upcoming payments");
+    }
+
+    const baseDipWeight = Number(document.getElementById("dipWeight")?.value || 1.2);
+    const newMoney = Number(document.getElementById("totalInvestment")?.value || 800);
+    const carriedReserve = getReserve();
+    const totalDeployable = newMoney + carriedReserve;
+
+    const memory = getMemory();
+
+    const preStocks = Object.entries(live).map(([key, item]) => {
+      const current = item.price || 0;
+      const avg = item.shares > 0 ? (item.book / item.shares) : 0;
+      const yieldPct = current > 0 ? (item.dps / current) * 100 : 0;
+      const rollingHigh = getRollingHigh(memory, key, current);
+      const dipPct = rollingHigh > 0 ? ((current - rollingHigh) / rollingHigh) * 100 : 0;
+      const vsAvgPct = avg > 0 ? ((current - avg) / avg) * 100 : 0;
+      return { key, current, avg, yieldPct, dipPct, vsAvgPct, score: 0 };
+    });
+
+    const selectedMode = getMode();
+    const modeConfig = selectedMode === "auto" ? chooseAutoMode(preStocks) : getBaseModeConfig(selectedMode);
+
+    const dipWeight = baseDipWeight * modeConfig.dipMult;
+
+    setText("activeModeLabel", selectedMode === "auto" ? `Auto → ${modeConfig.label}` : modeConfig.label);
+    setText("activeModeMeta", selectedMode === "auto" ? `System selected ${modeConfig.label.toLowerCase()} mode from live setup` : modeConfig.meta);
+
+    setText("reserveCarried", `£${formatMoney0(carriedReserve)}`);
+    setText("newMoneyAmount", `£${formatMoney0(newMoney)}`);
+    setText("totalDeployable", `£${formatMoney0(totalDeployable)}`);
+
+    const stocks = Object.entries(live).map(([key, item]) => {
+      const current = item.price || 0;
+      const avg = item.shares > 0 ? (item.book / item.shares) : 0;
+      const yieldPct = current > 0 ? (item.dps / current) * 100 : 0;
+      const rollingHigh = getRollingHigh(memory, key, current);
+      const dipPct = rollingHigh > 0 ? ((current - rollingHigh) / rollingHigh) * 100 : 0;
+      const vsAvgPct = avg > 0 ? ((current - avg) / avg) * 100 : 0;
+
+      let score = 0;
+
+      if (dipPct <= -8) score += 40;
+      else if (dipPct <= -5) score += 30;
+      else if (dipPct <= -3) score += 20;
+      else if (dipPct < 0) score += 10;
+
+      if (vsAvgPct <= -5) score += 25 * modeConfig.valueMult;
+      else if (vsAvgPct <= -2) score += 15 * modeConfig.valueMult;
+      else if (vsAvgPct < 0) score += 8 * modeConfig.valueMult;
+      else if (vsAvgPct > 5) score -= 10;
+
+      if (yieldPct >= 9) score += 15 * modeConfig.yieldMult;
+      else if (yieldPct >= 8) score += 10 * modeConfig.yieldMult;
+      else if (yieldPct >= 7) score += 6 * modeConfig.yieldMult;
+
+      const weight = pillarIncomeWeights[key] || 0;
+      if (weight > 50) score -= 30;
+      else if (weight > 40) score -= 18;
+      else if (weight > 35) score -= 10;
+      else if (weight < 15) score += 10;
+
+      score += Math.abs(Math.min(dipPct, 0)) * dipWeight;
+      score = Math.max(0, Math.min(100, score));
+
+      return {
+        key,
+        name: NAMES[key],
+        current,
+        avg,
+        yieldPct,
+        dipPct,
+        vsAvgPct,
+        score,
+        incomeWeight: weight
+      };
+    });
+
+    stocks.sort((a, b) => b.score - a.score || b.yieldPct - a.yieldPct);
+
+    const topScore = stocks[0]?.score || 0;
+    const secondScore = stocks[1]?.score || 0;
+    const singleOpportunity = topScore >= 55 && (topScore - secondScore >= 18);
+
+    if (singleOpportunity) {
+      setText("singleOpportunityTitle", `Single Opportunity Detected: ${stocks[0].name}`);
+      setText("singleOpportunityText", `This pillar clearly stands out. Allocator will tilt more heavily toward it while keeping risk control.`);
+    } else {
+      setText("singleOpportunityTitle", "No single-pillar opportunity detected");
+      setText("singleOpportunityText", "Allocator will use normal distribution unless one pillar clearly stands out.");
+    }
+
+    if (topScore < 20) {
+      setText("marketWarningTitle", "Weak market setup");
+      setText("marketWarningText", "Scores are very low across the board. Do not force full deployment.");
+    } else if (topScore < 35) {
+      setText("marketWarningTitle", "Cautious setup");
+      setText("marketWarningText", "Limited value is showing. Reduce aggression and keep extra reserve.");
+    } else {
+      setText("marketWarningTitle", "Market setup normal");
+      setText("marketWarningText", "Allocator can use standard deployment unless a clearer opportunity appears.");
+    }
+
+    const execution = getExecutionSignal(stocks);
+    setText("executionSignal", execution.label);
+    setText("executionSignalMeta", execution.meta);
+
+    let dynamicHoldPct = modeConfig.holdPct;
+
+    if (topScore < 20) dynamicHoldPct = Math.max(dynamicHoldPct, 0.60);
+    else if (topScore < 35) dynamicHoldPct = Math.max(dynamicHoldPct, 0.40);
+    else if (singleOpportunity) dynamicHoldPct = Math.min(dynamicHoldPct, 0.15);
+
+    const holdBack = Math.round(totalDeployable * dynamicHoldPct);
+    const buyNow = totalDeployable - holdBack;
+
+    setText("buyNowAmount", `£${formatMoney0(buyNow)}`);
+    setText("buyNowMeta", topScore < 35 ? "Reduced because live scores are weak" : singleOpportunity ? "Increased because one pillar clearly stands out" : "Primary execution amount");
+    setText("holdBackAmount", `£${formatMoney0(holdBack)}`);
+    setText("holdBackMeta", topScore < 35 ? "Higher reserve because conditions are weak" : "Reserve for deeper dip / next session");
+    setText("suggestedReserve", `£${formatMoney0(holdBack)}`);
+
+    const totalScore = stocks.reduce((sum, stock) => sum + stock.score, 0) || 1;
+
+    let rawAllocations = stocks.map(stock => ({
+      ...stock,
+      allocPct: totalScore > 0 ? stock.score / totalScore : 0.25
+    }));
+
+    if (singleOpportunity) {
+      rawAllocations = rawAllocations.map((stock, index) => {
+        if (index === 0) return { ...stock, allocPct: Math.max(stock.allocPct, 0.65) };
+        return { ...stock, allocPct: stock.allocPct * 0.35 };
+      });
+    }
+        const MIN_ALLOC_PCT = 0.00;
+    const MAX_ALLOC_PCT = singleOpportunity ? 0.75 : 0.45;
+
+    rawAllocations = rawAllocations.map(stock => ({
+      ...stock,
+      allocPct: Math.max(MIN_ALLOC_PCT, Math.min(MAX_ALLOC_PCT, stock.allocPct))
+    }));
+
+    const pctTotal = rawAllocations.reduce((sum, stock) => sum + stock.allocPct, 0) || 1;
+    rawAllocations = rawAllocations.map(stock => ({
+      ...stock,
+      allocPct: stock.allocPct / pctTotal
+    }));
+
+    let allocated = 0;
+    const plan = rawAllocations.map((stock, index) => {
+      let amount = Math.round(stock.allocPct * buyNow);
+      if (index === rawAllocations.length - 1) amount = buyNow - allocated;
+      allocated += amount;
+      return { ...stock, amount };
+    });
+
+    window.latestPlan = plan;
+
+    for (let i = 0; i < 4; i++) {
+      const p = plan[i];
+      setText(`alloc${i + 1}Amt`, `£${formatMoney0(p.amount)}`);
+      setText(`alloc${i + 1}Name`, p.name);
+      setText(
+        `alloc${i + 1}Note`,
+        `Dip ${formatPct(p.dipPct)} • Score ${Math.round(p.score)} • Yield ${formatPct(p.yieldPct)}`
+      );
+    }
+
+    const topPick = plan[0];
+    if (topPick) {
+      setText("topBuyName", topPick.name);
+      setText("topBuyMeta", `Score ${Math.round(topPick.score)} • Yield ${formatPct(topPick.yieldPct)}`);
+      setText("topPickWhy", topPick.name);
+      setText("topPickWhyMeta", getTopPickReason(topPick, topPick.incomeWeight));
+    } else {
+      setText("topBuyName", "--");
+      setText("topBuyMeta", "Waiting for signals");
+      setText("topPickWhy", "--");
+      setText("topPickWhyMeta", "Waiting for ranking breakdown…");
+    }
+
+    let strongCount = stocks.filter(s => s.score >= 65).length;
+    let weakCount = stocks.filter(s => s.score < 20).length;
+
+    if (singleOpportunity) {
+      setText("systemViewLabel", "Single Opportunity");
+      setText("systemViewMeta", `${stocks[0].name} clearly leads the setup`);
+    } else if (strongCount >= 2) {
+      setText("systemViewLabel", "Risk On");
+      setText("systemViewMeta", `${strongCount} strong buy signals active`);
+    } else if (weakCount >= 3) {
+      setText("systemViewLabel", "Stand Down");
+      setText("systemViewMeta", "Most pillars are weak. Patience favored.");
+    } else {
+      setText("systemViewLabel", "Neutral");
+      setText("systemViewMeta", "Mixed setup across the pillars");
+    }
+
+    stocks.forEach(stock => {
+      setText(`${stock.key}CurrentPrice`, stock.current > 0 ? `£${stock.current.toFixed(3)}` : "--");
+      setText(`${stock.key}Dip`, formatPct(stock.dipPct));
+      setText(`${stock.key}VsAvg`, formatPct(stock.vsAvgPct));
+      setText(`${stock.key}Score`, Math.round(stock.score));
+
+      let status = getStatusFromScore(stock.score, stock.dipPct, stock.vsAvgPct);
+
+      if (stock.score < 20 && stock.vsAvgPct > 5) {
+        status = { label: "AVOID", cls: "avoid" };
+      }
+
+      if (stock.incomeWeight > 50) {
+        status = { label: "TOO HEAVY", cls: "too-heavy" };
+      } else if (stock.incomeWeight > 40) {
+        status = { label: "OVERWEIGHT", cls: "overweight" };
+      }
+
+      setBadge(`${stock.key}Status`, status.label, status.cls);
+      setText(
+        `${stock.key}BrainNote`,
+        `${status.label} • Yield ${formatPct(stock.yieldPct)} • Income weight ${stock.incomeWeight.toFixed(1)}%`
+      );
+      setText(`${stock.key}DecisionText`, getDecisionText(stock));
+
+      const bar = document.getElementById(`${stock.key}Bar`);
+      if (bar) bar.style.width = `${Math.max(4, stock.score)}%`;
+    });
+
+    const newMemory = getMemory();
+    stocks.forEach(stock => updateRollingPriceMemory(newMemory, stock.key, stock.current));
+    saveMemory(newMemory);
+
+    updateTradeHelper();
+
+  } catch (err) {
+    console.error("Aurora Trading Brain load failed", err);
+    setText("executionSignal", "ERROR");
+    setText("executionSignalMeta", "Could not load sheet data");
+    setText("topBuyMeta", "Check Holdings / Dividends sheet connection");
+  }
+}
+
+document.querySelectorAll(".quick-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    if (btn.dataset.amt) {
+      document.getElementById("totalInvestment").value = btn.dataset.amt;
+      runBrain();
+    }
+  });
+});
+
+document.querySelectorAll(".mode-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    if (btn.dataset.mode) {
+      setMode(btn.dataset.mode);
+      runBrain();
+    }
+  });
+});
+
+document.getElementById("totalInvestment")?.addEventListener("input", runBrain);
+document.getElementById("dipWeight")?.addEventListener("input", runBrain);
+
+["tradeTicker", "tradeAmount", "tradePrice", "tradeStampable"].forEach(id => {
+  document.getElementById(id)?.addEventListener("input", updateTradeHelper);
+});
+
+document.getElementById("saveReserveBtn")?.addEventListener("click", saveSuggestedReserve);
+document.getElementById("resetReserveBtn")?.addEventListener("click", resetReserve);
+
+document.querySelectorAll(".trade-preset-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const slot = Number(btn.dataset.slot || 0);
+    if (slot > 0) presetTradeFromPlan(slot);
+  });
+});
+
+updateModeButtons();
+runBrain();
+</script>
+</body>
+</html>
