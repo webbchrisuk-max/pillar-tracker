@@ -803,12 +803,7 @@ const NAMES = {
   supr: "Supermarket REIT"
 };
 
-const RANGE_MAP = {
-  lng: { low52: 2.075, high52: 2.797 },
-  mng: { low52: 1.718, high52: 3.247 },
-  sdlf: { low52: 4.868, high52: 7.748 },
-  supr: { low52: 0.718, high52: 0.894 }
-};
+let liveRangeMap = {};
 
 let latestLiveData = {
   lng: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
@@ -1021,7 +1016,7 @@ function monthKeyFromIndex(index) {
 }
 
 function getRangeLevels(key) {
-  const cfg = RANGE_MAP[key];
+  const cfg = liveRangeMap[key];
   if (!cfg) return null;
 
   const low52 = Number(cfg.low52 || 0);
@@ -1229,26 +1224,35 @@ async function runBrain() {
       supr: { shares: 0, price: 0, dps: 0, book: 0, income: 0 }
     };
 
-    holdings.forEach(row => {
-      const key = mapTickerToKey(row.ticker);
-      if (!key) return;
+    const dynamicRanges = {};
 
-      const shares = parseNum(row.shares);
-      const rawPrice = parseNum(row.live_price);
-      const price = rawPrice > 20 ? rawPrice / 100 : rawPrice;
-      const dps = parseNum(row.annual_dividend_per_share);
-      const book = parseNum(row.book_cost);
+holdings.forEach(row => {
+  const key = mapTickerToKey(row.ticker);
+  if (!key) return;
 
-      live[key] = {
-        shares,
-        price,
-        dps,
-        book,
-        income: shares * dps
-      };
-    });
+  const shares = parseNum(row.shares);
+  const rawPrice = parseNum(row.live_price);
+  const price = rawPrice > 20 ? rawPrice / 100 : rawPrice;
+  const dps = parseNum(row.annual_dividend_per_share);
+  const book = parseNum(row.book_cost);
+  const low52 = parseNum(row.low_52w || row.low52 || row["low 52 week"]);
+  const high52 = parseNum(row.high_52w || row.high52 || row["high 52 week"]);
 
-    latestLiveData = live;
+  live[key] = {
+    shares,
+    price,
+    dps,
+    book,
+    income: shares * dps
+  };
+
+  dynamicRanges[key] = {
+    low52,
+    high52
+  };
+});
+liveRangeMap = dynamicRanges;
+latestLiveData = live;
 
     const totalAnnual = Object.values(live).reduce((sum, item) => sum + item.income, 0);
     const totalMonthly = totalAnnual / 12;
