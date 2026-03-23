@@ -104,7 +104,7 @@ h2, h3 {
 }
 
 .top-grid {
-  grid-template-columns: repeat(4, minmax(0,1fr));
+  grid-template-columns: repeat(5, minmax(0,1fr));
 }
 
 .triple-grid {
@@ -401,356 +401,376 @@ h2, h3 {
   </section>
 
   <!-- ===================== SECTION: PAYDAY AUTO ALLOCATOR ===================== -->
-<section class="section card">
-  <h2>Payday Auto Allocator</h2>
+  <section class="section card">
+    <h2>Payday Auto Allocator</h2>
 
-  <div class="grid triple-grid" style="margin-bottom:12px;">
-    <div class="mini">
-      <div class="k">Execution Signal</div>
-      <div class="v" id="executionSignal">HOLD</div>
-      <div class="subv" id="executionSignalMeta">Waiting for live setup…</div>
-    </div>
-
-    <div class="mini">
-      <div class="k">Active Mode</div>
-      <div class="v" id="activeModeLabel">Balance</div>
-      <div class="subv" id="activeModeMeta">Default allocator mode</div>
-    </div>
-
-    <div class="mini">
-      <div class="k">Why Top Pick Won</div>
-      <div class="v" id="topPickWhy">--</div>
-      <div class="subv" id="topPickWhyMeta">Waiting for ranking breakdown…</div>
-    </div>
-  </div>
-
-  <div class="warning-box" id="marketWarningBox" style="margin-bottom:12px;">
-    <strong id="marketWarningTitle">Market setup normal</strong>
-    <div class="subv" id="marketWarningText">Allocator will use standard deployment.</div>
-  </div>
-
-  <div class="grid quad-grid" style="margin-top:12px;">
-    <div class="mini">
-      <div class="k">Reserve Carried</div>
-      <div class="v" id="reserveCarried">£0</div>
-      <div class="subv">Unused hold-back from prior month / period</div>
-    </div>
-
-    <div class="mini">
-      <div class="k">New Money</div>
-      <div class="v" id="newMoneyAmount">£0</div>
-      <div class="subv">Current planned contribution</div>
-    </div>
-
-    <div class="mini">
-      <div class="k">Total Deployable</div>
-      <div class="v" id="totalDeployable">£0</div>
-      <div class="subv">New money + carried reserve</div>
-    </div>
-
-    <div class="mini">
-      <div class="k">Suggested Reserve</div>
-      <div class="v" id="suggestedReserve">£0</div>
-      <div class="subv">Cash to keep back after buys</div>
-    </div>
-  </div>
-
-  <div class="grid two-grid" style="margin-top:12px;">
-    <button class="quick-btn" id="saveReserveBtn">Save Suggested Reserve</button>
-    <button class="quick-btn" id="resetReserveBtn">Reset Reserve</button>
-  </div>
-
-  <div class="grid five-grid" style="margin-bottom:12px; margin-top:12px;">
-    <button class="quick-btn mode-btn" data-mode="auto">Auto</button>
-    <button class="quick-btn mode-btn" data-mode="income">Income</button>
-    <button class="quick-btn mode-btn" data-mode="balance">Balance</button>
-    <button class="quick-btn mode-btn" data-mode="dip">Dip Hunter</button>
-    <button class="quick-btn mode-btn" data-mode="defensive">Defensive</button>
-  </div>
-
-  <div class="grid two-grid">
-    <div class="input-box">
-      <label for="totalInvestment">Investment Amount (£)</label>
-      <input id="totalInvestment" type="number" value="800" step="1" />
-    </div>
-    <div class="input-box">
-      <label for="dipWeight">Dip Aggression</label>
-      <input id="dipWeight" type="number" value="1.2" step="0.1" min="0.5" max="2.0" />
-    </div>
-  </div>
-
-  <div class="quick-row">
-    <button class="quick-btn" data-amt="200">£200</button>
-    <button class="quick-btn" data-amt="400">£400</button>
-    <button class="quick-btn" data-amt="600">£600</button>
-    <button class="quick-btn" data-amt="800">£800</button>
-  </div>
-
-  <div class="grid two-grid" style="margin-top:12px;">
-    <div class="mini">
-      <div class="k">Buy Now</div>
-      <div class="v" id="buyNowAmount">£0</div>
-      <div class="subv" id="buyNowMeta">Primary execution amount</div>
-    </div>
-
-    <div class="mini">
-      <div class="k">Hold Back</div>
-      <div class="v" id="holdBackAmount">£0</div>
-      <div class="subv" id="holdBackMeta">Reserve for deeper dip / next session</div>
-    </div>
-  </div>
-
-  <div class="alloc-grid" style="margin-top:12px;">
-    <div class="alloc-box">
-      <div class="k">Primary Buy</div>
-      <div class="alloc-amt" id="alloc1Amt">£0</div>
-      <div class="alloc-name" id="alloc1Name">--</div>
-      <div class="alloc-note" id="alloc1Note">--</div>
-    </div>
-    <div class="alloc-box">
-      <div class="k">Secondary Buy</div>
-      <div class="alloc-amt" id="alloc2Amt">£0</div>
-      <div class="alloc-name" id="alloc2Name">--</div>
-      <div class="alloc-note" id="alloc2Note">--</div>
-    </div>
-    <div class="alloc-box">
-      <div class="k">Support Buy</div>
-      <div class="alloc-amt" id="alloc3Amt">£0</div>
-      <div class="alloc-name" id="alloc3Name">--</div>
-      <div class="alloc-note" id="alloc3Note">--</div>
-    </div>
-    <div class="alloc-box">
-      <div class="k">Maintenance Buy</div>
-      <div class="alloc-amt" id="alloc4Amt">£0</div>
-      <div class="alloc-name" id="alloc4Name">--</div>
-      <div class="alloc-note" id="alloc4Note">--</div>
-    </div>
-  </div>
-
-  <div class="card" style="margin-top:12px;">
-    <h3>Trade Entry Helper</h3>
-
-    <div class="grid quad-grid" style="margin-bottom:12px;">
-      <button class="quick-btn trade-preset-btn" data-slot="1">Use Primary Buy</button>
-      <button class="quick-btn trade-preset-btn" data-slot="2">Use Secondary Buy</button>
-      <button class="quick-btn trade-preset-btn" data-slot="3">Use Support Buy</button>
-      <button class="quick-btn trade-preset-btn" data-slot="4">Use Maintenance Buy</button>
-    </div>
-
-    <div class="grid quad-grid">
-      <div class="input-box">
-        <label for="tradeTicker">Ticker</label>
-        <input id="tradeTicker" type="text" placeholder="LGEN / MNG / PHNX / SUPR" />
+    <div class="grid triple-grid" style="margin-bottom:12px;">
+      <div class="mini">
+        <div class="k">Execution Signal</div>
+        <div class="v" id="executionSignal">HOLD</div>
+        <div class="subv" id="executionSignalMeta">Waiting for live setup…</div>
       </div>
 
-      <div class="input-box">
-        <label for="tradeAmount">Cash Invested (£)</label>
-        <input id="tradeAmount" type="number" step="0.01" placeholder="300" />
+      <div class="mini">
+        <div class="k">Active Mode</div>
+        <div class="v" id="activeModeLabel">Balance</div>
+        <div class="subv" id="activeModeMeta">Default allocator mode</div>
       </div>
 
-      <div class="input-box">
-        <label for="tradePrice">Executed Price (£)</label>
-        <input id="tradePrice" type="number" step="0.0001" placeholder="2.5000" />
+      <div class="mini">
+        <div class="k">Why Top Pick Won</div>
+        <div class="v" id="topPickWhy">--</div>
+        <div class="subv" id="topPickWhyMeta">Waiting for ranking breakdown…</div>
       </div>
+    </div>
 
-      <div class="input-box">
-        <label for="tradeStampable">Stamp Duty Applies?</label>
-        <input id="tradeStampable" type="text" value="Yes" />
-      </div>
+    <div class="warning-box" id="marketWarningBox" style="margin-bottom:12px;">
+      <strong id="marketWarningTitle">Market setup normal</strong>
+      <div class="subv" id="marketWarningText">Allocator will use standard deployment.</div>
     </div>
 
     <div class="grid quad-grid" style="margin-top:12px;">
       <div class="mini">
-        <div class="k">Estimated Shares</div>
-        <div class="v" id="tradeShares">0.0000</div>
-        <div class="subv">Cash ÷ executed price</div>
+        <div class="k">Reserve Carried</div>
+        <div class="v" id="reserveCarried">£0</div>
+        <div class="subv">Unused hold-back from prior month / period</div>
       </div>
 
       <div class="mini">
-        <div class="k">Stamp Duty</div>
-        <div class="v" id="tradeStampDuty">£0.00</div>
-        <div class="subv">0.5% rounded up to nearest £1</div>
+        <div class="k">New Money</div>
+        <div class="v" id="newMoneyAmount">£0</div>
+        <div class="subv">Current planned contribution</div>
       </div>
 
       <div class="mini">
-        <div class="k">Total Cost</div>
-        <div class="v" id="tradeTotalCost">£0.00</div>
-        <div class="subv">Cash invested + stamp duty</div>
+        <div class="k">Total Deployable</div>
+        <div class="v" id="totalDeployable">£0</div>
+        <div class="subv">New money + carried reserve</div>
       </div>
 
       <div class="mini">
-        <div class="k">New Avg Cost</div>
-        <div class="v" id="tradeNewAvgCost">£0.0000</div>
-        <div class="subv">Based on current Holdings row</div>
+        <div class="k">Suggested Reserve</div>
+        <div class="v" id="suggestedReserve">£0</div>
+        <div class="subv">Cash to keep back after buys</div>
       </div>
     </div>
 
-    <div class="mini" style="margin-top:12px;">
-      <div class="k">Update Holdings Sheet</div>
-      <div class="v" id="tradeUpdateTitle">Waiting for trade inputs…</div>
-      <div class="subv" id="tradeUpdateText">Enter ticker, amount and executed price to see the exact Holdings update.</div>
+    <div class="grid two-grid" style="margin-top:12px;">
+      <button class="quick-btn" id="saveReserveBtn">Save Suggested Reserve</button>
+      <button class="quick-btn" id="resetReserveBtn">Reset Reserve</button>
     </div>
+
+    <div class="grid five-grid" style="margin-bottom:12px; margin-top:12px;">
+      <button class="quick-btn mode-btn" data-mode="auto">Auto</button>
+      <button class="quick-btn mode-btn" data-mode="income">Income</button>
+      <button class="quick-btn mode-btn" data-mode="balance">Balance</button>
+      <button class="quick-btn mode-btn" data-mode="dip">Dip Hunter</button>
+      <button class="quick-btn mode-btn" data-mode="defensive">Defensive</button>
+    </div>
+
+    <div class="grid two-grid">
+      <div class="input-box">
+        <label for="totalInvestment">Investment Amount (£)</label>
+        <input id="totalInvestment" type="number" value="800" step="1" />
+      </div>
+      <div class="input-box">
+        <label for="dipWeight">Dip Aggression</label>
+        <input id="dipWeight" type="number" value="1.2" step="0.1" min="0.5" max="2.0" />
+      </div>
+    </div>
+
+    <div class="quick-row">
+      <button class="quick-btn" data-amt="200">£200</button>
+      <button class="quick-btn" data-amt="400">£400</button>
+      <button class="quick-btn" data-amt="600">£600</button>
+      <button class="quick-btn" data-amt="800">£800</button>
+    </div>
+        <div class="grid two-grid" style="margin-top:12px;">
+      <div class="mini">
+        <div class="k">Buy Now</div>
+        <div class="v" id="buyNowAmount">£0</div>
+        <div class="subv" id="buyNowMeta">Primary execution amount</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Hold Back</div>
+        <div class="v" id="holdBackAmount">£0</div>
+        <div class="subv" id="holdBackMeta">Reserve for deeper dip / next session</div>
+      </div>
+    </div>
+
+    <div class="alloc-grid" style="margin-top:12px;">
+      <div class="alloc-box">
+        <div class="k">Primary Buy</div>
+        <div class="alloc-amt" id="alloc1Amt">£0</div>
+        <div class="alloc-name" id="alloc1Name">--</div>
+        <div class="alloc-note" id="alloc1Note">--</div>
+      </div>
+      <div class="alloc-box">
+        <div class="k">Secondary Buy</div>
+        <div class="alloc-amt" id="alloc2Amt">£0</div>
+        <div class="alloc-name" id="alloc2Name">--</div>
+        <div class="alloc-note" id="alloc2Note">--</div>
+      </div>
+      <div class="alloc-box">
+        <div class="k">Support Buy</div>
+        <div class="alloc-amt" id="alloc3Amt">£0</div>
+        <div class="alloc-name" id="alloc3Name">--</div>
+        <div class="alloc-note" id="alloc3Note">--</div>
+      </div>
+      <div class="alloc-box">
+        <div class="k">Maintenance Buy</div>
+        <div class="alloc-amt" id="alloc4Amt">£0</div>
+        <div class="alloc-name" id="alloc4Name">--</div>
+        <div class="alloc-note" id="alloc4Note">--</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px;">
+      <h3>Trade Entry Helper</h3>
+
+      <div class="grid quad-grid" style="margin-bottom:12px;">
+        <button class="quick-btn trade-preset-btn" data-slot="1">Use Primary Buy</button>
+        <button class="quick-btn trade-preset-btn" data-slot="2">Use Secondary Buy</button>
+        <button class="quick-btn trade-preset-btn" data-slot="3">Use Support Buy</button>
+        <button class="quick-btn trade-preset-btn" data-slot="4">Use Maintenance Buy</button>
+      </div>
+
+      <div class="grid quad-grid">
+        <div class="input-box">
+          <label for="tradeTicker">Ticker</label>
+          <input id="tradeTicker" type="text" placeholder="LGEN / MNG / PHNX / SUPR" />
+        </div>
+
+        <div class="input-box">
+          <label for="tradeAmount">Cash Invested (£)</label>
+          <input id="tradeAmount" type="number" step="0.01" placeholder="300" />
+        </div>
+
+        <div class="input-box">
+          <label for="tradePrice">Executed Price (£)</label>
+          <input id="tradePrice" type="number" step="0.0001" placeholder="2.5000" />
+        </div>
+
+        <div class="input-box">
+          <label for="tradeStampable">Stamp Duty Applies?</label>
+          <input id="tradeStampable" type="text" value="Yes" />
+        </div>
+      </div>
+
+      <div class="grid quad-grid" style="margin-top:12px;">
+        <div class="mini">
+          <div class="k">Estimated Shares</div>
+          <div class="v" id="tradeShares">0.0000</div>
+          <div class="subv">Cash ÷ executed price</div>
+        </div>
+
+        <div class="mini">
+          <div class="k">Stamp Duty</div>
+          <div class="v" id="tradeStampDuty">£0.00</div>
+          <div class="subv">0.5% rounded up to nearest £1</div>
+        </div>
+
+        <div class="mini">
+          <div class="k">Total Cost</div>
+          <div class="v" id="tradeTotalCost">£0.00</div>
+          <div class="subv">Cash invested + stamp duty</div>
+        </div>
+
+        <div class="mini">
+          <div class="k">New Avg Cost</div>
+          <div class="v" id="tradeNewAvgCost">£0.0000</div>
+          <div class="subv">Based on current Holdings row</div>
+        </div>
+      </div>
+
+      <div class="mini" style="margin-top:12px;">
+        <div class="k">Update Holdings Sheet</div>
+        <div class="v" id="tradeUpdateTitle">Waiting for trade inputs…</div>
+        <div class="subv" id="tradeUpdateText">Enter ticker, amount and executed price to see the exact Holdings update.</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px;">
+      <h3>Post-Buy Workflow</h3>
+
+      <div class="grid quad-grid">
+        <div class="mini">
+          <div class="k">Step 1</div>
+          <div class="v">Fund IG</div>
+          <div class="subv">Move your planned capital into the account</div>
+        </div>
+        <div class="mini">
+          <div class="k">Step 2</div>
+          <div class="v">Run Brain</div>
+          <div class="subv">Check Auto / Balance / Income / Dip / Defensive</div>
+        </div>
+        <div class="mini">
+          <div class="k">Step 3</div>
+          <div class="v">Execute Buys</div>
+          <div class="subv">Use Trade Helper for exact Holdings update</div>
+        </div>
+        <div class="mini">
+          <div class="k">Step 4</div>
+          <div class="v">Save Reserve</div>
+          <div class="subv">Carry any unused cash into next cycle</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SECTION: PILLAR ANALYSIS ===================== -->
+  <section class="section card">
+    <h2>Pillar Intelligence</h2>
+
+    <div class="warning-box" id="singleOpportunityBox" style="margin-bottom:12px;">
+      <strong id="singleOpportunityTitle">No single-pillar opportunity detected</strong>
+      <div class="subv" id="singleOpportunityText">Allocator will use normal distribution unless one pillar clearly stands out.</div>
+    </div>
+
+    <div class="pillar-grid">
+
+      <div class="pillar-card">
+        <div class="pillar-top">
+          <div class="pillar-name">Legal &amp; General</div>
+          <div class="badge" id="lngStatus">--</div>
+        </div>
+        <div class="subv" id="lngBrainNote">--</div>
+        <div class="bar"><div class="fill" id="lngBar"></div></div>
+        <div class="grid top-grid">
+          <div class="mini"><div class="k">Price</div><div class="v" id="lngCurrentPrice">--</div></div>
+          <div class="mini"><div class="k">7D Dip</div><div class="v" id="lngDip">--</div></div>
+          <div class="mini"><div class="k">30D Dip</div><div class="v" id="lngDip30">--</div></div>
+          <div class="mini"><div class="k">Vs Avg</div><div class="v" id="lngVsAvg">--</div></div>
+          <div class="mini"><div class="k">Score</div><div class="v" id="lngScore">--</div></div>
+        </div>
+        <div class="grid triple-grid" style="margin-top:10px;">
+          <div class="mini"><div class="k">Fair Value</div><div class="v" id="lngFairValue">--</div></div>
+          <div class="mini"><div class="k">Strong Buy</div><div class="v" id="lngStrongBuy">--</div></div>
+          <div class="mini"><div class="k">Value Status</div><div class="v" id="lngValueStatus">--</div></div>
+        </div>
+        <div class="subv" id="lngDecisionText">Waiting for live decision…</div>
+      </div>
+
+      <div class="pillar-card">
+        <div class="pillar-top">
+          <div class="pillar-name">M&amp;G</div>
+          <div class="badge" id="mngStatus">--</div>
+        </div>
+        <div class="subv" id="mngBrainNote">--</div>
+        <div class="bar"><div class="fill" id="mngBar"></div></div>
+        <div class="grid top-grid">
+          <div class="mini"><div class="k">Price</div><div class="v" id="mngCurrentPrice">--</div></div>
+          <div class="mini"><div class="k">7D Dip</div><div class="v" id="mngDip">--</div></div>
+          <div class="mini"><div class="k">30D Dip</div><div class="v" id="mngDip30">--</div></div>
+          <div class="mini"><div class="k">Vs Avg</div><div class="v" id="mngVsAvg">--</div></div>
+          <div class="mini"><div class="k">Score</div><div class="v" id="mngScore">--</div></div>
+        </div>
+        <div class="grid triple-grid" style="margin-top:10px;">
+          <div class="mini"><div class="k">Fair Value</div><div class="v" id="mngFairValue">--</div></div>
+          <div class="mini"><div class="k">Strong Buy</div><div class="v" id="mngStrongBuy">--</div></div>
+          <div class="mini"><div class="k">Value Status</div><div class="v" id="mngValueStatus">--</div></div>
+        </div>
+        <div class="subv" id="mngDecisionText">Waiting for live decision…</div>
+      </div>
+            <div class="pillar-card">
+        <div class="pillar-top">
+          <div class="pillar-name">Standard Life</div>
+          <div class="badge" id="sdlfStatus">--</div>
+        </div>
+        <div class="subv" id="sdlfBrainNote">--</div>
+        <div class="bar"><div class="fill" id="sdlfBar"></div></div>
+        <div class="grid top-grid">
+          <div class="mini"><div class="k">Price</div><div class="v" id="sdlfCurrentPrice">--</div></div>
+          <div class="mini"><div class="k">7D Dip</div><div class="v" id="sdlfDip">--</div></div>
+          <div class="mini"><div class="k">30D Dip</div><div class="v" id="sdlfDip30">--</div></div>
+          <div class="mini"><div class="k">Vs Avg</div><div class="v" id="sdlfVsAvg">--</div></div>
+          <div class="mini"><div class="k">Score</div><div class="v" id="sdlfScore">--</div></div>
+        </div>
+        <div class="grid triple-grid" style="margin-top:10px;">
+          <div class="mini"><div class="k">Fair Value</div><div class="v" id="sdlfFairValue">--</div></div>
+          <div class="mini"><div class="k">Strong Buy</div><div class="v" id="sdlfStrongBuy">--</div></div>
+          <div class="mini"><div class="k">Value Status</div><div class="v" id="sdlfValueStatus">--</div></div>
+        </div>
+        <div class="subv" id="sdlfDecisionText">Waiting for live decision…</div>
+      </div>
+
+      <div class="pillar-card">
+        <div class="pillar-top">
+          <div class="pillar-name">Supermarket REIT</div>
+          <div class="badge" id="suprStatus">--</div>
+        </div>
+        <div class="subv" id="suprBrainNote">--</div>
+        <div class="bar"><div class="fill" id="suprBar"></div></div>
+        <div class="grid top-grid">
+          <div class="mini"><div class="k">Price</div><div class="v" id="suprCurrentPrice">--</div></div>
+          <div class="mini"><div class="k">7D Dip</div><div class="v" id="suprDip">--</div></div>
+          <div class="mini"><div class="k">30D Dip</div><div class="v" id="suprDip30">--</div></div>
+          <div class="mini"><div class="k">Vs Avg</div><div class="v" id="suprVsAvg">--</div></div>
+          <div class="mini"><div class="k">Score</div><div class="v" id="suprScore">--</div></div>
+        </div>
+        <div class="grid triple-grid" style="margin-top:10px;">
+          <div class="mini"><div class="k">Fair Value</div><div class="v" id="suprFairValue">--</div></div>
+          <div class="mini"><div class="k">Strong Buy</div><div class="v" id="suprStrongBuy">--</div></div>
+          <div class="mini"><div class="k">Value Status</div><div class="v" id="suprValueStatus">--</div></div>
+        </div>
+        <div class="subv" id="suprDecisionText">Waiting for live decision…</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== SECTION: MONTHLY DIVIDEND FORECAST ===================== -->
+  <section class="section card">
+    <h2>Monthly Dividend Forecast</h2>
+
+    <div class="grid quad-grid" id="forecastGrid">
+      <div class="mini"><div class="k">Jan</div><div class="v" id="forecastJan">£0.00</div><div class="subv" id="forecastJanMeta">No flow</div></div>
+      <div class="mini"><div class="k">Feb</div><div class="v" id="forecastFeb">£0.00</div><div class="subv" id="forecastFebMeta">No flow</div></div>
+      <div class="mini"><div class="k">Mar</div><div class="v" id="forecastMar">£0.00</div><div class="subv" id="forecastMarMeta">No flow</div></div>
+      <div class="mini"><div class="k">Apr</div><div class="v" id="forecastApr">£0.00</div><div class="subv" id="forecastAprMeta">No flow</div></div>
+      <div class="mini"><div class="k">May</div><div class="v" id="forecastMay">£0.00</div><div class="subv" id="forecastMayMeta">No flow</div></div>
+      <div class="mini"><div class="k">Jun</div><div class="v" id="forecastJun">£0.00</div><div class="subv" id="forecastJunMeta">No flow</div></div>
+      <div class="mini"><div class="k">Jul</div><div class="v" id="forecastJul">£0.00</div><div class="subv" id="forecastJulMeta">No flow</div></div>
+      <div class="mini"><div class="k">Aug</div><div class="v" id="forecastAug">£0.00</div><div class="subv" id="forecastAugMeta">No flow</div></div>
+      <div class="mini"><div class="k">Sep</div><div class="v" id="forecastSep">£0.00</div><div class="subv" id="forecastSepMeta">No flow</div></div>
+      <div class="mini"><div class="k">Oct</div><div class="v" id="forecastOct">£0.00</div><div class="subv" id="forecastOctMeta">No flow</div></div>
+      <div class="mini"><div class="k">Nov</div><div class="v" id="forecastNov">£0.00</div><div class="subv" id="forecastNovMeta">No flow</div></div>
+      <div class="mini"><div class="k">Dec</div><div class="v" id="forecastDec">£0.00</div><div class="subv" id="forecastDecMeta">No flow</div></div>
+    </div>
+
+    <div class="grid triple-grid" style="margin-top:12px;">
+      <div class="mini">
+        <div class="k">Best Dividend Month</div>
+        <div class="v" id="bestForecastMonth">--</div>
+        <div class="subv" id="bestForecastMonthMeta">No data</div>
+      </div>
+      <div class="mini">
+        <div class="k">Weakest Dividend Month</div>
+        <div class="v" id="worstForecastMonth">--</div>
+        <div class="subv" id="worstForecastMonthMeta">No data</div>
+      </div>
+      <div class="mini">
+        <div class="k">Next 3 Payments</div>
+        <div class="v" id="next3PaymentsTitle">--</div>
+        <div class="subv" id="next3PaymentsMeta">No upcoming payments</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    Aurora Trading Brain • Allocation + Timing + Risk Control
   </div>
 
-  <div class="card" style="margin-top:12px;">
-    <h3>Post-Buy Workflow</h3>
-
-    <div class="grid quad-grid">
-      <div class="mini">
-        <div class="k">Step 1</div>
-        <div class="v">Fund IG</div>
-        <div class="subv">Move your planned capital into the account</div>
-      </div>
-      <div class="mini">
-        <div class="k">Step 2</div>
-        <div class="v">Run Brain</div>
-        <div class="subv">Check Auto / Balance / Income / Dip / Defensive</div>
-      </div>
-      <div class="mini">
-        <div class="k">Step 3</div>
-        <div class="v">Execute Buys</div>
-        <div class="subv">Use Trade Helper for exact Holdings update</div>
-      </div>
-      <div class="mini">
-        <div class="k">Step 4</div>
-        <div class="v">Save Reserve</div>
-        <div class="subv">Carry any unused cash into next cycle</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===================== SECTION: PILLAR ANALYSIS ===================== -->
-<section class="section card">
-  <h2>Pillar Intelligence</h2>
-
-  <div class="warning-box" id="singleOpportunityBox" style="margin-bottom:12px;">
-    <strong id="singleOpportunityTitle">No single-pillar opportunity detected</strong>
-    <div class="subv" id="singleOpportunityText">Allocator will use normal distribution unless one pillar clearly stands out.</div>
-  </div>
-
-  <div class="pillar-grid">
-
-    <div class="pillar-card">
-      <div class="pillar-top">
-        <div class="pillar-name">Legal &amp; General</div>
-        <div class="badge" id="lngStatus">--</div>
-      </div>
-      <div class="subv" id="lngBrainNote">--</div>
-      <div class="bar"><div class="fill" id="lngBar"></div></div>
-      <div class="grid top-grid">
-        <div class="mini"><div class="k">Price</div><div class="v" id="lngCurrentPrice">--</div></div>
-        <div class="mini"><div class="k">7D Dip</div><div class="v" id="lngDip">--</div></div>
-        <div class="mini"><div class="k">30D Dip</div><div class="v" id="lngDip30">--</div></div>
-        <div class="mini"><div class="k">Vs Avg</div><div class="v" id="lngVsAvg">--</div></div>
-        <div class="mini"><div class="k">Score</div><div class="v" id="lngScore">--</div></div>
-      </div>
-      <div class="subv" id="lngDecisionText">Waiting for live decision…</div>
-    </div>
-
-    <div class="pillar-card">
-      <div class="pillar-top">
-        <div class="pillar-name">M&amp;G</div>
-        <div class="badge" id="mngStatus">--</div>
-      </div>
-      <div class="subv" id="mngBrainNote">--</div>
-      <div class="bar"><div class="fill" id="mngBar"></div></div>
-      <div class="grid top-grid">
-        <div class="mini"><div class="k">Price</div><div class="v" id="mngCurrentPrice">--</div></div>
-        <div class="mini"><div class="k">7D Dip</div><div class="v" id="mngDip">--</div></div>
-        <div class="mini"><div class="k">30D Dip</div><div class="v" id="mngDip30">--</div></div>
-        <div class="mini"><div class="k">Vs Avg</div><div class="v" id="mngVsAvg">--</div></div>
-        <div class="mini"><div class="k">Score</div><div class="v" id="mngScore">--</div></div>
-      </div>
-      <div class="subv" id="mngDecisionText">Waiting for live decision…</div>
-    </div>
-
-    <div class="pillar-card">
-      <div class="pillar-top">
-        <div class="pillar-name">Standard Life</div>
-        <div class="badge" id="sdlfStatus">--</div>
-      </div>
-      <div class="subv" id="sdlfBrainNote">--</div>
-      <div class="bar"><div class="fill" id="sdlfBar"></div></div>
-      <div class="grid top-grid">
-        <div class="mini"><div class="k">Price</div><div class="v" id="sdlfCurrentPrice">--</div></div>
-        <div class="mini"><div class="k">7D Dip</div><div class="v" id="sdlfDip">--</div></div>
-        <div class="mini"><div class="k">30D Dip</div><div class="v" id="sdlfDip30">--</div></div>
-        <div class="mini"><div class="k">Vs Avg</div><div class="v" id="sdlfVsAvg">--</div></div>
-        <div class="mini"><div class="k">Score</div><div class="v" id="sdlfScore">--</div></div>
-      </div>
-      <div class="subv" id="sdlfDecisionText">Waiting for live decision…</div>
-    </div>
-
-    <div class="pillar-card">
-      <div class="pillar-top">
-        <div class="pillar-name">Supermarket REIT</div>
-        <div class="badge" id="suprStatus">--</div>
-      </div>
-      <div class="subv" id="suprBrainNote">--</div>
-      <div class="bar"><div class="fill" id="suprBar"></div></div>
-      <div class="grid top-grid">
-        <div class="mini"><div class="k">Price</div><div class="v" id="suprCurrentPrice">--</div></div>
-        <div class="mini"><div class="k">7D Dip</div><div class="v" id="suprDip">--</div></div>
-        <div class="mini"><div class="k">30D Dip</div><div class="v" id="suprDip30">--</div></div>
-        <div class="mini"><div class="k">Vs Avg</div><div class="v" id="suprVsAvg">--</div></div>
-        <div class="mini"><div class="k">Score</div><div class="v" id="suprScore">--</div></div>
-      </div>
-      <div class="subv" id="suprDecisionText">Waiting for live decision…</div>
-    </div>
-
-  </div>
-</section>
-
-<!-- ===================== SECTION: MONTHLY DIVIDEND FORECAST ===================== -->
-<section class="section card">
-  <h2>Monthly Dividend Forecast</h2>
-
-  <div class="grid quad-grid" id="forecastGrid">
-    <div class="mini"><div class="k">Jan</div><div class="v" id="forecastJan">£0.00</div><div class="subv" id="forecastJanMeta">No flow</div></div>
-    <div class="mini"><div class="k">Feb</div><div class="v" id="forecastFeb">£0.00</div><div class="subv" id="forecastFebMeta">No flow</div></div>
-    <div class="mini"><div class="k">Mar</div><div class="v" id="forecastMar">£0.00</div><div class="subv" id="forecastMarMeta">No flow</div></div>
-    <div class="mini"><div class="k">Apr</div><div class="v" id="forecastApr">£0.00</div><div class="subv" id="forecastAprMeta">No flow</div></div>
-    <div class="mini"><div class="k">May</div><div class="v" id="forecastMay">£0.00</div><div class="subv" id="forecastMayMeta">No flow</div></div>
-    <div class="mini"><div class="k">Jun</div><div class="v" id="forecastJun">£0.00</div><div class="subv" id="forecastJunMeta">No flow</div></div>
-    <div class="mini"><div class="k">Jul</div><div class="v" id="forecastJul">£0.00</div><div class="subv" id="forecastJulMeta">No flow</div></div>
-    <div class="mini"><div class="k">Aug</div><div class="v" id="forecastAug">£0.00</div><div class="subv" id="forecastAugMeta">No flow</div></div>
-    <div class="mini"><div class="k">Sep</div><div class="v" id="forecastSep">£0.00</div><div class="subv" id="forecastSepMeta">No flow</div></div>
-    <div class="mini"><div class="k">Oct</div><div class="v" id="forecastOct">£0.00</div><div class="subv" id="forecastOctMeta">No flow</div></div>
-    <div class="mini"><div class="k">Nov</div><div class="v" id="forecastNov">£0.00</div><div class="subv" id="forecastNovMeta">No flow</div></div>
-    <div class="mini"><div class="k">Dec</div><div class="v" id="forecastDec">£0.00</div><div class="subv" id="forecastDecMeta">No flow</div></div>
-  </div>
-
-  <div class="grid triple-grid" style="margin-top:12px;">
-    <div class="mini">
-      <div class="k">Best Dividend Month</div>
-      <div class="v" id="bestForecastMonth">--</div>
-      <div class="subv" id="bestForecastMonthMeta">No data</div>
-    </div>
-    <div class="mini">
-      <div class="k">Weakest Dividend Month</div>
-      <div class="v" id="worstForecastMonth">--</div>
-      <div class="subv" id="worstForecastMonthMeta">No data</div>
-    </div>
-    <div class="mini">
-      <div class="k">Next 3 Payments</div>
-      <div class="v" id="next3PaymentsTitle">--</div>
-      <div class="subv" id="next3PaymentsMeta">No upcoming payments</div>
-    </div>
-  </div>
-</section>
-<div class="footer">
-  Aurora Trading Brain • Allocation + Timing + Risk Control
 </div>
 
-</div>
 <!-- ===================== SECTION: SCRIPT ===================== -->
 <script>
 const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
 const HOLDINGS_URL = `https://opensheet.elk.sh/${SHEET_ID}/Holdings`;
 const DIVIDENDS_URL = `https://opensheet.elk.sh/${SHEET_ID}/Dividends`;
 
-const PRICE_MEMORY_KEY = "aurora_prices_v6";
+const PRICE_MEMORY_KEY = "aurora_prices_v8";
 const MODE_KEY = "aurora_mode_v5";
 const RESERVE_KEY = "aurora_reserve_v2";
 
@@ -783,6 +803,13 @@ const NAMES = {
   supr: "Supermarket REIT"
 };
 
+const RANGE_MAP = {
+  lng: { low52: 2.075, high52: 2.797 },
+  mng: { low52: 1.718, high52: 3.247 },
+  sdlf: { low52: 4.868, high52: 7.748 },
+  supr: { low52: 0.718, high52: 0.894 }
+};
+
 let latestLiveData = {
   lng: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
   mng: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
@@ -811,6 +838,10 @@ function formatMoney0(v) {
 
 function formatPct(v) {
   return `${Number(v || 0).toFixed(2)}%`;
+}
+
+function formatPrice(v) {
+  return Number.isFinite(Number(v)) && Number(v) > 0 ? `£${Number(v).toFixed(3)}` : "--";
 }
 
 function parseNum(v) {
@@ -989,6 +1020,48 @@ function monthKeyFromIndex(index) {
   return MONTH_KEYS[index] || "";
 }
 
+function getRangeLevels(key) {
+  const cfg = RANGE_MAP[key];
+  if (!cfg) return null;
+
+  const low52 = Number(cfg.low52 || 0);
+  const high52 = Number(cfg.high52 || 0);
+  const range = high52 - low52;
+
+  if (low52 <= 0 || high52 <= 0 || range <= 0) return null;
+
+  return {
+    low52,
+    high52,
+    strongBuy: low52 + (range * 0.25),
+    fairValue: low52 + (range * 0.50),
+    avoidAbove: low52 + (range * 0.75)
+  };
+}
+
+function getFairValueStatus(price, cfg) {
+  if (!cfg || !Number.isFinite(price) || price <= 0) {
+    return { label: "No value data", scoreAdj: 0, rangePosition: null };
+  }
+
+  const range = cfg.high52 - cfg.low52;
+  const rangePosition = range > 0 ? ((price - cfg.low52) / range) : null;
+
+  if (price <= cfg.strongBuy) {
+    return { label: "Strong Buy Zone", scoreAdj: 25, rangePosition };
+  }
+
+  if (price <= cfg.fairValue) {
+    return { label: "Below Fair Value", scoreAdj: 15, rangePosition };
+  }
+
+  if (price > cfg.avoidAbove) {
+    return { label: "Overpriced", scoreAdj: -15, rangePosition };
+  }
+
+  return { label: "Near Fair Value", scoreAdj: 5, rangePosition };
+}
+
 function setBadge(id, text, cls) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -1009,6 +1082,7 @@ function getExecutionSignal(stocks) {
 
 function getTopPickReason(stock, pillarWeight) {
   const reasons = [];
+
   if (stock.dipPct <= -5) reasons.push(`7d dip ${formatPct(stock.dipPct)}`);
   else if (stock.dipPct < 0) reasons.push(`7d weakness ${formatPct(stock.dipPct)}`);
 
@@ -1017,6 +1091,12 @@ function getTopPickReason(stock, pillarWeight) {
 
   if (stock.vsAvgPct < 0) reasons.push(`below avg cost ${formatPct(stock.vsAvgPct)}`);
   if (stock.yieldPct >= 8) reasons.push(`yield ${formatPct(stock.yieldPct)}`);
+  if (stock.valueLabel) reasons.push(stock.valueLabel.toLowerCase());
+
+  if (stock.rangePosition != null) {
+    reasons.push(`${(stock.rangePosition * 100).toFixed(0)}% of range`);
+  }
+
   if (pillarWeight < 15) reasons.push(`underweight pillar`);
   if (pillarWeight > 35) reasons.push(`won despite overweight penalty`);
 
@@ -1120,11 +1200,13 @@ function chooseAutoMode(preStocks) {
   const lowScoreCount = preStocks.filter(s => s.score < 30).length;
   const strongDipCount = preStocks.filter(s => s.dipPct <= -5 && s.score >= 60).length;
   const highYieldCount = preStocks.filter(s => s.yieldPct >= 8 && s.score >= 35).length;
-  const richCount = preStocks.filter(s => s.vsAvgPct > 5).length;
+  const strongValueCount = preStocks.filter(s => s.valueLabel === "Strong Buy Zone").length;
+  const belowFairCount = preStocks.filter(s => s.valueLabel === "Below Fair Value").length;
+  const richCount = preStocks.filter(s => s.vsAvgPct > 5 || s.valueLabel === "Overpriced").length;
 
-  if (strongDipCount >= 1) return getBaseModeConfig("dip");
-  if (lowScoreCount >= 3 || richCount >=2) return getBaseModeConfig("defensive");
-  if (highYieldCount >= 2 && strongDipCount === 0) return getBaseModeConfig("income");
+  if (strongDipCount >= 1 || strongValueCount >= 1) return getBaseModeConfig("dip");
+  if (lowScoreCount >= 3 || richCount >= 2) return getBaseModeConfig("defensive");
+  if ((highYieldCount >= 2 && strongDipCount === 0) || belowFairCount >= 2) return getBaseModeConfig("income");
   return getBaseModeConfig("balance");
 }
 
@@ -1293,7 +1375,20 @@ async function runBrain() {
       const dipPct = high7 > 0 ? ((current - high7) / high7) * 100 : 0;
       const dip30Pct = price30 > 0 ? ((current - price30) / price30) * 100 : 0;
       const vsAvgPct = avg > 0 ? ((current - avg) / avg) * 100 : 0;
-      return { key, current, avg, yieldPct, dipPct, dip30Pct, vsAvgPct, score: 0 };
+      const fvCfg = getRangeLevels(key);
+      const fvStatus = getFairValueStatus(current, fvCfg);
+
+      return {
+        key,
+        current,
+        avg,
+        yieldPct,
+        dipPct,
+        dip30Pct,
+        vsAvgPct,
+        valueLabel: fvStatus.label,
+        score: Math.max(0, fvStatus.scoreAdj)
+      };
     });
 
     const selectedMode = getMode();
@@ -1320,6 +1415,9 @@ async function runBrain() {
       const dip30Pct = price30 > 0 ? ((current - price30) / price30) * 100 : 0;
       const vsAvgPct = avg > 0 ? ((current - avg) / avg) * 100 : 0;
 
+      const fvCfg = getRangeLevels(key);
+      const fvStatus = getFairValueStatus(current, fvCfg);
+
       let score = 0;
 
       if (dipPct <= -8) score += 40;
@@ -1342,6 +1440,8 @@ async function runBrain() {
       else if (yieldPct >= 8) score += 10 * modeConfig.yieldMult;
       else if (yieldPct >= 7) score += 6 * modeConfig.yieldMult;
 
+      score += fvStatus.scoreAdj;
+
       const weight = pillarIncomeWeights[key] || 0;
       if (weight > 50) score -= 30;
       else if (weight > 40) score -= 18;
@@ -1362,7 +1462,14 @@ async function runBrain() {
         dip30Pct,
         vsAvgPct,
         score,
-        incomeWeight: weight
+        incomeWeight: weight,
+        low52: fvCfg?.low52 ?? null,
+        high52: fvCfg?.high52 ?? null,
+        fairValue: fvCfg?.fairValue ?? null,
+        strongBuy: fvCfg?.strongBuy ?? null,
+        avoidAbove: fvCfg?.avoidAbove ?? null,
+        valueLabel: fvStatus.label,
+        rangePosition: fvStatus.rangePosition
       };
     });
 
@@ -1454,7 +1561,7 @@ async function runBrain() {
       setText(`alloc${i + 1}Name`, p.name);
       setText(
         `alloc${i + 1}Note`,
-        `7D ${formatPct(p.dipPct)} • 30D ${formatPct(p.dip30Pct)} • Score ${Math.round(p.score)} • Yield ${formatPct(p.yieldPct)}`
+        `${p.valueLabel} • 7D ${formatPct(p.dipPct)} • 30D ${formatPct(p.dip30Pct)} • Score ${Math.round(p.score)} • Yield ${formatPct(p.yieldPct)}`
       );
     }
 
@@ -1471,8 +1578,8 @@ async function runBrain() {
       setText("topPickWhyMeta", "Waiting for ranking breakdown…");
     }
 
-    let strongCount = stocks.filter(s => s.score >= 65).length;
-    let weakCount = stocks.filter(s => s.score < 20).length;
+    const strongCount = stocks.filter(s => s.score >= 65).length;
+    const weakCount = stocks.filter(s => s.score < 20).length;
 
     if (singleOpportunity) {
       setText("systemViewLabel", "Single Opportunity");
@@ -1495,7 +1602,15 @@ async function runBrain() {
       setText(`${stock.key}VsAvg`, formatPct(stock.vsAvgPct));
       setText(`${stock.key}Score`, Math.round(stock.score));
 
+      setText(`${stock.key}FairValue`, formatPrice(stock.fairValue));
+      setText(`${stock.key}StrongBuy`, formatPrice(stock.strongBuy));
+      setText(`${stock.key}ValueStatus`, stock.valueLabel || "--");
+
       let status = getStatusFromScore(stock.score, stock.dipPct, stock.vsAvgPct);
+
+      if (stock.valueLabel === "Overpriced" && stock.score < 35) {
+        status = { label: "AVOID", cls: "avoid" };
+      }
 
       if (stock.score < 20 && stock.vsAvgPct > 5) {
         status = { label: "AVOID", cls: "avoid" };
@@ -1508,9 +1623,14 @@ async function runBrain() {
       }
 
       setBadge(`${stock.key}Status`, status.label, status.cls);
+
+      const rangePct = stock.rangePosition != null
+        ? `${(stock.rangePosition * 100).toFixed(0)}% of range`
+        : "No range data";
+
       setText(
         `${stock.key}BrainNote`,
-        `${status.label} • 7D ${formatPct(stock.dipPct)} • 30D ${formatPct(stock.dip30Pct)} • Yield ${formatPct(stock.yieldPct)} • Income weight ${stock.incomeWeight.toFixed(1)}%`
+        `${status.label} • ${stock.valueLabel} • ${rangePct} • 7D ${formatPct(stock.dipPct)} • 30D ${formatPct(stock.dip30Pct)} • Yield ${formatPct(stock.yieldPct)} • Income weight ${stock.incomeWeight.toFixed(1)}%`
       );
       setText(`${stock.key}DecisionText`, getDecisionText(stock));
 
@@ -1572,3 +1692,4 @@ runBrain();
 </script>
 </body>
 </html>
+      
