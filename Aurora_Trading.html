@@ -454,8 +454,8 @@ h2, h3 {
         <div class="subv">Cash to keep back after buys</div>
       </div>
     </div>
-
-    <div class="grid two-grid" style="margin-top:12px;">
+    <!---------------------------------Part 2 ------------------------------------->
+        <div class="grid two-grid" style="margin-top:12px;">
       <button class="quick-btn" id="saveReserveBtn">Save Suggested Reserve</button>
       <button class="quick-btn" id="resetReserveBtn">Reset Reserve</button>
     </div>
@@ -485,7 +485,8 @@ h2, h3 {
       <button class="quick-btn" data-amt="600">£600</button>
       <button class="quick-btn" data-amt="800">£800</button>
     </div>
-        <div class="grid two-grid" style="margin-top:12px;">
+
+    <div class="grid two-grid" style="margin-top:12px;">
       <div class="mini">
         <div class="k">Buy Now</div>
         <div class="v" id="buyNowAmount">£0</div>
@@ -587,7 +588,9 @@ h2, h3 {
       <div class="mini" style="margin-top:12px;">
         <div class="k">Update Holdings Sheet</div>
         <div class="v" id="tradeUpdateTitle">Waiting for trade inputs…</div>
-        <div class="subv" id="tradeUpdateText">Enter ticker, amount and executed price to see the exact Holdings update.</div>
+        <div class="subv" id="tradeUpdateText">
+          Enter ticker, amount and executed price to see the exact Holdings update.
+        </div>
       </div>
     </div>
 
@@ -618,8 +621,8 @@ h2, h3 {
       </div>
     </div>
   </section>
-
-  <!-- ===================== SECTION: PILLAR ANALYSIS ===================== -->
+  <!--------------------------Part 3 ------------------------------------------>
+    <!-- ===================== SECTION: PILLAR ANALYSIS ===================== -->
   <section class="section card">
     <h2>Pillar Intelligence</h2>
 
@@ -673,7 +676,8 @@ h2, h3 {
         </div>
         <div class="subv" id="mngDecisionText">Waiting for live decision…</div>
       </div>
-            <div class="pillar-card">
+
+      <div class="pillar-card">
         <div class="pillar-top">
           <div class="pillar-name">Standard Life</div>
           <div class="badge" id="sdlfStatus">--</div>
@@ -769,6 +773,7 @@ h2, h3 {
 const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
 const HOLDINGS_URL = `https://opensheet.elk.sh/${SHEET_ID}/Holdings`;
 const DIVIDENDS_URL = `https://opensheet.elk.sh/${SHEET_ID}/Dividends`;
+const PRICE_HISTORY_URL = `https://opensheet.elk.sh/${SHEET_ID}/PriceLog`;
 
 const PRICE_MEMORY_KEY = "aurora_prices_v10";
 const MODE_KEY = "aurora_mode_v5";
@@ -853,6 +858,30 @@ function mapTickerToKey(v) {
   const raw = normaliseTicker(v);
   const stripped = raw.replace(".GB", "").replace(" GB", "");
   return TICKER_MAP[raw] || TICKER_MAP[stripped] || null;
+}
+
+function getPriceDaysAgo(history, key, days) {
+  const target = new Date();
+  target.setDate(target.getDate() - days);
+
+  const filtered = history
+    .filter(r => mapTickerToKey(r.Ticker || r.ticker) === key)
+    .map(r => ({
+      date: new Date(r.Date || r.date),
+      price: parseFloat(r.Price || r.price)
+    }))
+    .filter(r => !isNaN(r.date.getTime()) && Number.isFinite(r.price) && r.price > 0)
+    .sort((a, b) => a.date - b.date);
+
+  let chosen = null;
+
+  for (const row of filtered) {
+    if (row.date <= target) {
+      chosen = row.price;
+    }
+  }
+
+  return chosen || filtered[0]?.price || 0;
 }
 
 function getMode() {
@@ -1258,13 +1287,15 @@ async function runBrain() {
   try {
     updateModeButtons();
 
-    const [holdingsRes, dividendsRes] = await Promise.all([
+    const [holdingsRes, dividendsRes, priceHistoryRes] = await Promise.all([
       fetch(HOLDINGS_URL),
-      fetch(DIVIDENDS_URL)
+      fetch(DIVIDENDS_URL),
+      fetch(PRICE_HISTORY_URL)
     ]);
 
     const holdings = await holdingsRes.json();
     const dividends = await dividendsRes.json();
+    const priceHistory = await priceHistoryRes.json();
 
     const live = {
       lng: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
@@ -1424,9 +1455,9 @@ async function runBrain() {
       const current = item.price || 0;
       const avg = item.shares > 0 ? (item.book / item.shares) : 0;
       const yieldPct = current > 0 ? (item.dps / current) * 100 : 0;
-      const high7 = getRollingHigh(memory, key, 7, current);
-      const price30 = getHistoricalPrice(memory, key, 30, current);
-      const dipPct = high7 > 0 ? ((current - high7) / high7) * 100 : 0;
+      const price7 = getPriceDaysAgo(priceHistory, key, 7);
+      const price30 = getPriceDaysAgo(priceHistory, key, 30);
+      const dipPct = price7 > 0 ? ((current - price7) / price7) * 100 : 0;
       const dip30Pct = price30 > 0 ? ((current - price30) / price30) * 100 : 0;
       const vsAvgPct = avg > 0 ? ((current - avg) / avg) * 100 : 0;
       const fvCfg = getRangeLevels(key);
@@ -1462,10 +1493,10 @@ async function runBrain() {
       const avg = item.shares > 0 ? (item.book / item.shares) : 0;
       const yieldPct = current > 0 ? (item.dps / current) * 100 : 0;
 
-      const high7 = getRollingHigh(memory, key, 7, current);
-      const price30 = getHistoricalPrice(memory, key, 30, current);
+      const price7 = getPriceDaysAgo(priceHistory, key, 7);
+      const price30 = getPriceDaysAgo(priceHistory, key, 30);
 
-      const dipPct = high7 > 0 ? ((current - high7) / high7) * 100 : 0;
+      const dipPct = price7 > 0 ? ((current - price7) / price7) * 100 : 0;
       const dip30Pct = price30 > 0 ? ((current - price30) / price30) * 100 : 0;
       const vsAvgPct = avg > 0 ? ((current - avg) / avg) * 100 : 0;
 
@@ -1722,7 +1753,7 @@ async function runBrain() {
     console.error("Aurora Trading Brain load failed", err);
     setText("executionSignal", "ERROR");
     setText("executionSignalMeta", "Could not load sheet data");
-    setText("topBuyMeta", "Check Holdings / Dividends sheet connection");
+    setText("topBuyMeta", "Check Holdings / Dividends / PriceLog sheet connection");
   }
 }
 
@@ -1764,3 +1795,5 @@ document.querySelectorAll(".trade-preset-btn").forEach(btn => {
 updateModeButtons();
 runBrain();
 </script>
+</body>
+</html>
