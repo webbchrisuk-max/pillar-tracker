@@ -770,7 +770,7 @@ const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
 const HOLDINGS_URL = `https://opensheet.elk.sh/${SHEET_ID}/Holdings`;
 const DIVIDENDS_URL = `https://opensheet.elk.sh/${SHEET_ID}/Dividends`;
 
-const PRICE_MEMORY_KEY = "aurora_prices_v9";
+const PRICE_MEMORY_KEY = "aurora_prices_v10";
 const MODE_KEY = "aurora_mode_v5";
 const RESERVE_KEY = "aurora_reserve_v2";
 const MIN_BUY_AMOUNT = 50;
@@ -946,6 +946,13 @@ function todayIso() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function getDateDaysAgo(daysBack) {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - daysBack);
+  return d;
+}
+
 function updateRollingPriceMemory(memory, key, price) {
   if (!Number.isFinite(price) || price <= 0) return;
 
@@ -965,37 +972,52 @@ function updateRollingPriceMemory(memory, key, price) {
   memory[key] = memory[key]
     .filter(entry => entry && entry.date && Number.isFinite(Number(entry.price)))
     .sort((a, b) => new Date(a.date) - new Date(b.date))
-    .slice(-30);
+    .slice(-45);
+}
+
+function getPricesWithinDays(memory, key, daysBack, fallbackPrice) {
+  const history = Array.isArray(memory[key]) ? memory[key] : [];
+  if (!history.length) return [fallbackPrice || 0].filter(v => v > 0);
+
+  const cutoff = getDateDaysAgo(daysBack);
+  const prices = history
+    .filter(entry => {
+      const entryDate = new Date(entry.date);
+      return !isNaN(entryDate.getTime()) && entryDate >= cutoff;
+    })
+    .map(entry => Number(entry.price))
+    .filter(price => Number.isFinite(price) && price > 0);
+
+  if (!prices.length && fallbackPrice > 0) return [fallbackPrice];
+  return prices;
+}
+
+function getRollingHigh(memory, key, daysBack, fallbackPrice) {
+  const prices = getPricesWithinDays(memory, key, daysBack, fallbackPrice);
+  if (!prices.length) return fallbackPrice || 0;
+  return Math.max(...prices);
 }
 
 function getHistoricalPrice(memory, key, daysBack, fallbackPrice) {
   const history = Array.isArray(memory[key]) ? memory[key] : [];
   if (!history.length) return fallbackPrice || 0;
 
-  const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
-  const target = new Date();
-  target.setDate(target.getDate() - daysBack);
+  const sorted = [...history]
+    .filter(entry => entry && entry.date && Number.isFinite(Number(entry.price)))
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const target = getDateDaysAgo(daysBack);
 
   let chosen = null;
 
   for (const entry of sorted) {
     const entryDate = new Date(entry.date);
-    if (entryDate <= target) {
+    if (!isNaN(entryDate.getTime()) && entryDate <= target) {
       chosen = Number(entry.price);
     }
   }
 
   return chosen || Number(sorted[0]?.price) || fallbackPrice || 0;
-}
-
-function getRollingHigh(memory, key, fallbackPrice) {
-  const history = Array.isArray(memory[key]) ? memory[key] : [];
-  const prices = history
-    .map(entry => Number(entry.price))
-    .filter(price => Number.isFinite(price) && price > 0);
-
-  if (!prices.length) return fallbackPrice || 0;
-  return Math.max(...prices);
 }
 
 function daysUntil(dateStr) {
@@ -1402,7 +1424,7 @@ async function runBrain() {
       const current = item.price || 0;
       const avg = item.shares > 0 ? (item.book / item.shares) : 0;
       const yieldPct = current > 0 ? (item.dps / current) * 100 : 0;
-      const high7 = getRollingHigh(memory, key, current);
+      const high7 = getRollingHigh(memory, key, 7, current);
       const price30 = getHistoricalPrice(memory, key, 30, current);
       const dipPct = high7 > 0 ? ((current - high7) / high7) * 100 : 0;
       const dip30Pct = price30 > 0 ? ((current - price30) / price30) * 100 : 0;
@@ -1440,7 +1462,7 @@ async function runBrain() {
       const avg = item.shares > 0 ? (item.book / item.shares) : 0;
       const yieldPct = current > 0 ? (item.dps / current) * 100 : 0;
 
-      const high7 = getRollingHigh(memory, key, current);
+      const high7 = getRollingHigh(memory, key, 7, current);
       const price30 = getHistoricalPrice(memory, key, 30, current);
 
       const dipPct = high7 > 0 ? ((current - high7) / high7) * 100 : 0;
@@ -1742,5 +1764,3 @@ document.querySelectorAll(".trade-preset-btn").forEach(btn => {
 updateModeButtons();
 runBrain();
 </script>
-</body>
-</html>
