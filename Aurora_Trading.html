@@ -770,9 +770,10 @@ const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
 const HOLDINGS_URL = `https://opensheet.elk.sh/${SHEET_ID}/Holdings`;
 const DIVIDENDS_URL = `https://opensheet.elk.sh/${SHEET_ID}/Dividends`;
 
-const PRICE_MEMORY_KEY = "aurora_prices_v8";
+const PRICE_MEMORY_KEY = "aurora_prices_v9";
 const MODE_KEY = "aurora_mode_v5";
 const RESERVE_KEY = "aurora_reserve_v2";
+const MIN_BUY_AMOUNT = 50;
 
 const MONTH_KEYS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -1098,11 +1099,37 @@ function getTopPickReason(stock, pillarWeight) {
   return reasons.length ? reasons.join(" • ") : "Best overall live score";
 }
 
-function getStatusFromScore(score, dipPct, vsAvgPct) {
-  if (dipPct <= -8 && vsAvgPct <= -3 && score >= 80) return { label: "AGGRESSIVE BUY", cls: "aggressive" };
-  if (dipPct <= -5 && score >= 65) return { label: "GOOD BUY", cls: "good" };
-  if (dipPct <= -3 || vsAvgPct <= -1) return { label: "WATCH", cls: "watch" };
-  if (vsAvgPct > 5) return { label: "RISK", cls: "risk" };
+function getStatusFromScore(stock) {
+  if (stock.incomeWeight > 50) return { label: "TOO HEAVY", cls: "too-heavy" };
+  if (stock.incomeWeight > 40) return { label: "OVERWEIGHT", cls: "overweight" };
+
+  if (stock.valueLabel === "Overpriced" && stock.score < 35) {
+    return { label: "AVOID", cls: "avoid" };
+  }
+
+  if (stock.dipPct <= -8 && stock.vsAvgPct <= -3 && stock.score >= 80) {
+    return { label: "AGGRESSIVE BUY", cls: "aggressive" };
+  }
+
+  if (
+    (stock.dipPct <= -5 && stock.score >= 65) ||
+    (stock.valueLabel === "Strong Buy Zone" && stock.score >= 55)
+  ) {
+    return { label: "GOOD BUY", cls: "good" };
+  }
+
+  if (
+    (stock.valueLabel === "Strong Buy Zone" && stock.score >= 40) ||
+    (stock.dipPct <= -3) ||
+    (stock.vsAvgPct <= -1)
+  ) {
+    return { label: "WATCH", cls: "watch" };
+  }
+
+  if (stock.vsAvgPct > 5) {
+    return { label: "RISK", cls: "risk" };
+  }
+
   return { label: "HOLD", cls: "hold" };
 }
 
@@ -1226,33 +1253,34 @@ async function runBrain() {
 
     const dynamicRanges = {};
 
-holdings.forEach(row => {
-  const key = mapTickerToKey(row.ticker);
-  if (!key) return;
+    holdings.forEach(row => {
+      const key = mapTickerToKey(row.ticker);
+      if (!key) return;
 
-  const shares = parseNum(row.shares);
-  const rawPrice = parseNum(row.live_price);
-  const price = rawPrice > 20 ? rawPrice / 100 : rawPrice;
-  const dps = parseNum(row.annual_dividend_per_share);
-  const book = parseNum(row.book_cost);
-  const low52 = parseNum(row.low_52w || row.low52 || row["low 52 week"]);
-  const high52 = parseNum(row.high_52w || row.high52 || row["high 52 week"]);
+      const shares = parseNum(row.shares);
+      const rawPrice = parseNum(row.live_price);
+      const price = rawPrice > 20 ? rawPrice / 100 : rawPrice;
+      const dps = parseNum(row.annual_dividend_per_share);
+      const book = parseNum(row.book_cost);
+      const low52 = parseNum(row.low_52w || row.low52 || row["low 52 week"]);
+      const high52 = parseNum(row.high_52w || row.high52 || row["high 52 week"]);
 
-  live[key] = {
-    shares,
-    price,
-    dps,
-    book,
-    income: shares * dps
-  };
+      live[key] = {
+        shares,
+        price,
+        dps,
+        book,
+        income: shares * dps
+      };
 
-  dynamicRanges[key] = {
-    low52,
-    high52
-  };
-});
-liveRangeMap = dynamicRanges;
-latestLiveData = live;
+      dynamicRanges[key] = {
+        low52,
+        high52
+      };
+    });
+
+    liveRangeMap = dynamicRanges;
+    latestLiveData = live;
 
     const totalAnnual = Object.values(live).reduce((sum, item) => sum + item.income, 0);
     const totalMonthly = totalAnnual / 12;
@@ -1550,12 +1578,42 @@ latestLiveData = live;
     }));
 
     let allocated = 0;
-    const plan = rawAllocations.map((stock, index) => {
+    let plan = rawAllocations.map((stock, index) => {
       let amount = Math.round(stock.allocPct * buyNow);
       if (index === rawAllocations.length - 1) amount = buyNow - allocated;
       allocated += amount;
       return { ...stock, amount };
     });
+
+    let rejectedCash = 0;
+    plan = plan.map(stock => {
+      if (stock.amount > 0 && stock.amount < MIN_BUY_AMOUNT) {
+        rejectedCash += stock.amount;
+        return { ...stock, amount: 0 };
+      }
+      return stock;
+    });
+
+    const eligibleIndexes = plan
+      .map((stock, index) => ({ stock, index }))
+      .filter(({ stock }) => stock.amount >= MIN_BUY_AMOUNT)
+      .map(({ index }) => index);
+
+    if (rejectedCash > 0 && eligibleIndexes.length > 0) {
+      const eligibleScoreTotal =
+        eligibleIndexes.reduce((sum, index) => sum + plan[index].score, 0) || eligibleIndexes.length;
+
+      let redistributed = 0;
+
+      eligibleIndexes.forEach((index, idx) => {
+        let extra = Math.round((plan[index].score / eligibleScoreTotal) * rejectedCash);
+        if (idx === eligibleIndexes.length - 1) {
+          extra = rejectedCash - redistributed;
+        }
+        redistributed += extra;
+        plan[index].amount += extra;
+      });
+    }
 
     window.latestPlan = plan;
 
@@ -1610,20 +1668,10 @@ latestLiveData = live;
       setText(`${stock.key}StrongBuy`, formatPrice(stock.strongBuy));
       setText(`${stock.key}ValueStatus`, stock.valueLabel || "--");
 
-      let status = getStatusFromScore(stock.score, stock.dipPct, stock.vsAvgPct);
-
-      if (stock.valueLabel === "Overpriced" && stock.score < 35) {
-        status = { label: "AVOID", cls: "avoid" };
-      }
+      let status = getStatusFromScore(stock);
 
       if (stock.score < 20 && stock.vsAvgPct > 5) {
         status = { label: "AVOID", cls: "avoid" };
-      }
-
-      if (stock.incomeWeight > 50) {
-        status = { label: "TOO HEAVY", cls: "too-heavy" };
-      } else if (stock.incomeWeight > 40) {
-        status = { label: "OVERWEIGHT", cls: "overweight" };
       }
 
       setBadge(`${stock.key}Status`, status.label, status.cls);
@@ -1696,4 +1744,3 @@ runBrain();
 </script>
 </body>
 </html>
-      
