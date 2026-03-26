@@ -104,7 +104,7 @@ h2, h3 {
 }
 
 .top-grid {
-  grid-template-columns: repeat(5, minmax(2,1fr));
+  grid-template-columns: repeat(4, minmax(0,1fr));
 }
 
 .triple-grid {
@@ -121,6 +121,33 @@ h2, h3 {
 
 .two-grid {
   grid-template-columns: repeat(2, minmax(0,1fr));
+}
+
+.hero-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.hero-bottom {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.mission-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 12px;
+}
+
+.mission-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 12px;
+  margin-top: 12px;
 }
 
 .stat-label {
@@ -169,6 +196,39 @@ h2, h3 {
   line-height: 1.4;
 }
 
+/* ===================== HERO UPGRADE ===================== */
+
+.hero-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.hero-bottom {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* ===================== MISSION PANEL ===================== */
+
+.mission-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 12px;
+}
+
+.mission-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* ===================== CARDS ===================== */
+
 .alloc-box,
 .pillar-card {
   background: linear-gradient(145deg, rgba(12, 24, 39, 0.96), rgba(7, 15, 25, 0.96));
@@ -176,6 +236,8 @@ h2, h3 {
   border-radius: 18px;
   padding: 14px;
 }
+
+/* ===================== PILLAR HEADER ===================== */
 
 .pillar-top {
   display: flex;
@@ -189,6 +251,8 @@ h2, h3 {
   font-size: 18px;
   font-weight: 700;
 }
+
+/* ===================== BADGES ===================== */
 
 .badge {
   padding: 5px 10px;
@@ -208,7 +272,8 @@ h2, h3 {
 .overweight { color: var(--amber); }
 .too-heavy { color: var(--red); }
 .avoid { color: var(--red); }
-.neutral { color: var(--muted); }
+
+/* ===================== PROGRESS BAR ===================== */
 
 .bar {
   height: 12px;
@@ -227,6 +292,8 @@ h2, h3 {
   width: 0;
   transition: width 0.25s ease;
 }
+
+/* ===================== INPUTS ===================== */
 
 .input-box {
   background: rgba(255,255,255,0.03);
@@ -255,6 +322,8 @@ h2, h3 {
   outline: none;
 }
 
+/* ===================== BUTTONS ===================== */
+
 .quick-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0,1fr));
@@ -271,6 +340,8 @@ h2, h3 {
   font-weight: 700;
   cursor: pointer;
 }
+
+/* ===================== ALLOC GRID ===================== */
 
 .alloc-grid {
   display: grid;
@@ -297,11 +368,15 @@ h2, h3 {
   line-height: 1.4;
 }
 
+/* ===================== PILLAR GRID ===================== */
+
 .pillar-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0,1fr));
   gap: 12px;
 }
+
+/* ===================== WARNING ===================== */
 
 .warning-box {
   border-radius: 14px;
@@ -315,6 +390,8 @@ h2, h3 {
   margin-bottom: 6px;
 }
 
+/* ===================== FOOTER ===================== */
+
 .footer {
   margin-top: 14px;
   color: var(--muted);
@@ -322,21 +399,30 @@ h2, h3 {
   text-align: center;
 }
 
+/* ===================== MOBILE ===================== */
+
 @media (max-width: 920px) {
-  .top-grid,
-  .triple-grid,
-  .quad-grid,
-  .five-grid,
+  .hero-strip,
+  .hero-bottom,
+  .mission-grid,
+  .mission-grid-2,
   .alloc-grid,
   .pillar-grid,
-  .quick-row,
-  .two-grid {
+  .quick-row {
     grid-template-columns: 1fr;
+  }
+
+  .two-grid {
+    grid-template-columns: repeat(2, minmax(0,1fr));
   }
 
   h1 { font-size: 24px; }
   .stat { font-size: 24px; }
 }
+.positive { color: var(--green); }
+.negative { color: var(--red); }
+.sync-live { color: var(--green); }
+.sync-wait { color: var(--amber); }
 </style>
 </head>
 <body>
@@ -345,22 +431,47 @@ h2, h3 {
   <!-- ===================== SECTION: HERO ===================== -->
   <section class="hero">
     <h1>Aurora Trading Brain</h1>
-    <div class="sub">Dividend intelligence, concentration control, dip detection, buy signals, auto mode, reserve tracking, and trade execution helper in one system.</div>
+    <div class="sub">Dividend intelligence, capital deployment, reserve control, income tracking, timing signals, and stage progress in one engine.</div>
 
-    <div class="grid top-grid" style="margin-top:14px;">
+    <div class="hero-strip">
+      <div class="card">
+        <div class="stat-label">Live Portfolio Value</div>
+        <div class="stat">£<span id="portfolioValue">0.00</span></div>
+        <div class="subv" id="portfolioValueMeta">Live holdings value</div>
+      </div>
+
+      <div class="card">
+        <div class="stat-label">Live Gain</div>
+        <div class="stat" id="portfolioGain">£0.00</div>
+        <div class="subv" id="portfolioGainMeta">0.00%</div>
+      </div>
+
+      <div class="card">
+        <div class="stat-label">Live Sync Status</div>
+        <div class="stat" id="liveSyncStatus">SYNCING</div>
+        <div class="subv" id="liveSyncMeta">Waiting for refresh…</div>
+      </div>
+
       <div class="card">
         <div class="stat-label">Confirmed Annual Income</div>
         <div class="stat">£<span id="totalAnnualIncome">0.00</span> <small>/ year</small></div>
+        <div class="subv">Live pillar income</div>
       </div>
+    </div>
+
+    <div class="hero-bottom">
       <div class="card">
         <div class="stat-label">Average Monthly Income</div>
         <div class="stat">£<span id="totalMonthlyIncome">0.00</span> <small>/ month</small></div>
+        <div class="subv" id="monthlyIncomeMeta">Monthly average across current holdings</div>
       </div>
+
       <div class="card">
         <div class="stat-label">Top Buy</div>
         <div class="stat" id="topBuyName">--</div>
         <div class="subv" id="topBuyMeta">Waiting for signals</div>
       </div>
+
       <div class="card">
         <div class="stat-label">System View</div>
         <div class="stat" id="systemViewLabel">Neutral</div>
@@ -400,6 +511,71 @@ h2, h3 {
     </div>
   </section>
 
+  <!-- ===================== SECTION: PAYDAY MISSION ===================== -->
+  <section class="section card">
+    <h2>Payday Mission</h2>
+
+    <div class="mission-grid">
+      <div class="mini">
+        <div class="k">Master Income Goal</div>
+        <div class="v" id="masterIncomeGoal">£2,000.00</div>
+        <div class="subv">Target monthly income</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Current Monthly Income</div>
+        <div class="v" id="currentMonthlyIncomeGoal">£0.00</div>
+        <div class="subv">Based on live holdings</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Still To Reach Goal</div>
+        <div class="v" id="remainingToGoal">£0.00</div>
+        <div class="subv">Gap to £2,000/month</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Investment Impact</div>
+        <div class="v" id="annualImpact">£0.00</div>
+        <div class="subv" id="monthlyImpact">£0.00/month added</div>
+      </div>
+    </div>
+
+    <div class="mission-grid-2">
+      <div class="mini">
+        <div class="k">Blended Yield</div>
+        <div class="v" id="blendedYield">0.00%</div>
+        <div class="subv">Weighted by current buy plan</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Stage Tracker</div>
+        <div class="v" id="stageTracker">1 of 8</div>
+        <div class="subv" id="stageTrackerMeta">Building your income ladder</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Years To Next Stage</div>
+        <div class="v" id="yearsToNextStage">--</div>
+        <div class="subv">At current plan pace</div>
+      </div>
+    </div>
+
+    <div class="grid two-grid" style="margin-top:12px;">
+      <div class="mini">
+        <div class="k">Stage Target</div>
+        <div class="v" id="stageTarget">£2,000/year</div>
+        <div class="subv">Current annual stage target</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Next Stage Target</div>
+        <div class="v" id="nextStageTarget">£4,000/year</div>
+        <div class="subv">Next annual milestone</div>
+      </div>
+    </div>
+  </section>
+
   <!-- ===================== SECTION: PAYDAY AUTO ALLOCATOR ===================== -->
   <section class="section card">
     <h2>Payday Auto Allocator</h2>
@@ -433,7 +609,7 @@ h2, h3 {
       <div class="mini">
         <div class="k">Reserve Carried</div>
         <div class="v" id="reserveCarried">£0</div>
-        <div class="subv">Unused hold-back from prior month / period</div>
+        <div class="subv">Manual reserve / live war chest</div>
       </div>
 
       <div class="mini">
@@ -445,7 +621,7 @@ h2, h3 {
       <div class="mini">
         <div class="k">Total Deployable</div>
         <div class="v" id="totalDeployable">£0</div>
-        <div class="subv">New money + carried reserve</div>
+        <div class="subv">This session only</div>
       </div>
 
       <div class="mini">
@@ -454,10 +630,22 @@ h2, h3 {
         <div class="subv">Cash to keep back after buys</div>
       </div>
     </div>
-    <!---------------------------------Part 2 ------------------------------------->
-        <div class="grid two-grid" style="margin-top:12px;">
+
+    <div class="grid two-grid" style="margin-top:12px;">
       <button class="quick-btn" id="saveReserveBtn">Save Suggested Reserve</button>
       <button class="quick-btn" id="resetReserveBtn">Reset Reserve</button>
+    </div>
+
+    <div class="grid two-grid" style="margin-top:10px;">
+      <div class="input-box">
+        <label for="manualReserve">Manual Reserve</label>
+        <input id="manualReserve" type="number" placeholder="e.g. 250" />
+      </div>
+      <button class="quick-btn" id="setManualReserveBtn">Set Reserve</button>
+    </div>
+
+    <div class="grid two-grid" style="margin-top:10px;">
+      <button class="quick-btn" id="useReserveBtn">Use Reserve</button>
     </div>
 
     <div class="grid five-grid" style="margin-bottom:12px; margin-top:12px;">
@@ -470,7 +658,7 @@ h2, h3 {
 
     <div class="grid two-grid">
       <div class="input-box">
-        <label for="totalInvestment">Investment Amount (£)</label>
+        <label for="totalInvestment">Investment Amount</label>
         <input id="totalInvestment" type="number" value="800" step="1" />
       </div>
       <div class="input-box">
@@ -526,102 +714,7 @@ h2, h3 {
         <div class="alloc-note" id="alloc4Note">--</div>
       </div>
     </div>
-
-    <div class="card" style="margin-top:12px;">
-      <h3>Trade Entry Helper</h3>
-
-      <div class="grid quad-grid" style="margin-bottom:12px;">
-        <button class="quick-btn trade-preset-btn" data-slot="1">Use Primary Buy</button>
-        <button class="quick-btn trade-preset-btn" data-slot="2">Use Secondary Buy</button>
-        <button class="quick-btn trade-preset-btn" data-slot="3">Use Support Buy</button>
-        <button class="quick-btn trade-preset-btn" data-slot="4">Use Maintenance Buy</button>
-      </div>
-
-      <div class="grid quad-grid">
-        <div class="input-box">
-          <label for="tradeTicker">Ticker</label>
-          <input id="tradeTicker" type="text" placeholder="LGEN / MNG / SDLF / SUPR" />
-        </div>
-
-        <div class="input-box">
-          <label for="tradeAmount">Cash Invested (£)</label>
-          <input id="tradeAmount" type="number" step="0.01" placeholder="300" />
-        </div>
-
-        <div class="input-box">
-          <label for="tradePrice">Executed Price (£)</label>
-          <input id="tradePrice" type="number" step="0.0001" placeholder="2.5000" />
-        </div>
-
-        <div class="input-box">
-          <label for="tradeStampable">Stamp Duty Applies?</label>
-          <input id="tradeStampable" type="text" value="Yes" />
-        </div>
-      </div>
-
-      <div class="grid quad-grid" style="margin-top:12px;">
-        <div class="mini">
-          <div class="k">Estimated Shares</div>
-          <div class="v" id="tradeShares">0.0000</div>
-          <div class="subv">Cash ÷ executed price</div>
-        </div>
-
-        <div class="mini">
-          <div class="k">Stamp Duty</div>
-          <div class="v" id="tradeStampDuty">£0.00</div>
-          <div class="subv">0.5% rounded up to nearest £1</div>
-        </div>
-
-        <div class="mini">
-          <div class="k">Total Cost</div>
-          <div class="v" id="tradeTotalCost">£0.00</div>
-          <div class="subv">Cash invested + stamp duty</div>
-        </div>
-
-        <div class="mini">
-          <div class="k">New Avg Cost</div>
-          <div class="v" id="tradeNewAvgCost">£0.0000</div>
-          <div class="subv">Based on current Holdings row</div>
-        </div>
-      </div>
-
-      <div class="mini" style="margin-top:12px;">
-        <div class="k">Update Holdings Sheet</div>
-        <div class="v" id="tradeUpdateTitle">Waiting for trade inputs…</div>
-        <div class="subv" id="tradeUpdateText">
-          Enter ticker, amount and executed price to see the exact Holdings update.
-        </div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:12px;">
-      <h3>Post-Buy Workflow</h3>
-
-      <div class="grid quad-grid">
-        <div class="mini">
-          <div class="k">Step 1</div>
-          <div class="v">Fund IG</div>
-          <div class="subv">Move your planned capital into the account</div>
-        </div>
-        <div class="mini">
-          <div class="k">Step 2</div>
-          <div class="v">Run Brain</div>
-          <div class="subv">Check Auto / Balance / Income / Dip / Defensive</div>
-        </div>
-        <div class="mini">
-          <div class="k">Step 3</div>
-          <div class="v">Execute Buys</div>
-          <div class="subv">Use Trade Helper for exact Holdings update</div>
-        </div>
-        <div class="mini">
-          <div class="k">Step 4</div>
-          <div class="v">Save Reserve</div>
-          <div class="subv">Carry any unused cash into next cycle</div>
-        </div>
-      </div>
-    </div>
   </section>
-  
   <!-- ===================== SECTION: PILLAR ANALYSIS ===================== -->
 <section class="section card">
   <h2>Pillar Intelligence</h2>
@@ -633,225 +726,232 @@ h2, h3 {
 
   <div class="pillar-grid">
 
-    <!-- Legal & General -->
+    <!-- ===================== LGEN ===================== -->
     <div class="pillar-card">
       <div class="pillar-top">
         <div class="pillar-name">Legal &amp; General</div>
         <div class="badge" id="lngStatus">--</div>
       </div>
+
       <div class="subv" id="lngBrainNote">--</div>
       <div class="bar"><div class="fill" id="lngBar"></div></div>
 
+      <!-- TOP STATS -->
       <div class="grid two-grid">
-  <div class="mini"><div class="k">Price</div><div class="v" id="lngCurrentPrice">--</div></div>
-  <div class="mini"><div class="k">Score</div><div class="v" id="lngScore">--</div></div>
-  <div class="mini"><div class="k">7D Dip</div><div class="v" id="lngDip">--</div></div>
-  <div class="mini"><div class="k">30D Dip</div><div class="v" id="lngDip30">--</div></div>
+        <div class="mini"><div class="k">Price</div><div class="v" id="lngCurrentPrice">--</div></div>
+        <div class="mini"><div class="k">Score</div><div class="v" id="lngScore">--</div></div>
+        <div class="mini"><div class="k">7D Dip</div><div class="v" id="lngDip">--</div></div>
+        <div class="mini"><div class="k">30D Dip</div><div class="v" id="lngDip30">--</div></div>
+      </div>
+
+      <div class="mini" style="margin-top:10px;">
+        <div class="k">Vs Avg</div>
+        <div class="v" id="lngVsAvg">--</div>
+      </div>
+
+      <!-- VALUE -->
+      <div class="grid triple-grid" style="margin-top:10px;">
+        <div class="mini"><div class="k">Fair Value</div><div class="v" id="lngFairValue">--</div></div>
+        <div class="mini"><div class="k">Strong Buy</div><div class="v" id="lngStrongBuy">--</div></div>
+        <div class="mini"><div class="k">Value Status</div><div class="v" id="lngValueStatus">--</div></div>
+      </div>
+
+      <!-- EX DIV -->
+      <div class="grid triple-grid" style="margin-top:10px;">
+        <div class="mini"><div class="k">Next Ex-Div</div><div class="v" id="lngExDiv">--</div></div>
+        <div class="mini"><div class="k">Expected Drop</div><div class="v" id="lngExDrop">--</div></div>
+        <div class="mini"><div class="k">Target Buy Zone</div><div class="v" id="lngTargetZone">--</div></div>
+      </div>
+      <div class="grid two-grid" style="margin-top:10px;">
+  <div class="mini"><div class="k">Annual Income</div><div class="v" id="lngAnnualIncome">--</div></div>
+  <div class="mini"><div class="k">Monthly Income</div><div class="v" id="lngMonthlyIncome">--</div></div>
 </div>
 
-<div class="mini" style="margin-top:10px;">
-  <div class="k">Vs Avg</div>
-  <div class="v" id="lngVsAvg">--</div>
+<div class="grid two-grid" style="margin-top:10px;">
+  <div class="mini"><div class="k">Gap To £2k</div><div class="v" id="lngGapTarget">--</div></div>
+  <div class="mini"><div class="k">Gap To £4k</div><div class="v" id="lngGapNextStage">--</div></div>
 </div>
 
-<div class="grid triple-grid" style="margin-top:10px;">
-  <div class="mini"><div class="k">Fair Value</div><div class="v" id="lngFairValue">--</div></div>
-  <div class="mini"><div class="k">Strong Buy</div><div class="v" id="lngStrongBuy">--</div></div>
-  <div class="mini"><div class="k">Value Status</div><div class="v" id="lngValueStatus">--</div></div>
-</div>
-
-<div class="grid triple-grid" style="margin-top:10px;">
-  <div class="mini"><div class="k">Next Ex-Div</div><div class="v" id="lngExDiv">--</div></div>
-  <div class="mini"><div class="k">Expected Drop</div><div class="v" id="lngExDrop">--</div></div>
-  <div class="mini"><div class="k">Target Buy Zone</div><div class="v" id="lngTargetZone">--</div></div>
-</div>
-
-      <div class="subv" id="lngTimingNote">Waiting for ex-div timing…</div>
-      <div class="subv" id="lngTimingVerdict">Timing verdict loading…</div>
-      <div class="subv" id="lngDecisionText">Waiting for live decision…</div>
+      <div class="subv" id="lngTimingNote"></div>
+      <div class="subv" id="lngTimingVerdict"></div>
+      <div class="subv" id="lngDecisionText"></div>
     </div>
 
-    <!-- M&G -->
+    <!-- ===================== MNG ===================== -->
     <div class="pillar-card">
       <div class="pillar-top">
         <div class="pillar-name">M&amp;G</div>
         <div class="badge" id="mngStatus">--</div>
       </div>
+
       <div class="subv" id="mngBrainNote">--</div>
       <div class="bar"><div class="fill" id="mngBar"></div></div>
 
       <div class="grid two-grid">
-  <div class="mini"><div class="k">Price</div><div class="v" id="mngCurrentPrice">--</div></div>
-  <div class="mini"><div class="k">Score</div><div class="v" id="mngScore">--</div></div>
-  <div class="mini"><div class="k">7D Dip</div><div class="v" id="mngDip">--</div></div>
-  <div class="mini"><div class="k">30D Dip</div><div class="v" id="mngDip30">--</div></div>
+        <div class="mini"><div class="k">Price</div><div class="v" id="mngCurrentPrice">--</div></div>
+        <div class="mini"><div class="k">Score</div><div class="v" id="mngScore">--</div></div>
+        <div class="mini"><div class="k">7D Dip</div><div class="v" id="mngDip">--</div></div>
+        <div class="mini"><div class="k">30D Dip</div><div class="v" id="mngDip30">--</div></div>
+      </div>
+
+      <div class="mini" style="margin-top:10px;">
+        <div class="k">Vs Avg</div>
+        <div class="v" id="mngVsAvg">--</div>
+      </div>
+
+      <div class="grid triple-grid" style="margin-top:10px;">
+        <div class="mini"><div class="k">Fair Value</div><div class="v" id="mngFairValue">--</div></div>
+        <div class="mini"><div class="k">Strong Buy</div><div class="v" id="mngStrongBuy">--</div></div>
+        <div class="mini"><div class="k">Value Status</div><div class="v" id="mngValueStatus">--</div></div>
+      </div>
+
+      <div class="grid triple-grid" style="margin-top:10px;">
+        <div class="mini"><div class="k">Next Ex-Div</div><div class="v" id="mngExDiv">--</div></div>
+        <div class="mini"><div class="k">Expected Drop</div><div class="v" id="mngExDrop">--</div></div>
+        <div class="mini"><div class="k">Target Buy Zone</div><div class="v" id="mngTargetZone">--</div></div>
+      </div>
+      <div class="grid two-grid" style="margin-top:10px;">
+  <div class="mini"><div class="k">Annual Income</div><div class="v" id="mngAnnualIncome">--</div></div>
+  <div class="mini"><div class="k">Monthly Income</div><div class="v" id="mngMonthlyIncome">--</div></div>
 </div>
 
-<div class="mini" style="margin-top:10px;">
-  <div class="k">Vs Avg</div>
-  <div class="v" id="mngVsAvg">--</div>
+<div class="grid two-grid" style="margin-top:10px;">
+  <div class="mini"><div class="k">Gap To £2k</div><div class="v" id="mngGapTarget">--</div></div>
+  <div class="mini"><div class="k">Gap To £4k</div><div class="v" id="mngGapNextStage">--</div></div>
 </div>
 
-<div class="grid triple-grid" style="margin-top:10px;">
-  <div class="mini"><div class="k">Fair Value</div><div class="v" id="mngFairValue">--</div></div>
-  <div class="mini"><div class="k">Strong Buy</div><div class="v" id="mngStrongBuy">--</div></div>
-  <div class="mini"><div class="k">Value Status</div><div class="v" id="mngValueStatus">--</div></div>
-</div>
-
-<div class="grid triple-grid" style="margin-top:10px;">
-  <div class="mini"><div class="k">Next Ex-Div</div><div class="v" id="mngExDiv">--</div></div>
-  <div class="mini"><div class="k">Expected Drop</div><div class="v" id="mngExDrop">--</div></div>
-  <div class="mini"><div class="k">Target Buy Zone</div><div class="v" id="mngTargetZone">--</div></div>
-</div>
-
-      <div class="subv" id="mngTimingNote">Waiting for ex-div timing…</div>
-      <div class="subv" id="mngTimingVerdict">Timing verdict loading…</div>
-      <div class="subv" id="mngDecisionText">Waiting for live decision…</div>
+      <div class="subv" id="mngTimingNote"></div>
+      <div class="subv" id="mngTimingVerdict"></div>
+      <div class="subv" id="mngDecisionText"></div>
     </div>
 
-    <!-- Standard Life -->
+    <!-- ===================== SDLF ===================== -->
     <div class="pillar-card">
       <div class="pillar-top">
         <div class="pillar-name">Standard Life</div>
         <div class="badge" id="sdlfStatus">--</div>
       </div>
+
       <div class="subv" id="sdlfBrainNote">--</div>
       <div class="bar"><div class="fill" id="sdlfBar"></div></div>
 
       <div class="grid two-grid">
-  <div class="mini"><div class="k">Price</div><div class="v" id="sdlfCurrentPrice">--</div></div>
-  <div class="mini"><div class="k">Score</div><div class="v" id="sdlfScore">--</div></div>
-  <div class="mini"><div class="k">7D Dip</div><div class="v" id="sdlfDip">--</div></div>
-  <div class="mini"><div class="k">30D Dip</div><div class="v" id="sdlfDip30">--</div></div>
+        <div class="mini"><div class="k">Price</div><div class="v" id="sdlfCurrentPrice">--</div></div>
+        <div class="mini"><div class="k">Score</div><div class="v" id="sdlfScore">--</div></div>
+        <div class="mini"><div class="k">7D Dip</div><div class="v" id="sdlfDip">--</div></div>
+        <div class="mini"><div class="k">30D Dip</div><div class="v" id="sdlfDip30">--</div></div>
+      </div>
+
+      <div class="mini" style="margin-top:10px;">
+        <div class="k">Vs Avg</div>
+        <div class="v" id="sdlfVsAvg">--</div>
+      </div>
+
+      <div class="grid triple-grid" style="margin-top:10px;">
+        <div class="mini"><div class="k">Fair Value</div><div class="v" id="sdlfFairValue">--</div></div>
+        <div class="mini"><div class="k">Strong Buy</div><div class="v" id="sdlfStrongBuy">--</div></div>
+        <div class="mini"><div class="k">Value Status</div><div class="v" id="sdlfValueStatus">--</div></div>
+      </div>
+
+      <div class="grid triple-grid" style="margin-top:10px;">
+        <div class="mini"><div class="k">Next Ex-Div</div><div class="v" id="sdlfExDiv">--</div></div>
+        <div class="mini"><div class="k">Expected Drop</div><div class="v" id="sdlfExDrop">--</div></div>
+        <div class="mini"><div class="k">Target Buy Zone</div><div class="v" id="sdlfTargetZone">--</div></div>
+      </div>
+      <div class="grid two-grid" style="margin-top:10px;">
+  <div class="mini"><div class="k">Annual Income</div><div class="v" id="sdlfAnnualIncome">--</div></div>
+  <div class="mini"><div class="k">Monthly Income</div><div class="v" id="sdlfMonthlyIncome">--</div></div>
 </div>
 
-<div class="mini" style="margin-top:10px;">
-  <div class="k">Vs Avg</div>
-  <div class="v" id="sdlfVsAvg">--</div>
+<div class="grid two-grid" style="margin-top:10px;">
+  <div class="mini"><div class="k">Gap To £2k</div><div class="v" id="sdlfGapTarget">--</div></div>
+  <div class="mini"><div class="k">Gap To £4k</div><div class="v" id="sdlfGapNextStage">--</div></div>
 </div>
 
-<div class="grid triple-grid" style="margin-top:10px;">
-  <div class="mini"><div class="k">Fair Value</div><div class="v" id="sdlfFairValue">--</div></div>
-  <div class="mini"><div class="k">Strong Buy</div><div class="v" id="sdlfStrongBuy">--</div></div>
-  <div class="mini"><div class="k">Value Status</div><div class="v" id="sdlfValueStatus">--</div></div>
-</div>
-
-<div class="grid triple-grid" style="margin-top:10px;">
-  <div class="mini"><div class="k">Next Ex-Div</div><div class="v" id="sdlfExDiv">--</div></div>
-  <div class="mini"><div class="k">Expected Drop</div><div class="v" id="sdlfExDrop">--</div></div>
-  <div class="mini"><div class="k">Target Buy Zone</div><div class="v" id="sdlfTargetZone">--</div></div>
-</div>
-
-      <div class="subv" id="sdlfTimingNote">Waiting for ex-div timing…</div>
-      <div class="subv" id="sdlfTimingVerdict">Timing verdict loading…</div>
-      <div class="subv" id="sdlfDecisionText">Waiting for live decision…</div>
+      <div class="subv" id="sdlfTimingNote"></div>
+      <div class="subv" id="sdlfTimingVerdict"></div>
+      <div class="subv" id="sdlfDecisionText"></div>
     </div>
 
-    <!-- Supermarket REIT -->
+    <!-- ===================== SUPR ===================== -->
     <div class="pillar-card">
       <div class="pillar-top">
         <div class="pillar-name">Supermarket REIT</div>
         <div class="badge" id="suprStatus">--</div>
       </div>
+
       <div class="subv" id="suprBrainNote">--</div>
       <div class="bar"><div class="fill" id="suprBar"></div></div>
 
       <div class="grid two-grid">
-  <div class="mini"><div class="k">Price</div><div class="v" id="suprCurrentPrice">--</div></div>
-  <div class="mini"><div class="k">Score</div><div class="v" id="suprScore">--</div></div>
-  <div class="mini"><div class="k">7D Dip</div><div class="v" id="suprDip">--</div></div>
-  <div class="mini"><div class="k">30D Dip</div><div class="v" id="suprDip30">--</div></div>
+        <div class="mini"><div class="k">Price</div><div class="v" id="suprCurrentPrice">--</div></div>
+        <div class="mini"><div class="k">Score</div><div class="v" id="suprScore">--</div></div>
+        <div class="mini"><div class="k">7D Dip</div><div class="v" id="suprDip">--</div></div>
+        <div class="mini"><div class="k">30D Dip</div><div class="v" id="suprDip30">--</div></div>
+      </div>
+
+      <div class="mini" style="margin-top:10px;">
+        <div class="k">Vs Avg</div>
+        <div class="v" id="suprVsAvg">--</div>
+      </div>
+
+      <div class="grid triple-grid" style="margin-top:10px;">
+        <div class="mini"><div class="k">Fair Value</div><div class="v" id="suprFairValue">--</div></div>
+        <div class="mini"><div class="k">Strong Buy</div><div class="v" id="suprStrongBuy">--</div></div>
+        <div class="mini"><div class="k">Value Status</div><div class="v" id="suprValueStatus">--</div></div>
+      </div>
+
+      <div class="grid triple-grid" style="margin-top:10px;">
+        <div class="mini"><div class="k">Next Ex-Div</div><div class="v" id="suprExDiv">--</div></div>
+        <div class="mini"><div class="k">Expected Drop</div><div class="v" id="suprExDrop">--</div></div>
+        <div class="mini"><div class="k">Target Buy Zone</div><div class="v" id="suprTargetZone">--</div></div>
+      </div>
+      <div class="grid two-grid" style="margin-top:10px;">
+  <div class="mini"><div class="k">Annual Income</div><div class="v" id="suprAnnualIncome">--</div></div>
+  <div class="mini"><div class="k">Monthly Income</div><div class="v" id="suprMonthlyIncome">--</div></div>
 </div>
 
-<div class="mini" style="margin-top:10px;">
-  <div class="k">Vs Avg</div>
-  <div class="v" id="suprVsAvg">--</div>
+<div class="grid two-grid" style="margin-top:10px;">
+  <div class="mini"><div class="k">Gap To £2k</div><div class="v" id="suprGapTarget">--</div></div>
+  <div class="mini"><div class="k">Gap To £4k</div><div class="v" id="suprGapNextStage">--</div></div>
 </div>
 
-<div class="grid triple-grid" style="margin-top:10px;">
-  <div class="mini"><div class="k">Fair Value</div><div class="v" id="suprFairValue">--</div></div>
-  <div class="mini"><div class="k">Strong Buy</div><div class="v" id="suprStrongBuy">--</div></div>
-  <div class="mini"><div class="k">Value Status</div><div class="v" id="suprValueStatus">--</div></div>
-</div>
-
-<div class="grid triple-grid" style="margin-top:10px;">
-  <div class="mini"><div class="k">Next Ex-Div</div><div class="v" id="suprExDiv">--</div></div>
-  <div class="mini"><div class="k">Expected Drop</div><div class="v" id="suprExDrop">--</div></div>
-  <div class="mini"><div class="k">Target Buy Zone</div><div class="v" id="suprTargetZone">--</div></div>
-</div>
-
-      <div class="subv" id="suprTimingNote">Waiting for ex-div timing…</div>
-      <div class="subv" id="suprTimingVerdict">Timing verdict loading…</div>
-      <div class="subv" id="suprDecisionText">Waiting for live decision…</div>
+      <div class="subv" id="suprTimingNote"></div>
+      <div class="subv" id="suprTimingVerdict"></div>
+      <div class="subv" id="suprDecisionText"></div>
     </div>
 
   </div>
 </section>
- 
-  <!-- ===================== SECTION: MONTHLY DIVIDEND FORECAST ===================== -->
-  <section class="section card">
-    <h2>Monthly Dividend Forecast</h2>
 
-    <div class="grid quad-grid" id="forecastGrid">
-      <div class="mini"><div class="k">Jan</div><div class="v" id="forecastJan">£0.00</div><div class="subv" id="forecastJanMeta">No flow</div></div>
-      <div class="mini"><div class="k">Feb</div><div class="v" id="forecastFeb">£0.00</div><div class="subv" id="forecastFebMeta">No flow</div></div>
-      <div class="mini"><div class="k">Mar</div><div class="v" id="forecastMar">£0.00</div><div class="subv" id="forecastMarMeta">No flow</div></div>
-      <div class="mini"><div class="k">Apr</div><div class="v" id="forecastApr">£0.00</div><div class="subv" id="forecastAprMeta">No flow</div></div>
-      <div class="mini"><div class="k">May</div><div class="v" id="forecastMay">£0.00</div><div class="subv" id="forecastMayMeta">No flow</div></div>
-      <div class="mini"><div class="k">Jun</div><div class="v" id="forecastJun">£0.00</div><div class="subv" id="forecastJunMeta">No flow</div></div>
-      <div class="mini"><div class="k">Jul</div><div class="v" id="forecastJul">£0.00</div><div class="subv" id="forecastJulMeta">No flow</div></div>
-      <div class="mini"><div class="k">Aug</div><div class="v" id="forecastAug">£0.00</div><div class="subv" id="forecastAugMeta">No flow</div></div>
-      <div class="mini"><div class="k">Sep</div><div class="v" id="forecastSep">£0.00</div><div class="subv" id="forecastSepMeta">No flow</div></div>
-      <div class="mini"><div class="k">Oct</div><div class="v" id="forecastOct">£0.00</div><div class="subv" id="forecastOctMeta">No flow</div></div>
-      <div class="mini"><div class="k">Nov</div><div class="v" id="forecastNov">£0.00</div><div class="subv" id="forecastNovMeta">No flow</div></div>
-      <div class="mini"><div class="k">Dec</div><div class="v" id="forecastDec">£0.00</div><div class="subv" id="forecastDecMeta">No flow</div></div>
-    </div>
-
-    <div class="grid triple-grid" style="margin-top:12px;">
-      <div class="mini">
-        <div class="k">Best Dividend Month</div>
-        <div class="v" id="bestForecastMonth">--</div>
-        <div class="subv" id="bestForecastMonthMeta">No data</div>
-      </div>
-      <div class="mini">
-        <div class="k">Weakest Dividend Month</div>
-        <div class="v" id="worstForecastMonth">--</div>
-        <div class="subv" id="worstForecastMonthMeta">No data</div>
-      </div>
-      <div class="mini">
-        <div class="k">Next 3 Payments</div>
-        <div class="v" id="next3PaymentsTitle">--</div>
-        <div class="subv" id="next3PaymentsMeta">No upcoming payments</div>
-      </div>
-    </div>
-  </section>
-
-  <div class="footer">
-    Aurora Trading Brain • Allocation + Timing + Risk Control
-  </div>
-
+<div class="footer">
+  Aurora Trading Brain • Allocation + Timing + Income Engine
 </div>
-
-<!-- ===================== SECTION: SCRIPT ===================== -->
+</div>
 <script>
 const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
 const HOLDINGS_URL = `https://opensheet.elk.sh/${SHEET_ID}/Holdings`;
 const DIVIDENDS_URL = `https://opensheet.elk.sh/${SHEET_ID}/Dividends`;
 const PRICE_HISTORY_URL = `https://opensheet.elk.sh/${SHEET_ID}/PriceLog`;
 
-const PRICE_MEMORY_KEY = "aurora_prices_v10";
-const MODE_KEY = "aurora_mode_v5";
-const RESERVE_KEY = "aurora_reserve_v2";
+const MODE_KEY = "aurora_mode_v7";
+const RESERVE_KEY = "aurora_reserve_v4";
 const MIN_BUY_AMOUNT = 50;
 
-const MONTH_KEYS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MASTER_MONTHLY_GOAL = 2000;
+const STAGE_TARGET_ANNUAL = 2000;
+const NEXT_STAGE_TARGET_ANNUAL = 4000;
+const TOTAL_STAGES = 8;
+const YEARS_ASSUMPTION_DIVISOR = 12;
 
 const TICKER_MAP = {
   LGEN: "lng",
   "LGEN.L": "lng",
+  "LGEN.GB": "lng",
   "LON:LGEN": "lng",
   MNG: "mng",
   "MNG.L": "mng",
+  "MNG.GB": "mng",
   "LON:MNG": "mng",
   PHNX: "sdlf",
   "PHNX.L": "sdlf",
@@ -874,30 +974,24 @@ const NAMES = {
 };
 
 let liveRangeMap = {};
-
-const GAP_MAP = {
-  lng: 309,
-  mng: 825,
-  sdlf: 1063,
-  supr: 1203
-};
-
-function getGapWeight(gap) {
-  const maxGap = 1203;
-  if (!gap || gap <= 0) return 1;
-  return 1 + (gap / maxGap);
-}
-
 let latestLiveData = {
-  lng: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
-  mng: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
-  sdlf: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
-  supr: { shares: 0, price: 0, dps: 0, book: 0, income: 0 }
+  lng: { shares: 0, price: 0, dps: 0, book: 0, income: 0, value: 0 },
+  mng: { shares: 0, price: 0, dps: 0, book: 0, income: 0, value: 0 },
+  sdlf: { shares: 0, price: 0, dps: 0, book: 0, income: 0, value: 0 },
+  supr: { shares: 0, price: 0, dps: 0, book: 0, income: 0, value: 0 }
 };
 
 function setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.innerText = value;
+}
+
+function setTextWithClass(id, value, classNameToAdd, classNamesToRemove = []) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerText = value;
+  classNamesToRemove.forEach(cls => el.classList.remove(cls));
+  if (classNameToAdd) el.classList.add(classNameToAdd);
 }
 
 function formatMoney(v) {
@@ -926,6 +1020,12 @@ function parseNum(v) {
   const n = parseFloat(String(v ?? "").replace(/[^0-9.-]/g, ""));
   return Number.isFinite(n) ? n : 0;
 }
+
+function normaliseSharePrice(v) {
+  const n = parseNum(v);
+  return n > 20 ? n / 100 : n;
+}
+
 function formatDateShort(dateStr) {
   if (!dateStr) return "--";
   const d = new Date(dateStr);
@@ -972,36 +1072,23 @@ function getTimingVerdict(stock, exDivInfo) {
   const score = Number(stock?.score || 0);
   const valueLabel = stock?.valueLabel || "";
 
-  if (!days && days !== 0) {
+  if (days === null || days === undefined) {
     if (score >= 60) return "BUY NOW";
-    if (score >= 40) return "NO TIMING EDGE";
     return "NO TIMING EDGE";
   }
 
-  // If ex-div is very close and there is a meaningful expected drop, wait
   if (days >= 0 && days <= 10 && expectedDrop > 0 && current > targetZone) {
     return "WAIT FOR EX-DIV";
   }
 
-  // If ex-div is today or just passed and price is near target zone
-  if (days >= -3 && days <= 3 && expectedDrop > 0) {
-    if (current <= targetZone * 1.01) {
-      return "POST-EX BUY ZONE";
-    }
+  if (days >= -3 && days <= 3 && expectedDrop > 0 && current <= targetZone * 1.01) {
+    return "POST-EX BUY ZONE";
   }
 
-  // If already cheap enough and score is strong, buy now
-  if (
-    score >= 65 &&
-    (
-      valueLabel === "Strong Buy Zone" ||
-      valueLabel === "Below Fair Value"
-    )
-  ) {
+  if (score >= 65 && (valueLabel === "Strong Buy Zone" || valueLabel === "Below Fair Value")) {
     return "BUY NOW";
   }
 
-  // If close to ex-div but not enough advantage yet
   if (days > 10 && days <= 20) {
     return "WATCH TIMING";
   }
@@ -1024,20 +1111,17 @@ function getPriceDaysAgo(history, key, days) {
   target.setDate(target.getDate() - days);
 
   const filtered = history
-    .filter(r => mapTickerToKey(r.Ticker || r.ticker) === key)
+    .filter(r => mapTickerToKey(r.Ticker || r.ticker || r.TICKER) === key)
     .map(r => ({
       date: new Date(r.Date || r.date),
-      price: parseFloat(r.Price || r.price)
+      price: normaliseSharePrice(r.Price || r.price)
     }))
     .filter(r => !isNaN(r.date.getTime()) && Number.isFinite(r.price) && r.price > 0)
     .sort((a, b) => a.date - b.date);
 
   let chosen = null;
-
   for (const row of filtered) {
-    if (row.date <= target) {
-      chosen = row.price;
-    }
+    if (row.date <= target) chosen = row.price;
   }
 
   return chosen || filtered[0]?.price || 0;
@@ -1054,48 +1138,28 @@ function setMode(mode) {
 function getBaseModeConfig(mode) {
   if (mode === "income") {
     return {
-      mode,
-      label: "Income",
-      meta: "Favors higher live yield and income build",
-      dipMult: 1.0,
-      yieldMult: 1.35,
-      valueMult: 1.0,
-      holdPct: 0.10
+      mode, label: "Income", meta: "Favors higher live yield and income build",
+      dipMult: 1.0, yieldMult: 1.35, valueMult: 1.0, holdPct: 0.10
     };
   }
 
   if (mode === "dip") {
     return {
-      mode,
-      label: "Dip Hunter",
-      meta: "Favors deeper pullbacks and discounts",
-      dipMult: 1.45,
-      yieldMult: 1.0,
-      valueMult: 1.0,
-      holdPct: 0.25
+      mode, label: "Dip Hunter", meta: "Favors deeper pullbacks and discounts",
+      dipMult: 1.45, yieldMult: 1.0, valueMult: 1.0, holdPct: 0.25
     };
   }
 
   if (mode === "defensive") {
     return {
-      mode,
-      label: "Defensive",
-      meta: "Keeps more cash back and softens aggression",
-      dipMult: 0.9,
-      yieldMult: 0.9,
-      valueMult: 1.1,
-      holdPct: 0.35
+      mode, label: "Defensive", meta: "Keeps more cash back and softens aggression",
+      dipMult: 0.9, yieldMult: 0.9, valueMult: 1.1, holdPct: 0.35
     };
   }
 
   return {
-    mode: "balance",
-    label: "Balance",
-    meta: "Balanced between dip, value, and yield",
-    dipMult: 1.1,
-    yieldMult: 1.0,
-    valueMult: 1.0,
-    holdPct: 0.20
+    mode: "balance", label: "Balance", meta: "Balanced between dip, value, and yield",
+    dipMult: 1.1, yieldMult: 1.0, valueMult: 1.0, holdPct: 0.20
   };
 }
 
@@ -1109,18 +1173,6 @@ function updateModeButtons() {
   });
 }
 
-function getMemory() {
-  try {
-    return JSON.parse(localStorage.getItem(PRICE_MEMORY_KEY) || "{}");
-  } catch {
-    return {};
-  }
-}
-
-function saveMemory(memory) {
-  localStorage.setItem(PRICE_MEMORY_KEY, JSON.stringify(memory));
-}
-
 function getReserve() {
   const value = Number(localStorage.getItem(RESERVE_KEY) || "0");
   return Number.isFinite(value) ? value : 0;
@@ -1130,82 +1182,37 @@ function setReserve(value) {
   localStorage.setItem(RESERVE_KEY, String(Number(value || 0)));
 }
 
+function saveSuggestedReserve() {
+  const text = String(document.getElementById("suggestedReserve")?.innerText || "0");
+  const suggested = parseNum(text);
+  const existing = getReserve();
+  setReserve(existing + suggested);
+  runBrain();
+}
+
+function useReserveNow() {
+  const reserve = getReserve();
+  if (reserve <= 0) return;
+  const currentInvestment = Number(document.getElementById("totalInvestment")?.value || 0);
+  document.getElementById("totalInvestment").value = currentInvestment + reserve;
+  setReserve(0);
+  runBrain();
+}
+
+function resetReserve() {
+  setReserve(0);
+  runBrain();
+}
+
+function setManualReserve() {
+  const val = Number(document.getElementById("manualReserve")?.value || 0);
+  if (!Number.isFinite(val) || val < 0) return;
+  setReserve(val);
+  runBrain();
+}
+
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
-}
-
-function getDateDaysAgo(daysBack) {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() - daysBack);
-  return d;
-}
-
-function updateRollingPriceMemory(memory, key, price) {
-  if (!Number.isFinite(price) || price <= 0) return;
-
-  if (!memory[key] || !Array.isArray(memory[key])) {
-    memory[key] = [];
-  }
-
-  const today = todayIso();
-  const existingIndex = memory[key].findIndex(entry => entry.date === today);
-
-  if (existingIndex >= 0) {
-    memory[key][existingIndex].price = price;
-  } else {
-    memory[key].push({ date: today, price });
-  }
-
-  memory[key] = memory[key]
-    .filter(entry => entry && entry.date && Number.isFinite(Number(entry.price)))
-    .sort((a, b) => new Date(a.date) - new Date(b.date))
-    .slice(-45);
-}
-
-function getPricesWithinDays(memory, key, daysBack, fallbackPrice) {
-  const history = Array.isArray(memory[key]) ? memory[key] : [];
-  if (!history.length) return [fallbackPrice || 0].filter(v => v > 0);
-
-  const cutoff = getDateDaysAgo(daysBack);
-  const prices = history
-    .filter(entry => {
-      const entryDate = new Date(entry.date);
-      return !isNaN(entryDate.getTime()) && entryDate >= cutoff;
-    })
-    .map(entry => Number(entry.price))
-    .filter(price => Number.isFinite(price) && price > 0);
-
-  if (!prices.length && fallbackPrice > 0) return [fallbackPrice];
-  return prices;
-}
-
-function getRollingHigh(memory, key, daysBack, fallbackPrice) {
-  const prices = getPricesWithinDays(memory, key, daysBack, fallbackPrice);
-  if (!prices.length) return fallbackPrice || 0;
-  return Math.max(...prices);
-}
-
-function getHistoricalPrice(memory, key, daysBack, fallbackPrice) {
-  const history = Array.isArray(memory[key]) ? memory[key] : [];
-  if (!history.length) return fallbackPrice || 0;
-
-  const sorted = [...history]
-    .filter(entry => entry && entry.date && Number.isFinite(Number(entry.price)))
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-  const target = getDateDaysAgo(daysBack);
-
-  let chosen = null;
-
-  for (const entry of sorted) {
-    const entryDate = new Date(entry.date);
-    if (!isNaN(entryDate.getTime()) && entryDate <= target) {
-      chosen = Number(entry.price);
-    }
-  }
-
-  return chosen || Number(sorted[0]?.price) || fallbackPrice || 0;
 }
 
 function daysUntil(dateStr) {
@@ -1214,16 +1221,6 @@ function daysUntil(dateStr) {
   const then = new Date(dateStr);
   if (isNaN(then.getTime())) return null;
   return Math.ceil((then - now) / (1000 * 60 * 60 * 24));
-}
-
-function monthIndexFromDate(dateStr) {
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return null;
-  return d.getMonth();
-}
-
-function monthKeyFromIndex(index) {
-  return MONTH_KEYS[index] || "";
 }
 
 function getRangeLevels(key) {
@@ -1253,18 +1250,9 @@ function getFairValueStatus(price, cfg) {
   const range = cfg.high52 - cfg.low52;
   const rangePosition = range > 0 ? ((price - cfg.low52) / range) : null;
 
-  if (price <= cfg.strongBuy) {
-    return { label: "Strong Buy Zone", scoreAdj: 25, rangePosition };
-  }
-
-  if (price <= cfg.fairValue) {
-    return { label: "Below Fair Value", scoreAdj: 15, rangePosition };
-  }
-
-  if (price > cfg.avoidAbove) {
-    return { label: "Overpriced", scoreAdj: -15, rangePosition };
-  }
-
+  if (price <= cfg.strongBuy) return { label: "Strong Buy Zone", scoreAdj: 25, rangePosition };
+  if (price <= cfg.fairValue) return { label: "Below Fair Value", scoreAdj: 15, rangePosition };
+  if (price > cfg.avoidAbove) return { label: "Overpriced", scoreAdj: -15, rangePosition };
   return { label: "Near Fair Value", scoreAdj: 5, rangePosition };
 }
 
@@ -1298,11 +1286,7 @@ function getTopPickReason(stock, pillarWeight) {
   if (stock.vsAvgPct < 0) reasons.push(`below avg cost ${formatPct(stock.vsAvgPct)}`);
   if (stock.yieldPct >= 8) reasons.push(`yield ${formatPct(stock.yieldPct)}`);
   if (stock.valueLabel) reasons.push(stock.valueLabel.toLowerCase());
-
-  if (stock.rangePosition != null) {
-    reasons.push(`${(stock.rangePosition * 100).toFixed(0)}% of range`);
-  }
-
+  if (stock.rangePosition != null) reasons.push(`${(stock.rangePosition * 100).toFixed(0)}% of range`);
   if (pillarWeight < 15) reasons.push(`underweight pillar`);
   if (pillarWeight > 35) reasons.push(`won despite overweight penalty`);
 
@@ -1319,33 +1303,15 @@ function getWeightStatus(weight) {
 function getStatusFromScore(stock) {
   if (stock.incomeWeight > 50) return { label: "TOO HEAVY", cls: "too-heavy" };
   if (stock.incomeWeight > 40) return { label: "OVERWEIGHT", cls: "overweight" };
+  if (stock.valueLabel === "Overpriced" && stock.score < 35) return { label: "AVOID", cls: "avoid" };
 
-  if (stock.valueLabel === "Overpriced" && stock.score < 35) {
-    return { label: "AVOID", cls: "avoid" };
-  }
-
-  if (stock.dipPct <= -8 && stock.vsAvgPct <= -3 && stock.score >= 80) {
-    return { label: "AGGRESSIVE BUY", cls: "aggressive" };
-  }
-
-  if (
-    (stock.dipPct <= -5 && stock.score >= 65) ||
-    (stock.valueLabel === "Strong Buy Zone" && stock.score >= 55)
-  ) {
+  if ((stock.timingVerdict === "BUY NOW" || stock.timingVerdict === "POST-EX BUY ZONE") && stock.score >= 65) {
     return { label: "GOOD BUY", cls: "good" };
   }
 
-  if (
-    (stock.valueLabel === "Strong Buy Zone" && stock.score >= 40) ||
-    (stock.dipPct <= -3) ||
-    (stock.vsAvgPct <= -1)
-  ) {
-    return { label: "WATCH", cls: "watch" };
-  }
-
-  if (stock.vsAvgPct > 5) {
-    return { label: "RISK", cls: "risk" };
-  }
+  if (stock.score >= 85) return { label: "GOOD BUY", cls: "good" };
+  if (stock.score >= 50) return { label: "WATCH", cls: "watch" };
+  if (stock.vsAvgPct > 5) return { label: "RISK", cls: "risk" };
 
   return { label: "HOLD", cls: "hold" };
 }
@@ -1355,84 +1321,6 @@ function getDecisionText(stock) {
   if (stock.score >= 50) return "Decent setup. Good for controlled accumulation.";
   if (stock.score >= 30) return "Mixed setup. Only light buying if needed.";
   return "Do not force this buy right now.";
-}
-
-function calculateStampDuty(cashAmount, stampApplies) {
-  if (!stampApplies || cashAmount <= 0) return 0;
-  const raw = cashAmount * 0.005;
-  return raw > 0 ? Math.ceil(raw) : 0;
-}
-
-function presetTradeFromPlan(slot) {
-  const planned = window.latestPlan || [];
-  const pick = planned[slot - 1];
-  if (!pick) return;
-
-  const tickerMap = {
-    lng: "LGEN",
-    mng: "MNG",
-    sdlf: "SDLF",
-    supr: "SUPR"
-  };
-
-  const tickerEl = document.getElementById("tradeTicker");
-  const amountEl = document.getElementById("tradeAmount");
-
-  if (tickerEl) tickerEl.value = tickerMap[pick.key] || "";
-  if (amountEl) amountEl.value = pick.amount || 0;
-
-  updateTradeHelper();
-}
-
-function saveSuggestedReserve() {
-  const text = String(document.getElementById("suggestedReserve")?.innerText || "0");
-  const value = parseNum(text);
-  setReserve(value);
-  runBrain();
-}
-
-function resetReserve() {
-  setReserve(0);
-  runBrain();
-}
-
-function updateTradeHelper() {
-  const tickerRaw = document.getElementById("tradeTicker")?.value || "";
-  const amount = Number(document.getElementById("tradeAmount")?.value || 0);
-  const price = Number(document.getElementById("tradePrice")?.value || 0);
-  const stampableText = String(document.getElementById("tradeStampable")?.value || "Yes").trim().toLowerCase();
-
-  const stampApplies = !["no", "n", "false", "0"].includes(stampableText);
-  const key = mapTickerToKey(tickerRaw);
-
-  if (!key || amount <= 0 || price <= 0) {
-    setText("tradeShares", "0.0000");
-    setText("tradeStampDuty", "£0.00");
-    setText("tradeTotalCost", "£0.00");
-    setText("tradeNewAvgCost", "£0.0000");
-    setText("tradeUpdateTitle", "Waiting for trade inputs…");
-    setText("tradeUpdateText", "Enter ticker, amount and executed price to see the exact Holdings update.");
-    return;
-  }
-
-  const current = latestLiveData[key] || { shares: 0, book: 0 };
-  const sharesBought = amount / price;
-  const stampDuty = calculateStampDuty(amount, stampApplies);
-  const totalCost = amount + stampDuty;
-  const newShares = Number(current.shares || 0) + sharesBought;
-  const newBook = Number(current.book || 0) + totalCost;
-  const newAvg = newShares > 0 ? newBook / newShares : 0;
-
-  setText("tradeShares", sharesBought.toFixed(4));
-  setText("tradeStampDuty", `£${formatMoney(stampDuty)}`);
-  setText("tradeTotalCost", `£${formatMoney(totalCost)}`);
-  setText("tradeNewAvgCost", `£${newAvg.toFixed(4)}`);
-
-  setText("tradeUpdateTitle", `${NAMES[key]} Holdings update`);
-  setText(
-    "tradeUpdateText",
-    `Add ${sharesBought.toFixed(4)} shares. New total shares: ${newShares.toFixed(4)}. Add £${formatMoney(totalCost)} to book cost. New total book cost: £${formatMoney(newBook)}. New average cost: £${newAvg.toFixed(4)}.`
-  );
 }
 
 function chooseAutoMode(preStocks) {
@@ -1448,6 +1336,7 @@ function chooseAutoMode(preStocks) {
   if ((highYieldCount >= 2 && strongDipCount === 0) || belowFairCount >= 2) return getBaseModeConfig("income");
   return getBaseModeConfig("balance");
 }
+
 function buildExDivMap(dividends, live) {
   const today = todayIso();
   const exDivMap = {};
@@ -1476,11 +1365,9 @@ function buildExDivMap(dividends, live) {
     const annualDps = Number(live[key]?.dps || 0);
 
     let expectedDrop = getUpcomingDividendAmount(row);
-
-    // Fallback if no next dividend amount exists in sheet
     if (expectedDrop <= 0 && annualDps > 0) {
       if (key === "supr") expectedDrop = annualDps / 12;
-      else if (key === "lng" || key === "mng" || key === "sdlf") expectedDrop = annualDps / 2;
+      else expectedDrop = annualDps / 2;
     }
 
     const targetZone = livePrice > 0 && expectedDrop > 0 ? Math.max(0, livePrice - expectedDrop) : 0;
@@ -1498,9 +1385,83 @@ function buildExDivMap(dividends, live) {
   return exDivMap;
 }
 
+function updateMissionPanel(totalAnnual, totalMonthly, live, plan) {
+  const remainingToGoal = Math.max(0, MASTER_MONTHLY_GOAL - totalMonthly);
+
+  setText("masterIncomeGoal", `£${formatMoney(MASTER_MONTHLY_GOAL)}`);
+  setText("currentMonthlyIncomeGoal", `£${formatMoney(totalMonthly)}`);
+  setText("remainingToGoal", `£${formatMoney(remainingToGoal)}`);
+
+  const totalPlanAmount = plan.reduce((sum, p) => sum + (p.amount || 0), 0);
+  const annualImpact = plan.reduce((sum, p) => {
+    const stock = live[p.key];
+    const price = Number(stock?.price || 0);
+    const dps = Number(stock?.dps || 0);
+    if (price <= 0 || dps <= 0 || p.amount <= 0) return sum;
+    return sum + ((p.amount / price) * dps);
+  }, 0);
+
+  const monthlyImpact = annualImpact / 12;
+  const blendedYield = totalPlanAmount > 0 ? (annualImpact / totalPlanAmount) * 100 : 0;
+
+  setText("annualImpact", `£${formatMoney(annualImpact)}/year`);
+  setText("monthlyImpact", `£${formatMoney(monthlyImpact)}/month added`);
+  setText("blendedYield", formatPct(blendedYield));
+
+  const currentStage = Math.max(1, Math.min(TOTAL_STAGES, Math.ceil(totalAnnual / STAGE_TARGET_ANNUAL)));
+  setText("stageTracker", `${currentStage} of ${TOTAL_STAGES}`);
+  setText("stageTarget", `£${formatMoney0(STAGE_TARGET_ANNUAL)}/year`);
+  setText("nextStageTarget", `£${formatMoney0(NEXT_STAGE_TARGET_ANNUAL)}/year`);
+
+  const annualGapToNextStage = Math.max(0, NEXT_STAGE_TARGET_ANNUAL - totalAnnual);
+
+const annualRunRateFromPlan = annualImpact;
+
+const yearsToNextStage = annualRunRateFromPlan > 0
+  ? annualGapToNextStage / annualRunRateFromPlan
+  : null;
+
+setText(
+  "yearsToNextStage",
+  yearsToNextStage === null || !Number.isFinite(yearsToNextStage)
+    ? "--"
+    : yearsToNextStage < 0.1
+      ? "<0.1y"
+      : `${yearsToNextStage.toFixed(1)}y`
+);
+
+  setText(
+    "stageTrackerMeta",
+    annualGapToNextStage > 0
+      ? `£${formatMoney0(annualGapToNextStage)} to next annual stage`
+      : "Stage target reached"
+  );
+}
+
+function updateHeroPortfolio(live) {
+  const portfolioValue = Object.values(live).reduce((sum, x) => sum + Number(x.value || 0), 0);
+  const bookCost = Object.values(live).reduce((sum, x) => sum + Number(x.book || 0), 0);
+  const gain = portfolioValue - bookCost;
+  const gainPct = bookCost > 0 ? (gain / bookCost) * 100 : 0;
+
+  setText("portfolioValue", formatMoney(portfolioValue));
+  setTextWithClass(
+    "portfolioGain",
+    `${gain >= 0 ? "+" : "-"}£${formatMoney(Math.abs(gain))}`,
+    gain >= 0 ? "positive" : "negative",
+    ["positive", "negative"]
+  );
+  setText("portfolioGainMeta", `${gain >= 0 ? "+" : ""}${formatPct(gainPct)}`);
+
+  setTextWithClass("liveSyncStatus", "LIVE", "sync-live", ["sync-live", "sync-wait"]);
+  setText("liveSyncMeta", `Last refresh ${new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`);
+}
+
 async function runBrain() {
   try {
     updateModeButtons();
+    setTextWithClass("liveSyncStatus", "SYNCING", "sync-wait", ["sync-live", "sync-wait"]);
+    setText("liveSyncMeta", "Refreshing holdings…");
 
     const [holdingsRes, dividendsRes, priceHistoryRes] = await Promise.all([
       fetch(HOLDINGS_URL),
@@ -1513,10 +1474,10 @@ async function runBrain() {
     const priceHistory = await priceHistoryRes.json();
 
     const live = {
-      lng: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
-      mng: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
-      sdlf: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
-      supr: { shares: 0, price: 0, dps: 0, book: 0, income: 0 }
+      lng: { shares: 0, price: 0, dps: 0, book: 0, income: 0, value: 0 },
+      mng: { shares: 0, price: 0, dps: 0, book: 0, income: 0, value: 0 },
+      sdlf: { shares: 0, price: 0, dps: 0, book: 0, income: 0, value: 0 },
+      supr: { shares: 0, price: 0, dps: 0, book: 0, income: 0, value: 0 }
     };
 
     const dynamicRanges = {};
@@ -1526,25 +1487,22 @@ async function runBrain() {
       if (!key) return;
 
       const shares = parseNum(row.shares);
-      const rawPrice = parseNum(row.live_price);
-      const price = rawPrice > 20 ? rawPrice / 100 : rawPrice;
+      const price = normaliseSharePrice(row.live_price);
       const dps = parseNum(row.annual_dividend_per_share);
       const book = parseNum(row.book_cost);
-      const low52 = parseNum(row.low_52w || row.low52 || row["low 52 week"]);
-      const high52 = parseNum(row.high_52w || row.high52 || row["high 52 week"]);
+      const low52 = normaliseSharePrice(row.low_52w || row.low52 || row["low 52 week"]);
+      const high52 = normaliseSharePrice(row.high_52w || row.high52 || row["high 52 week"]);
 
       live[key] = {
         shares,
         price,
         dps,
         book,
-        income: shares * dps
+        income: shares * dps,
+        value: shares * price
       };
 
-      dynamicRanges[key] = {
-        low52,
-        high52
-      };
+      dynamicRanges[key] = { low52, high52 };
     });
 
     liveRangeMap = dynamicRanges;
@@ -1556,6 +1514,9 @@ async function runBrain() {
 
     setText("totalAnnualIncome", formatMoney(totalAnnual));
     setText("totalMonthlyIncome", formatMoney(totalMonthly));
+    setText("monthlyIncomeMeta", `£${formatMoney(totalAnnual)} annual run rate`);
+
+    updateHeroPortfolio(live);
 
     const pillarIncomeWeights = {};
     Object.keys(live).forEach(key => {
@@ -1572,9 +1533,6 @@ async function runBrain() {
     }
 
     const upcomingEvents = [];
-    const monthTotals = Array(12).fill(0);
-    const monthBreakdown = Array(12).fill(null).map(() => ({}));
-
     dividends.forEach(row => {
       const key = mapTickerToKey(row.ticker);
       if (!key) return;
@@ -1584,20 +1542,8 @@ async function runBrain() {
       const payDate = String(row.pay_date || "").trim();
       const totalDividend = parseNum(row.total_dividend);
 
-      if (exDate) {
-        upcomingEvents.push({ key, holding, type: "Ex-Date", date: exDate, cash: 0 });
-      }
-
-      if (payDate) {
-        upcomingEvents.push({ key, holding, type: "Pay Date", date: payDate, cash: totalDividend });
-
-        const monthIndex = monthIndexFromDate(payDate);
-        if (monthIndex !== null) {
-          monthTotals[monthIndex] += totalDividend;
-          if (!monthBreakdown[monthIndex][holding]) monthBreakdown[monthIndex][holding] = 0;
-          monthBreakdown[monthIndex][holding] += totalDividend;
-        }
-      }
+      if (exDate) upcomingEvents.push({ key, holding, type: "Ex-Date", date: exDate, cash: 0 });
+      if (payDate) upcomingEvents.push({ key, holding, type: "Pay Date", date: payDate, cash: totalDividend });
     });
 
     const futureEvents = upcomingEvents
@@ -1629,43 +1575,10 @@ async function runBrain() {
       setText("nextCashDueMeta", "Waiting for upcoming payment…");
     }
 
-    MONTH_KEYS.forEach((monthName, index) => {
-      setText(`forecast${monthName}`, `£${formatMoney(monthTotals[index])}`);
-
-      if (monthTotals[index] <= 0) {
-        setText(`forecast${monthName}Meta`, "No flow");
-      } else {
-        const biggest = Object.entries(monthBreakdown[index]).sort((a, b) => b[1] - a[1])[0];
-        const sharePct = biggest ? (biggest[1] / monthTotals[index]) * 100 : 0;
-        setText(`forecast${monthName}Meta`, `${biggest[0]} ${sharePct.toFixed(0)}%`);
-      }
-    });
-
-    const bestMonthValue = Math.max(...monthTotals);
-    const worstMonthValue = Math.min(...monthTotals);
-    const bestMonthIndex = monthTotals.findIndex(v => v === bestMonthValue);
-    const worstMonthIndex = monthTotals.findIndex(v => v === worstMonthValue);
-
-    setText("bestForecastMonth", monthKeyFromIndex(bestMonthIndex));
-    setText("bestForecastMonthMeta", `£${formatMoney(bestMonthValue)} expected`);
-    setText("worstForecastMonth", monthKeyFromIndex(worstMonthIndex));
-    setText("worstForecastMonthMeta", `£${formatMoney(worstMonthValue)} expected`);
-
-    const next3 = futureEvents.filter(event => event.type === "Pay Date").slice(0, 3);
-    if (next3.length) {
-      setText("next3PaymentsTitle", `${next3.length} queued`);
-      setText("next3PaymentsMeta", next3.map(event => `${event.holding} ${event.date} £${formatMoney(event.cash)}`).join(" • "));
-    } else {
-      setText("next3PaymentsTitle", "--");
-      setText("next3PaymentsMeta", "No upcoming payments");
-    }
-
     const baseDipWeight = Number(document.getElementById("dipWeight")?.value || 1.2);
     const newMoney = Number(document.getElementById("totalInvestment")?.value || 800);
     const carriedReserve = getReserve();
-    const totalDeployable = newMoney + carriedReserve;
-
-    const memory = getMemory();
+    const totalDeployable = newMoney;
 
     const preStocks = Object.entries(live).map(([key, item]) => {
       const current = item.price || 0;
@@ -1680,25 +1593,20 @@ async function runBrain() {
       const fvStatus = getFairValueStatus(current, fvCfg);
 
       return {
-        key,
-        current,
-        avg,
-        yieldPct,
-        dipPct,
-        dip30Pct,
-        vsAvgPct,
-        valueLabel: fvStatus.label,
-        score: Math.max(0, fvStatus.scoreAdj)
+        key, current, avg, yieldPct, dipPct, dip30Pct, vsAvgPct,
+        valueLabel: fvStatus.label, score: Math.max(0, fvStatus.scoreAdj)
       };
     });
 
     const selectedMode = getMode();
     const modeConfig = selectedMode === "auto" ? chooseAutoMode(preStocks) : getBaseModeConfig(selectedMode);
-
     const dipWeight = baseDipWeight * modeConfig.dipMult;
 
     setText("activeModeLabel", selectedMode === "auto" ? `Auto → ${modeConfig.label}` : modeConfig.label);
-    setText("activeModeMeta", selectedMode === "auto" ? `System selected ${modeConfig.label.toLowerCase()} mode from live setup` : modeConfig.meta);
+    setText("activeModeMeta", selectedMode === "auto"
+      ? `System selected ${modeConfig.label.toLowerCase()} mode from live setup`
+      : modeConfig.meta
+    );
 
     setText("reserveCarried", `£${formatMoney0(carriedReserve)}`);
     setText("newMoneyAmount", `£${formatMoney0(newMoney)}`);
@@ -1750,18 +1658,9 @@ async function runBrain() {
       else if (weight < 15) score += 10;
 
       score += Math.abs(Math.min(dipPct, 0)) * dipWeight;
-score += Math.abs(Math.min(dip30Pct, 0)) * 0.6;
+      score += Math.abs(Math.min(dip30Pct, 0)) * 0.6;
 
-// 🔥 GAP WEIGHTING (NEW LOGIC)
-const gapWeight = getGapWeight(GAP_MAP[key] || 0);
-score = score * gapWeight;
-
-// ⚠️ Reduce priority if nearly complete (like LGEN)
-if ((GAP_MAP[key] || 0) < 400) {
-  score *= 0.6;
-}
-
-score = Math.max(0, Math.min(100, score));
+      score = Math.max(0, Math.min(100, score));
 
       return {
         key,
@@ -1774,11 +1673,10 @@ score = Math.max(0, Math.min(100, score));
         vsAvgPct,
         score,
         incomeWeight: weight,
-        low52: fvCfg?.low52 ?? null,
-        high52: fvCfg?.high52 ?? null,
+        annualIncome: item.income,
+        monthlyIncome: item.income / 12,
         fairValue: fvCfg?.fairValue ?? null,
         strongBuy: fvCfg?.strongBuy ?? null,
-        avoidAbove: fvCfg?.avoidAbove ?? null,
         valueLabel: fvStatus.label,
         rangePosition: fvStatus.rangePosition
       };
@@ -1792,7 +1690,7 @@ score = Math.max(0, Math.min(100, score));
 
     if (singleOpportunity) {
       setText("singleOpportunityTitle", `Single Opportunity Detected: ${stocks[0].name}`);
-      setText("singleOpportunityText", `This pillar clearly stands out. Allocator will tilt more heavily toward it while keeping risk control.`);
+      setText("singleOpportunityText", "This pillar clearly stands out. Allocator will tilt more heavily toward it while keeping risk control.");
     } else {
       setText("singleOpportunityTitle", "No single-pillar opportunity detected");
       setText("singleOpportunityText", "Allocator will use normal distribution unless one pillar clearly stands out.");
@@ -1814,7 +1712,6 @@ score = Math.max(0, Math.min(100, score));
     setText("executionSignalMeta", execution.meta);
 
     let dynamicHoldPct = modeConfig.holdPct;
-
     if (topScore < 20) dynamicHoldPct = Math.max(dynamicHoldPct, 0.60);
     else if (topScore < 35) dynamicHoldPct = Math.max(dynamicHoldPct, 0.40);
     else if (singleOpportunity) dynamicHoldPct = Math.min(dynamicHoldPct, 0.15);
@@ -1879,16 +1776,12 @@ score = Math.max(0, Math.min(100, score));
       .map(({ index }) => index);
 
     if (rejectedCash > 0 && eligibleIndexes.length > 0) {
-      const eligibleScoreTotal =
-        eligibleIndexes.reduce((sum, index) => sum + plan[index].score, 0) || eligibleIndexes.length;
-
+      const eligibleScoreTotal = eligibleIndexes.reduce((sum, index) => sum + plan[index].score, 0) || eligibleIndexes.length;
       let redistributed = 0;
 
       eligibleIndexes.forEach((index, idx) => {
         let extra = Math.round((plan[index].score / eligibleScoreTotal) * rejectedCash);
-        if (idx === eligibleIndexes.length - 1) {
-          extra = rejectedCash - redistributed;
-        }
+        if (idx === eligibleIndexes.length - 1) extra = rejectedCash - redistributed;
         redistributed += extra;
         plan[index].amount += extra;
       });
@@ -1905,6 +1798,8 @@ score = Math.max(0, Math.min(100, score));
         `${p.valueLabel} • 7D ${formatPct(p.dipPct)} • 30D ${formatPct(p.dip30Pct)} • Score ${Math.round(p.score)} • Yield ${formatPct(p.yieldPct)}`
       );
     }
+
+    updateMissionPanel(totalAnnual, totalMonthly, live, plan);
 
     const topPick = plan[0];
     if (topPick) {
@@ -1942,85 +1837,68 @@ score = Math.max(0, Math.min(100, score));
       setText(`${stock.key}Dip30`, formatPct(stock.dip30Pct));
       setText(`${stock.key}VsAvg`, formatPct(stock.vsAvgPct));
       setText(`${stock.key}Score`, Math.round(stock.score));
-
       setText(`${stock.key}FairValue`, formatPrice(stock.fairValue));
       setText(`${stock.key}StrongBuy`, formatPrice(stock.strongBuy));
       setText(`${stock.key}ValueStatus`, stock.valueLabel || "--");
+
       const exDivInfo = exDivMap[stock.key] || {
-  exDate: "",
-  daysToExDiv: null,
-  expectedDrop: 0,
-  targetZone: 0,
-  timingView: "No ex-div data"
-  };
-  setText(
-  `${stock.key}TimingNote`,
-  exDivInfo.timingView
-);
-const timingVerdict = getTimingVerdict(stock, exDivInfo);
+        exDate: "",
+        daysToExDiv: null,
+        expectedDrop: 0,
+        targetZone: 0,
+        timingView: "No ex-div data"
+      };
 
-setText(
-  `${stock.key}TimingVerdict`,
-  `Timing Verdict: ${timingVerdict}`
-);
+      setText(
+        `${stock.key}ExDiv`,
+        exDivInfo.exDate
+          ? `${formatDateShort(exDivInfo.exDate)}${exDivInfo.daysToExDiv != null ? ` • ${exDivInfo.daysToExDiv}d` : ""}`
+          : "--"
+      );
+      setText(`${stock.key}ExDrop`, exDivInfo.expectedDrop > 0 ? `£${exDivInfo.expectedDrop.toFixed(3)}` : "--");
+      setText(`${stock.key}TargetZone`, exDivInfo.targetZone > 0 ? `£${exDivInfo.targetZone.toFixed(3)}` : "--");
+      setText(`${stock.key}TimingNote`, exDivInfo.timingView);
 
-setText(
-  `${stock.key}ExDiv`,
-  exDivInfo.exDate
-    ? `${formatDateShort(exDivInfo.exDate)}${exDivInfo.daysToExDiv != null ? ` • ${exDivInfo.daysToExDiv}d` : ""}`
-    : "--"
-);
-
-setText(
-  `${stock.key}ExDrop`,
-  exDivInfo.expectedDrop > 0 ? `£${exDivInfo.expectedDrop.toFixed(3)}` : "--"
-);
-
-setText(
-  `${stock.key}TargetZone`,
-  exDivInfo.targetZone > 0 ? `£${exDivInfo.targetZone.toFixed(3)}` : "--"
-);
-
-setText(
-  `${stock.key}TimingNote`,
-  exDivInfo.timingView
-);
+      const timingVerdict = getTimingVerdict(stock, exDivInfo);
+      stock.timingVerdict = timingVerdict;
+      setText(`${stock.key}TimingVerdict`, `Timing Verdict: ${timingVerdict}`);
 
       let status = getStatusFromScore(stock);
-
-      if (stock.score < 20 && stock.vsAvgPct > 5) {
-        status = { label: "AVOID", cls: "avoid" };
-      }
-
+      if (stock.score < 20 && stock.vsAvgPct > 5) status = { label: "AVOID", cls: "avoid" };
       setBadge(`${stock.key}Status`, status.label, status.cls);
 
       const rangePct = stock.rangePosition != null
         ? `${(stock.rangePosition * 100).toFixed(0)}% of range`
         : "No range data";
-
       const weightStatus = getWeightStatus(stock.incomeWeight);
 
-setText(
-  `${stock.key}BrainNote`,
-  `${status.label} • ${stock.valueLabel} • ${rangePct} • 7D ${formatPct(stock.dipPct)} • 30D ${formatPct(stock.dip30Pct)} • Yield ${formatPct(stock.yieldPct)} • Income weight ${stock.incomeWeight.toFixed(1)}% • ${weightStatus.text}`
-);
+      setText(
+        `${stock.key}BrainNote`,
+        `${status.label} • ${stock.valueLabel} • ${rangePct} • 7D ${formatPct(stock.dipPct)} • 30D ${formatPct(stock.dip30Pct)} • Yield ${formatPct(stock.yieldPct)} • Income weight ${stock.incomeWeight.toFixed(1)}% • ${weightStatus.text}`
+      );
       setText(`${stock.key}DecisionText`, getDecisionText(stock));
+
+      const annualIncome = stock.annualIncome || 0;
+      const monthlyIncome = stock.monthlyIncome || 0;
+      const gapToTarget = Math.max(0, STAGE_TARGET_ANNUAL - annualIncome);
+      const gapToNextStage = Math.max(0, NEXT_STAGE_TARGET_ANNUAL - annualIncome);
+
+      setText(`${stock.key}AnnualIncome`, `£${formatMoney(annualIncome)}`);
+      setText(`${stock.key}MonthlyIncome`, `£${formatMoney(monthlyIncome)}`);
+      setText(`${stock.key}GapTarget`, `£${formatMoney0(gapToTarget)}`);
+      setText(`${stock.key}GapNextStage`, `£${formatMoney0(gapToNextStage)}`);
 
       const bar = document.getElementById(`${stock.key}Bar`);
       if (bar) bar.style.width = `${Math.max(4, stock.score)}%`;
     });
-
-    const newMemory = getMemory();
-    stocks.forEach(stock => updateRollingPriceMemory(newMemory, stock.key, stock.current));
-    saveMemory(newMemory);
-
-    updateTradeHelper();
 
   } catch (err) {
     console.error("Aurora Trading Brain load failed", err);
     setText("executionSignal", "ERROR");
     setText("executionSignalMeta", "Could not load sheet data");
     setText("topBuyMeta", "Check Holdings / Dividends / PriceLog sheet connection");
+    setTextWithClass("liveSyncStatus", "ERROR", "negative", ["sync-live", "sync-wait", "positive"]);
+    setText("liveSyncMeta", "Sheet connection failed");
   }
 }
 
@@ -2044,20 +1922,10 @@ document.querySelectorAll(".mode-btn").forEach(btn => {
 
 document.getElementById("totalInvestment")?.addEventListener("input", runBrain);
 document.getElementById("dipWeight")?.addEventListener("input", runBrain);
-
-["tradeTicker", "tradeAmount", "tradePrice", "tradeStampable"].forEach(id => {
-  document.getElementById(id)?.addEventListener("input", updateTradeHelper);
-});
-
 document.getElementById("saveReserveBtn")?.addEventListener("click", saveSuggestedReserve);
 document.getElementById("resetReserveBtn")?.addEventListener("click", resetReserve);
-
-document.querySelectorAll(".trade-preset-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const slot = Number(btn.dataset.slot || 0);
-    if (slot > 0) presetTradeFromPlan(slot);
-  });
-});
+document.getElementById("useReserveBtn")?.addEventListener("click", useReserveNow);
+document.getElementById("setManualReserveBtn")?.addEventListener("click", setManualReserve);
 
 updateModeButtons();
 runBrain();
