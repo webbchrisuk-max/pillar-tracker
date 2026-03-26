@@ -811,6 +811,19 @@ const NAMES = {
 
 let liveRangeMap = {};
 
+const GAP_MAP = {
+  lng: 309,
+  mng: 825,
+  sdlf: 1063,
+  supr: 1203
+};
+
+function getGapWeight(gap) {
+  const maxGap = 1203;
+  if (!gap || gap <= 0) return 1;
+  return 1 + (gap / maxGap);
+}
+
 let latestLiveData = {
   lng: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
   mng: { shares: 0, price: 0, dps: 0, book: 0, income: 0 },
@@ -1534,8 +1547,18 @@ async function runBrain() {
       else if (weight < 15) score += 10;
 
       score += Math.abs(Math.min(dipPct, 0)) * dipWeight;
-      score += Math.abs(Math.min(dip30Pct, 0)) * 0.6;
-      score = Math.max(0, Math.min(100, score));
+score += Math.abs(Math.min(dip30Pct, 0)) * 0.6;
+
+// 🔥 GAP WEIGHTING (NEW LOGIC)
+const gapWeight = getGapWeight(GAP_MAP[key] || 0);
+score = score * gapWeight;
+
+// ⚠️ Reduce priority if nearly complete (like LGEN)
+if ((GAP_MAP[key] || 0) < 400) {
+  score *= 0.6;
+}
+
+score = Math.max(0, Math.min(100, score));
 
       return {
         key,
