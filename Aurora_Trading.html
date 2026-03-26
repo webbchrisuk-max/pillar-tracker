@@ -104,7 +104,7 @@ h2, h3 {
 }
 
 .top-grid {
-  grid-template-columns: repeat(5, minmax(0,1fr));
+  grid-template-columns: repeat(5, minmax(2,1fr));
 }
 
 .triple-grid {
@@ -642,27 +642,32 @@ h2, h3 {
       <div class="subv" id="lngBrainNote">--</div>
       <div class="bar"><div class="fill" id="lngBar"></div></div>
 
-      <div class="grid top-grid">
-        <div class="mini"><div class="k">Price</div><div class="v" id="lngCurrentPrice">--</div></div>
-        <div class="mini"><div class="k">7D Dip</div><div class="v" id="lngDip">--</div></div>
-        <div class="mini"><div class="k">30D Dip</div><div class="v" id="lngDip30">--</div></div>
-        <div class="mini"><div class="k">Vs Avg</div><div class="v" id="lngVsAvg">--</div></div>
-        <div class="mini"><div class="k">Score</div><div class="v" id="lngScore">--</div></div>
-      </div>
+      <div class="grid two-grid">
+  <div class="mini"><div class="k">Price</div><div class="v" id="lngCurrentPrice">--</div></div>
+  <div class="mini"><div class="k">Score</div><div class="v" id="lngScore">--</div></div>
+  <div class="mini"><div class="k">7D Dip</div><div class="v" id="lngDip">--</div></div>
+  <div class="mini"><div class="k">30D Dip</div><div class="v" id="lngDip30">--</div></div>
+</div>
 
-      <div class="grid triple-grid" style="margin-top:10px;">
-        <div class="mini"><div class="k">Fair Value</div><div class="v" id="lngFairValue">--</div></div>
-        <div class="mini"><div class="k">Strong Buy</div><div class="v" id="lngStrongBuy">--</div></div>
-        <div class="mini"><div class="k">Value Status</div><div class="v" id="lngValueStatus">--</div></div>
-      </div>
+<div class="mini" style="margin-top:10px;">
+  <div class="k">Vs Avg</div>
+  <div class="v" id="lngVsAvg">--</div>
+</div>
 
-      <div class="grid triple-grid" style="margin-top:10px;">
-        <div class="mini"><div class="k">Next Ex-Div</div><div class="v" id="lngExDiv">--</div></div>
-        <div class="mini"><div class="k">Expected Drop</div><div class="v" id="lngExDrop">--</div></div>
-        <div class="mini"><div class="k">Target Buy Zone</div><div class="v" id="lngTargetZone">--</div></div>
-      </div>
+<div class="grid triple-grid" style="margin-top:10px;">
+  <div class="mini"><div class="k">Fair Value</div><div class="v" id="lngFairValue">--</div></div>
+  <div class="mini"><div class="k">Strong Buy</div><div class="v" id="lngStrongBuy">--</div></div>
+  <div class="mini"><div class="k">Value Status</div><div class="v" id="lngValueStatus">--</div></div>
+</div>
+
+<div class="grid triple-grid" style="margin-top:10px;">
+  <div class="mini"><div class="k">Next Ex-Div</div><div class="v" id="lngExDiv">--</div></div>
+  <div class="mini"><div class="k">Expected Drop</div><div class="v" id="lngExDrop">--</div></div>
+  <div class="mini"><div class="k">Target Buy Zone</div><div class="v" id="lngTargetZone">--</div></div>
+</div>
 
       <div class="subv" id="lngTimingNote">Waiting for ex-div timing…</div>
+      <div class="subv" id="lngTimingVerdict">Timing verdict loading…</div>
       <div class="subv" id="lngDecisionText">Waiting for live decision…</div>
     </div>
 
@@ -675,27 +680,32 @@ h2, h3 {
       <div class="subv" id="mngBrainNote">--</div>
       <div class="bar"><div class="fill" id="mngBar"></div></div>
 
-      <div class="grid top-grid">
-        <div class="mini"><div class="k">Price</div><div class="v" id="mngCurrentPrice">--</div></div>
-        <div class="mini"><div class="k">7D Dip</div><div class="v" id="mngDip">--</div></div>
-        <div class="mini"><div class="k">30D Dip</div><div class="v" id="mngDip30">--</div></div>
-        <div class="mini"><div class="k">Vs Avg</div><div class="v" id="mngVsAvg">--</div></div>
-        <div class="mini"><div class="k">Score</div><div class="v" id="mngScore">--</div></div>
-      </div>
+      <div class="grid two-grid">
+  <div class="mini"><div class="k">Price</div><div class="v" id="mngCurrentPrice">--</div></div>
+  <div class="mini"><div class="k">Score</div><div class="v" id="mngScore">--</div></div>
+  <div class="mini"><div class="k">7D Dip</div><div class="v" id="mngDip">--</div></div>
+  <div class="mini"><div class="k">30D Dip</div><div class="v" id="mngDip30">--</div></div>
+</div>
 
-      <div class="grid triple-grid" style="margin-top:10px;">
-        <div class="mini"><div class="k">Fair Value</div><div class="v" id="mngFairValue">--</div></div>
-        <div class="mini"><div class="k">Strong Buy</div><div class="v" id="mngStrongBuy">--</div></div>
-        <div class="mini"><div class="k">Value Status</div><div class="v" id="mngValueStatus">--</div></div>
-      </div>
+<div class="mini" style="margin-top:10px;">
+  <div class="k">Vs Avg</div>
+  <div class="v" id="mngVsAvg">--</div>
+</div>
 
-      <div class="grid triple-grid" style="margin-top:10px;">
-        <div class="mini"><div class="k">Next Ex-Div</div><div class="v" id="mngExDiv">--</div></div>
-        <div class="mini"><div class="k">Expected Drop</div><div class="v" id="mngExDrop">--</div></div>
-        <div class="mini"><div class="k">Target Buy Zone</div><div class="v" id="mngTargetZone">--</div></div>
-      </div>
+<div class="grid triple-grid" style="margin-top:10px;">
+  <div class="mini"><div class="k">Fair Value</div><div class="v" id="mngFairValue">--</div></div>
+  <div class="mini"><div class="k">Strong Buy</div><div class="v" id="mngStrongBuy">--</div></div>
+  <div class="mini"><div class="k">Value Status</div><div class="v" id="mngValueStatus">--</div></div>
+</div>
+
+<div class="grid triple-grid" style="margin-top:10px;">
+  <div class="mini"><div class="k">Next Ex-Div</div><div class="v" id="mngExDiv">--</div></div>
+  <div class="mini"><div class="k">Expected Drop</div><div class="v" id="mngExDrop">--</div></div>
+  <div class="mini"><div class="k">Target Buy Zone</div><div class="v" id="mngTargetZone">--</div></div>
+</div>
 
       <div class="subv" id="mngTimingNote">Waiting for ex-div timing…</div>
+      <div class="subv" id="mngTimingVerdict">Timing verdict loading…</div>
       <div class="subv" id="mngDecisionText">Waiting for live decision…</div>
     </div>
 
@@ -708,27 +718,32 @@ h2, h3 {
       <div class="subv" id="sdlfBrainNote">--</div>
       <div class="bar"><div class="fill" id="sdlfBar"></div></div>
 
-      <div class="grid top-grid">
-        <div class="mini"><div class="k">Price</div><div class="v" id="sdlfCurrentPrice">--</div></div>
-        <div class="mini"><div class="k">7D Dip</div><div class="v" id="sdlfDip">--</div></div>
-        <div class="mini"><div class="k">30D Dip</div><div class="v" id="sdlfDip30">--</div></div>
-        <div class="mini"><div class="k">Vs Avg</div><div class="v" id="sdlfVsAvg">--</div></div>
-        <div class="mini"><div class="k">Score</div><div class="v" id="sdlfScore">--</div></div>
-      </div>
+      <div class="grid two-grid">
+  <div class="mini"><div class="k">Price</div><div class="v" id="sdlfCurrentPrice">--</div></div>
+  <div class="mini"><div class="k">Score</div><div class="v" id="sdlfScore">--</div></div>
+  <div class="mini"><div class="k">7D Dip</div><div class="v" id="sdlfDip">--</div></div>
+  <div class="mini"><div class="k">30D Dip</div><div class="v" id="sdlfDip30">--</div></div>
+</div>
 
-      <div class="grid triple-grid" style="margin-top:10px;">
-        <div class="mini"><div class="k">Fair Value</div><div class="v" id="sdlfFairValue">--</div></div>
-        <div class="mini"><div class="k">Strong Buy</div><div class="v" id="sdlfStrongBuy">--</div></div>
-        <div class="mini"><div class="k">Value Status</div><div class="v" id="sdlfValueStatus">--</div></div>
-      </div>
+<div class="mini" style="margin-top:10px;">
+  <div class="k">Vs Avg</div>
+  <div class="v" id="sdlfVsAvg">--</div>
+</div>
 
-      <div class="grid triple-grid" style="margin-top:10px;">
-        <div class="mini"><div class="k">Next Ex-Div</div><div class="v" id="sdlfExDiv">--</div></div>
-        <div class="mini"><div class="k">Expected Drop</div><div class="v" id="sdlfExDrop">--</div></div>
-        <div class="mini"><div class="k">Target Buy Zone</div><div class="v" id="sdlfTargetZone">--</div></div>
-      </div>
+<div class="grid triple-grid" style="margin-top:10px;">
+  <div class="mini"><div class="k">Fair Value</div><div class="v" id="sdlfFairValue">--</div></div>
+  <div class="mini"><div class="k">Strong Buy</div><div class="v" id="sdlfStrongBuy">--</div></div>
+  <div class="mini"><div class="k">Value Status</div><div class="v" id="sdlfValueStatus">--</div></div>
+</div>
+
+<div class="grid triple-grid" style="margin-top:10px;">
+  <div class="mini"><div class="k">Next Ex-Div</div><div class="v" id="sdlfExDiv">--</div></div>
+  <div class="mini"><div class="k">Expected Drop</div><div class="v" id="sdlfExDrop">--</div></div>
+  <div class="mini"><div class="k">Target Buy Zone</div><div class="v" id="sdlfTargetZone">--</div></div>
+</div>
 
       <div class="subv" id="sdlfTimingNote">Waiting for ex-div timing…</div>
+      <div class="subv" id="sdlfTimingVerdict">Timing verdict loading…</div>
       <div class="subv" id="sdlfDecisionText">Waiting for live decision…</div>
     </div>
 
@@ -741,27 +756,32 @@ h2, h3 {
       <div class="subv" id="suprBrainNote">--</div>
       <div class="bar"><div class="fill" id="suprBar"></div></div>
 
-      <div class="grid top-grid">
-        <div class="mini"><div class="k">Price</div><div class="v" id="suprCurrentPrice">--</div></div>
-        <div class="mini"><div class="k">7D Dip</div><div class="v" id="suprDip">--</div></div>
-        <div class="mini"><div class="k">30D Dip</div><div class="v" id="suprDip30">--</div></div>
-        <div class="mini"><div class="k">Vs Avg</div><div class="v" id="suprVsAvg">--</div></div>
-        <div class="mini"><div class="k">Score</div><div class="v" id="suprScore">--</div></div>
-      </div>
+      <div class="grid two-grid">
+  <div class="mini"><div class="k">Price</div><div class="v" id="suprCurrentPrice">--</div></div>
+  <div class="mini"><div class="k">Score</div><div class="v" id="suprScore">--</div></div>
+  <div class="mini"><div class="k">7D Dip</div><div class="v" id="suprDip">--</div></div>
+  <div class="mini"><div class="k">30D Dip</div><div class="v" id="suprDip30">--</div></div>
+</div>
 
-      <div class="grid triple-grid" style="margin-top:10px;">
-        <div class="mini"><div class="k">Fair Value</div><div class="v" id="suprFairValue">--</div></div>
-        <div class="mini"><div class="k">Strong Buy</div><div class="v" id="suprStrongBuy">--</div></div>
-        <div class="mini"><div class="k">Value Status</div><div class="v" id="suprValueStatus">--</div></div>
-      </div>
+<div class="mini" style="margin-top:10px;">
+  <div class="k">Vs Avg</div>
+  <div class="v" id="suprVsAvg">--</div>
+</div>
 
-      <div class="grid triple-grid" style="margin-top:10px;">
-        <div class="mini"><div class="k">Next Ex-Div</div><div class="v" id="suprExDiv">--</div></div>
-        <div class="mini"><div class="k">Expected Drop</div><div class="v" id="suprExDrop">--</div></div>
-        <div class="mini"><div class="k">Target Buy Zone</div><div class="v" id="suprTargetZone">--</div></div>
-      </div>
+<div class="grid triple-grid" style="margin-top:10px;">
+  <div class="mini"><div class="k">Fair Value</div><div class="v" id="suprFairValue">--</div></div>
+  <div class="mini"><div class="k">Strong Buy</div><div class="v" id="suprStrongBuy">--</div></div>
+  <div class="mini"><div class="k">Value Status</div><div class="v" id="suprValueStatus">--</div></div>
+</div>
+
+<div class="grid triple-grid" style="margin-top:10px;">
+  <div class="mini"><div class="k">Next Ex-Div</div><div class="v" id="suprExDiv">--</div></div>
+  <div class="mini"><div class="k">Expected Drop</div><div class="v" id="suprExDrop">--</div></div>
+  <div class="mini"><div class="k">Target Buy Zone</div><div class="v" id="suprTargetZone">--</div></div>
+</div>
 
       <div class="subv" id="suprTimingNote">Waiting for ex-div timing…</div>
+      <div class="subv" id="suprTimingVerdict">Timing verdict loading…</div>
       <div class="subv" id="suprDecisionText">Waiting for live decision…</div>
     </div>
 
@@ -942,6 +962,51 @@ function getTimingView(daysToExDiv) {
   if (daysToExDiv <= 10) return "Approaching ex-div";
   if (daysToExDiv <= 20) return "Watch for setup";
   return "No immediate ex-div edge";
+}
+
+function getTimingVerdict(stock, exDivInfo) {
+  const days = exDivInfo?.daysToExDiv;
+  const targetZone = Number(exDivInfo?.targetZone || 0);
+  const expectedDrop = Number(exDivInfo?.expectedDrop || 0);
+  const current = Number(stock?.current || 0);
+  const score = Number(stock?.score || 0);
+  const valueLabel = stock?.valueLabel || "";
+
+  if (!days && days !== 0) {
+    if (score >= 60) return "BUY NOW";
+    if (score >= 40) return "NO TIMING EDGE";
+    return "NO TIMING EDGE";
+  }
+
+  // If ex-div is very close and there is a meaningful expected drop, wait
+  if (days >= 0 && days <= 10 && expectedDrop > 0 && current > targetZone) {
+    return "WAIT FOR EX-DIV";
+  }
+
+  // If ex-div is today or just passed and price is near target zone
+  if (days >= -3 && days <= 3 && expectedDrop > 0) {
+    if (current <= targetZone * 1.01) {
+      return "POST-EX BUY ZONE";
+    }
+  }
+
+  // If already cheap enough and score is strong, buy now
+  if (
+    score >= 65 &&
+    (
+      valueLabel === "Strong Buy Zone" ||
+      valueLabel === "Below Fair Value"
+    )
+  ) {
+    return "BUY NOW";
+  }
+
+  // If close to ex-div but not enough advantage yet
+  if (days > 10 && days <= 20) {
+    return "WATCH TIMING";
+  }
+
+  return "NO TIMING EDGE";
 }
 
 function normaliseTicker(v) {
@@ -1887,7 +1952,17 @@ score = Math.max(0, Math.min(100, score));
   expectedDrop: 0,
   targetZone: 0,
   timingView: "No ex-div data"
-};
+  };
+  setText(
+  `${stock.key}TimingNote`,
+  exDivInfo.timingView
+);
+const timingVerdict = getTimingVerdict(stock, exDivInfo);
+
+setText(
+  `${stock.key}TimingVerdict`,
+  `Timing Verdict: ${timingVerdict}`
+);
 
 setText(
   `${stock.key}ExDiv`,
