@@ -152,7 +152,7 @@ h2, h3 {
 
 .stat-label {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 18px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
 }
@@ -164,7 +164,7 @@ h2, h3 {
 }
 
 .stat small {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--muted);
   font-weight: 500;
 }
@@ -248,7 +248,7 @@ h2, h3 {
 }
 
 .pillar-name {
-  font-size: 18px;
+  font-size: 30px;
   font-weight: 700;
 }
 
@@ -1393,6 +1393,7 @@ function updateMissionPanel(totalAnnual, totalMonthly, live, plan) {
   setText("remainingToGoal", `£${formatMoney(remainingToGoal)}`);
 
   const totalPlanAmount = plan.reduce((sum, p) => sum + (p.amount || 0), 0);
+
   const annualImpact = plan.reduce((sum, p) => {
     const stock = live[p.key];
     const price = Number(stock?.price || 0);
@@ -1408,27 +1409,37 @@ function updateMissionPanel(totalAnnual, totalMonthly, live, plan) {
   setText("monthlyImpact", `£${formatMoney(monthlyImpact)}/month added`);
   setText("blendedYield", formatPct(blendedYield));
 
-  const currentStage = Math.max(1, Math.min(TOTAL_STAGES, Math.ceil(totalAnnual / STAGE_TARGET_ANNUAL)));
+  const stageSize = 2000;
+  const currentStage = Math.max(1, Math.min(TOTAL_STAGES, Math.floor(totalAnnual / stageSize) + 1));
+  const currentStageTarget = currentStage * stageSize;
+  const nextStageTarget = Math.min((currentStage + 1) * stageSize, TOTAL_STAGES * stageSize);
+
   setText("stageTracker", `${currentStage} of ${TOTAL_STAGES}`);
-  setText("stageTarget", `£${formatMoney0(STAGE_TARGET_ANNUAL)}/year`);
-  setText("nextStageTarget", `£${formatMoney0(NEXT_STAGE_TARGET_ANNUAL)}/year`);
+  setText("stageTarget", `£${formatMoney0(currentStageTarget)}/year`);
+  setText("nextStageTarget", `£${formatMoney0(nextStageTarget)}/year`);
 
-  const annualGapToNextStage = Math.max(0, NEXT_STAGE_TARGET_ANNUAL - totalAnnual);
+  const annualGapToNextStage = Math.max(0, nextStageTarget - totalAnnual);
 
-const annualRunRateFromPlan = annualImpact;
+  const monthlyInvestmentAssumption = Number(document.getElementById("totalInvestment")?.value || 0);
 
-const yearsToNextStage = annualRunRateFromPlan > 0
-  ? annualGapToNextStage / annualRunRateFromPlan
-  : null;
+  const annualRunRateFromPlan =
+    totalPlanAmount > 0 && monthlyInvestmentAssumption > 0
+      ? (annualImpact / totalPlanAmount) * monthlyInvestmentAssumption * 12
+      : 0;
 
-setText(
-  "yearsToNextStage",
-  yearsToNextStage === null || !Number.isFinite(yearsToNextStage)
-    ? "--"
-    : yearsToNextStage < 0.1
-      ? "<0.1y"
-      : `${yearsToNextStage.toFixed(1)}y`
-);
+  const yearsToNextStage =
+    annualRunRateFromPlan > 0
+      ? annualGapToNextStage / annualRunRateFromPlan
+      : null;
+
+  setText(
+    "yearsToNextStage",
+    yearsToNextStage === null || !Number.isFinite(yearsToNextStage)
+      ? "--"
+      : yearsToNextStage < 0.1
+        ? "<0.1y"
+        : `${yearsToNextStage.toFixed(1)}y`
+  );
 
   setText(
     "stageTrackerMeta",
@@ -1578,7 +1589,7 @@ async function runBrain() {
     const baseDipWeight = Number(document.getElementById("dipWeight")?.value || 1.2);
     const newMoney = Number(document.getElementById("totalInvestment")?.value || 800);
     const carriedReserve = getReserve();
-    const totalDeployable = newMoney;
+    const totalDeployable = newMoney + carriedReserve;
 
     const preStocks = Object.entries(live).map(([key, item]) => {
       const current = item.price || 0;
