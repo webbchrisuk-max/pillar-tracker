@@ -102,6 +102,21 @@ h2, h3 {
   padding: 14px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.18);
 }
+/* ===================== IG SIGNAL CARD STATES ===================== */
+.card.good {
+  border-color: rgba(80,255,143,0.6);
+  box-shadow: 0 0 18px rgba(80,255,143,0.25);
+}
+
+.card.watch {
+  border-color: rgba(255,200,87,0.6);
+  box-shadow: 0 0 18px rgba(255,200,87,0.25);
+}
+
+.card.risk {
+  border-color: rgba(255,107,138,0.6);
+  box-shadow: 0 0 18px rgba(255,107,138,0.25);
+}
 
 .grid {
   display: grid;
@@ -492,7 +507,7 @@ thead th:nth-child(9) {
         <div class="subv" id="releasedSurplusMeta">From bills costing less than planned</div>
       </div>
 
-      <div class="card">
+      <div class="card" id="igCard">
         <div class="stat-label">IG ISA Signal</div>
         <div class="stat small" id="igSignal">--</div>
         <div class="subv" id="igSignalMeta">Waiting for planner calculation</div>
@@ -1250,8 +1265,25 @@ function updatePlannerTotals() {
     igMeta = "Do not skim to IG yet — holding pot still needs support.";
   }
 
-  setText("igSignal", igSignal);
-  setText("igSignalMeta", igMeta);
+  const igSignalEl = document.getElementById("igSignal");
+const igCard = document.getElementById("igCard");
+
+if (igSignalEl && igCard) {
+  igSignalEl.innerText = igSignal;
+
+  // reset classes
+  igCard.classList.remove("good", "watch", "risk");
+
+  if (igSignal === "Move Surplus") {
+    igCard.classList.add("good");
+  } else if (igSignal === "Balanced") {
+    igCard.classList.add("watch");
+  } else if (igSignal === "Protect Pot") {
+    igCard.classList.add("risk");
+  }
+}
+
+setText("igSignalMeta", igMeta);
 
   savePlannerData();
 }
