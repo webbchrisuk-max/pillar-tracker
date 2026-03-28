@@ -722,17 +722,17 @@ thead th:nth-child(9) {
 const STORAGE_KEY = "aurora_holding_planner_v3";
 
 const defaultScheduledBills = [
-  { id: "liverpool", name: "Liverpool Trip", due: "2026-05-31", amount: 350, paid: false, actualPaid: 0, included: true, category: "Travel", notes: "End of May" },
-  { id: "tooth", name: "Tooth Extraction Balance", due: "2026-06-16", amount: 120, paid: false, actualPaid: 0, included: true, category: "Dentist", notes: "Confirmed" },
-  { id: "hygienist", name: "Hygienist", due: "2026-07-10", amount: 50, paid: false, actualPaid: 0, included: true, category: "Dentist", notes: "Confirmed" },
-  { id: "carrepairs", name: "Car Repairs", due: "2026-08-15", amount: 400, paid: false, actualPaid: 0, included: true, category: "Car", notes: "Editable placeholder" },
-  { id: "carservice", name: "Car Service", due: "2026-09-15", amount: 300, paid: false, actualPaid: 0, included: true, category: "Car", notes: "Editable estimate" },
-  { id: "insurance", name: "Car Insurance", due: "2026-10-01", amount: 240, paid: false, actualPaid: 0, included: true, category: "Car", notes: "Editable estimate" },
-  { id: "ps", name: "PlayStation Subscription", due: "2026-11-14", amount: 99.99, paid: false, actualPaid: 0, included: true, category: "Subscription", notes: "Annual renewal" },
-  { id: "christmas", name: "Christmas", due: "2026-12-01", amount: 500, paid: false, actualPaid: 0, included: true, category: "Seasonal", notes: "Planned target" },
-  { id: "mot", name: "MOT", due: "2027-01-31", amount: 60, paid: false, actualPaid: 0, included: true, category: "Car", notes: "Editable estimate" },
-  { id: "boiler", name: "Boiler Service", due: "2027-01-31", amount: 90, paid: false, actualPaid: 0, included: true, category: "Home", notes: "End of January / early February" },
-  { id: "tvsub", name: "TV Subscription", due: "2027-03-15", amount: 50, paid: false, actualPaid: 0, included: true, category: "Subscription", notes: "Annual subscription" }
+  { id: "liverpool", name: "Liverpool Trip", due: "2026-05-31", amount: 350, paid: false, actualPaid: 0, deducted: false, included: true, category: "Travel", notes: "End of May" },
+  { id: "tooth", name: "Tooth Extraction Balance", due: "2026-06-16", amount: 120, paid: false, actualPaid: 0, deducted: false, included: true, category: "Dentist", notes: "Confirmed" },
+  { id: "hygienist", name: "Hygienist", due: "2026-07-10", amount: 50, paid: false, actualPaid: 0, deducted: false, included: true, category: "Dentist", notes: "Confirmed" },
+  { id: "carrepairs", name: "Car Repairs", due: "2026-08-15", amount: 400, paid: false, actualPaid: 0, deducted: false, included: true, category: "Car", notes: "Editable placeholder" },
+  { id: "carservice", name: "Car Service", due: "2026-09-15", amount: 300, paid: false, actualPaid: 0, deducted: false, included: true, category: "Car", notes: "Editable estimate" },
+  { id: "insurance", name: "Car Insurance", due: "2026-10-01", amount: 240, paid: false, actualPaid: 0, deducted: false, included: true, category: "Car", notes: "Editable estimate" },
+  { id: "ps", name: "PlayStation Subscription", due: "2026-11-14", amount: 99.99, paid: false, actualPaid: 0, deducted: false, included: true, category: "Subscription", notes: "Annual renewal" },
+  { id: "christmas", name: "Christmas", due: "2026-12-01", amount: 500, paid: false, actualPaid: 0, deducted: false, included: true, category: "Seasonal", notes: "Planned target" },
+  { id: "mot", name: "MOT", due: "2027-01-31", amount: 60, paid: false, actualPaid: 0, deducted: false, included: true, category: "Car", notes: "Editable estimate" },
+  { id: "boiler", name: "Boiler Service", due: "2027-01-31", amount: 90, paid: false, actualPaid: 0, deducted: false, included: true, category: "Home", notes: "End of January / early February" },
+  { id: "tvsub", name: "TV Subscription", due: "2027-03-15", amount: 50, paid: false, actualPaid: 0, deducted: false, included: true, category: "Subscription", notes: "Annual subscription" }
 ];
 
 const defaultFutureCosts = [
@@ -843,7 +843,12 @@ function loadPlannerData() {
     plannerState = {
       ...getFreshDefaults(),
       ...parsed,
-      scheduledBills: Array.isArray(parsed.scheduledBills) ? parsed.scheduledBills : JSON.parse(JSON.stringify(defaultScheduledBills)),
+      scheduledBills: Array.isArray(parsed.scheduledBills)
+        ? parsed.scheduledBills.map(bill => ({
+            deducted: false,
+            ...bill
+          }))
+        : JSON.parse(JSON.stringify(defaultScheduledBills)),
       futureCosts: Array.isArray(parsed.futureCosts) ? parsed.futureCosts : JSON.parse(JSON.stringify(defaultFutureCosts)),
       recurringCosts: Array.isArray(parsed.recurringCosts) ? parsed.recurringCosts : JSON.parse(JSON.stringify(defaultRecurringCosts)),
       yearlyRecurringCosts: Array.isArray(parsed.yearlyRecurringCosts) ? parsed.yearlyRecurringCosts : JSON.parse(JSON.stringify(defaultYearlyRecurringCosts))
@@ -870,6 +875,25 @@ function resetPlannerData() {
   });
 
   plannerState = fresh;
+}
+
+function applyPaidScheduledDeductions() {
+  plannerState.scheduledBills.forEach(bill => {
+    if (bill.paid && !bill.deducted) {
+      const amountToDeduct = Number(bill.actualPaid || 0);
+      if (amountToDeduct > 0) {
+        plannerState.holdingBalance = Math.max(
+          0,
+          Number(plannerState.holdingBalance || 0) - amountToDeduct
+        );
+      }
+      bill.deducted = true;
+    }
+
+    if (!bill.paid && bill.deducted) {
+      bill.deducted = false;
+    }
+  });
 }
 
 function renderScheduledBills() {
@@ -1145,61 +1169,59 @@ function updatePlannerTotals() {
   );
 
   const releasedSurplusEl = document.getElementById("releasedSurplus");
-if (releasedSurplusEl) {
-  releasedSurplusEl.innerText = formatMoney(releasedSurplus);
-  releasedSurplusEl.classList.remove("good", "risk", "neutral");
+  if (releasedSurplusEl) {
+    releasedSurplusEl.innerText = formatMoney(releasedSurplus);
+    releasedSurplusEl.classList.remove("good", "risk", "neutral");
 
-  if (releasedSurplus > 0) {
-    releasedSurplusEl.classList.add("good");
-  } else if (releasedSurplus < 0) {
-    releasedSurplusEl.classList.add("risk");
-  } else {
-    releasedSurplusEl.classList.add("neutral");
+    if (releasedSurplus > 0) {
+      releasedSurplusEl.classList.add("good");
+    } else if (releasedSurplus < 0) {
+      releasedSurplusEl.classList.add("risk");
+    } else {
+      releasedSurplusEl.classList.add("neutral");
+    }
   }
-}
 
-setText(
-  "releasedSurplusMeta",
-  releasedSurplus > 0
-    ? `Planned paid bills were £${formatMoney(plannedPaidScheduledTotal)} but actual paid was £${formatMoney(actualPaidScheduledTotal)}`
-    : "No surplus released from paid bills yet"
-);
+  setText(
+    "releasedSurplusMeta",
+    releasedSurplus > 0
+      ? `Planned paid bills were £${formatMoney(plannedPaidScheduledTotal)} but actual paid was £${formatMoney(actualPaidScheduledTotal)}`
+      : "No surplus released from paid bills yet"
+  );
 
-setText("weeklyTarget", `£${formatMoney0(weeklyTarget)}`);
-setText("weeklyTargetMeta", `Based on £${formatMoney(includedGrandTotal)} included yearly costs`);
+  setText("weeklyTarget", `£${formatMoney0(weeklyTarget)}`);
+  setText("weeklyTargetMeta", `Based on £${formatMoney(includedGrandTotal)} included yearly costs`);
 
-setText("monthlyTarget", `£${formatMoney(monthlyTarget)}`);
-setText("currentRateAnnual", `£${formatMoney(currentRateAnnual)}`);
-setText("currentRateMeta", `From £${formatMoney0(plannerState.weeklyFunding)}/week`);
+  setText("monthlyTarget", `£${formatMoney(monthlyTarget)}`);
+  setText("currentRateAnnual", `£${formatMoney(currentRateAnnual)}`);
+  setText("currentRateMeta", `From £${formatMoney0(plannerState.weeklyFunding)}/week`);
 
-const surplusEl = document.getElementById("surplusShortfall");
+  const surplusEl = document.getElementById("surplusShortfall");
+  if (surplusEl) {
+    surplusEl.innerText = `${surplusShortfall >= 0 ? "+" : "-"}£${formatMoney(Math.abs(surplusShortfall))}`;
+    surplusEl.classList.remove("good", "risk", "neutral");
 
-if (surplusEl) {
-  surplusEl.innerText = `${surplusShortfall >= 0 ? "+" : "-"}£${formatMoney(Math.abs(surplusShortfall))}`;
-
-  surplusEl.classList.remove("good", "risk", "neutral");
-
-  if (surplusShortfall > 0) {
-    surplusEl.classList.add("good");
-  } else if (surplusShortfall < 0) {
-    surplusEl.classList.add("risk");
-  } else {
-    surplusEl.classList.add("neutral");
+    if (surplusShortfall > 0) {
+      surplusEl.classList.add("good");
+    } else if (surplusShortfall < 0) {
+      surplusEl.classList.add("risk");
+    } else {
+      surplusEl.classList.add("neutral");
+    }
   }
-}
 
-setText(
-  "surplusShortfallMeta",
-  surplusShortfall >= 0
-    ? "Funding ahead of target"
-    : "Funding below target"
-);
+  setText(
+    "surplusShortfallMeta",
+    surplusShortfall >= 0
+      ? "Funding ahead of target"
+      : "Funding below target"
+  );
 
-setText("yearlyScheduled", `£${formatMoney(scheduledIncludedTotal)}`);
-setText("yearlyRecurring", `£${formatMoney(recurringIncludedTotal)}`);
-setText("yearlyFuture", `£${formatMoney(futureIncludedTotal)}`);
-setText("yearlyGrand", `£${formatMoney(includedGrandTotal)}`);
-setText("yearlyRecurringYearly", `£${formatMoney(yearlyRecurringTotal)}`);
+  setText("yearlyScheduled", `£${formatMoney(scheduledIncludedTotal)}`);
+  setText("yearlyRecurring", `£${formatMoney(recurringIncludedTotal)}`);
+  setText("yearlyFuture", `£${formatMoney(futureIncludedTotal)}`);
+  setText("yearlyGrand", `£${formatMoney(includedGrandTotal)}`);
+  setText("yearlyRecurringYearly", `£${formatMoney(yearlyRecurringTotal)}`);
 
   const yearlyRows = [
     { name: "Scheduled Bills Included", yearly: scheduledIncludedTotal, notes: `Unpaid scheduled remaining: £${formatMoney(unpaidScheduledTotal)}` },
@@ -1318,6 +1340,7 @@ function addScheduledBill() {
     amount: 0,
     paid: false,
     actualPaid: 0,
+    deducted: false,
     included: true,
     category: "Other",
     notes: ""
@@ -1368,6 +1391,9 @@ function runPlanner() {
   plannerState.holdingBalance = parseNum(document.getElementById("holdingBalanceInput")?.value);
   plannerState.weeklyFunding = parseNum(document.getElementById("weeklyFundingInput")?.value);
   plannerState.minimumBuffer = parseNum(document.getElementById("minimumBufferInput")?.value);
+
+  applyPaidScheduledDeductions();
+  document.getElementById("holdingBalanceInput").value = plannerState.holdingBalance.toFixed(2);
 
   renderScheduledBills();
   renderFutureCosts();
@@ -1424,5 +1450,5 @@ document.getElementById("addYearlyRecurringBtn")?.addEventListener("click", addY
 
 runPlanner();
 </script>
+</style>
 </body>
-</html>
