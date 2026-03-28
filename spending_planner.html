@@ -6,8 +6,7 @@
 <title>Aurora Holding Pot Planner v3</title>
 
 <style>
-/* <!-- ===================== SECTION: ROOT / THEME ===================== --> */
-:root {
+ :root {
   --bg: #071018;
   --bg2: #0c1624;
   --panel: rgba(15, 27, 43, 0.88);
@@ -27,6 +26,10 @@
 
 * { box-sizing: border-box; }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 html, body {
   margin: 0;
   background:
@@ -39,6 +42,7 @@ html, body {
 
 body {
   padding: 18px 14px 42px;
+  overflow-x: hidden;
 }
 
 .wrap {
@@ -189,8 +193,9 @@ h2, h3 {
   color: var(--text);
   border-radius: 10px;
   padding: 10px 12px;
-  font-size: 15px;
+  font-size: 16px;
   outline: none;
+  box-sizing: border-box;
 }
 
 .quick-btn,
@@ -221,18 +226,19 @@ h2, h3 {
 
 .table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
-  min-width: 720px;
+  min-width: 900px;
 }
 
 th, td {
   text-align: left;
-  padding: 10px 8px;
+  padding: 12px 10px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
   vertical-align: top;
 }
@@ -247,13 +253,28 @@ th {
 .table-input,
 .table-select {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.08);
   color: var(--text);
   border-radius: 8px;
   padding: 8px 10px;
-  font-size: 13px;
+  font-size: 16px;
   outline: none;
+  box-sizing: border-box;
+  display: block;
+}
+
+.table-input[type="date"],
+input[type="date"].table-input,
+input[type="date"] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 120px;
+  font-size: 13px;
+  padding: 8px 6px;
+  box-sizing: border-box;
 }
 
 .check-wrap {
@@ -299,6 +320,23 @@ th {
   text-align: center;
 }
 
+/* Due Date column gets guaranteed room */
+#scheduledBillsBody td:nth-child(2),
+thead th:nth-child(2) {
+  min-width: 140px;
+}
+
+/* Planned column gets enough room too */
+#scheduledBillsBody td:nth-child(3),
+thead th:nth-child(3) {
+  min-width: 90px;
+}
+
+/* small extra breathing room */
+#scheduledBillsBody td:nth-child(3) input {
+  margin-left: 4px;
+}
+
 @media (max-width: 920px) {
   .hero-grid,
   .two-grid,
@@ -309,39 +347,121 @@ th {
 
   h1 { font-size: 24px; }
   .stat { font-size: 24px; }
-}
-/* ===================== 🔥 REAL FIX: iOS DATE INPUT OVERFLOW ===================== */
 
-/* force all inputs to stay inside their cell */
-.table-input {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
+  table {
+    min-width: 900px;
+  }
 
-/* specifically fix iOS date input */
-input[type="date"] {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  font-size: 13px;
+  .table-input,
+  .table-select,
+  .input-box input,
+  .input-box select {
+    font-size: 16px;
+  }
+
+  .table-input[type="date"],
+  input[type="date"].table-input,
+  input[type="date"] {
+    min-width: 130px;
+  }
+}
+/* ===================== COLUMN WIDTH TUNING ===================== */
+
+/* Scheduled Bills specific column widths */
+#scheduledBillsBody td:nth-child(1),
+#scheduledBillsBody td:nth-child(1) input,
+thead th:nth-child(1) {
+  min-width: 150px;
+} /* Name */
+
+#scheduledBillsBody td:nth-child(2),
+#scheduledBillsBody td:nth-child(2) input,
+thead th:nth-child(2) {
+  min-width: 140px;
+} /* Due Date */
+
+#scheduledBillsBody td:nth-child(3),
+#scheduledBillsBody td:nth-child(3) input,
+thead th:nth-child(3) {
+  min-width: 60px;
+  max-width: 80px;
+} /* Planned */
+
+#scheduledBillsBody td:nth-child(4),
+thead th:nth-child(4) {
+  min-width: 85px;
+} /* Paid */
+
+#scheduledBillsBody td:nth-child(5),
+#scheduledBillsBody td:nth-child(5) input,
+thead th:nth-child(5) {
+  min-width: 60px;
+  max-width: 80px;
+} /* Actual Paid */
+
+#scheduledBillsBody td:nth-child(6),
+thead th:nth-child(6) {
+  min-width: 90px;
+} /* Included */
+
+#scheduledBillsBody td:nth-child(7),
+#scheduledBillsBody td:nth-child(7) input,
+thead th:nth-child(7) {
+  min-width: 120px;
+} /* Category */
+
+#scheduledBillsBody td:nth-child(8),
+#scheduledBillsBody td:nth-child(8) input,
+thead th:nth-child(8) {
+  min-width: 185px;
+} /* Notes */
+
+#scheduledBillsBody td:nth-child(9),
+thead th:nth-child(9) {
+  min-width: 70px;
+} /* Delete */
+
+/* Make money input boxes tighter */
+#scheduledBillsBody input[data-field="amount"],
+#scheduledBillsBody input[data-field="actualPaid"] {
   padding: 8px 6px;
+  text-align: left;
 }
 
-/* force table columns to respect width */
-table {
-  table-layout: fixed;
+/* Let category and notes breathe */
+#scheduledBillsBody input[data-field="category"],
+#scheduledBillsBody input[data-field="notes"] {
+  width: 100%;
+  min-width: 0;
 }
 
-/* stop cells from expanding beyond limits */
-td {
-  overflow: hidden;
+/* Optional: slightly smaller text in tighter money boxes */
+#scheduledBillsBody input[data-field="amount"],
+#scheduledBillsBody input[data-field="actualPaid"],
+#scheduledBillsBody input[type="date"] {
+  font-size: 12px;
+}
+/* ===================== COMPACT MONEY INPUTS ===================== */
+
+/* Monthly amount (recurring) */
+#recurringCostsBody input[data-field="amount"] {
+  max-width: 90px;
+  padding: 6px 6px;
+  font-size: 13px;
 }
 
-/* give planned field breathing room */
-#scheduledBillsBody td:nth-child(3) input {
-  margin-left: 6px;
+/* Yearly calculated value (text span) */
+.recurring-yearly {
+  font-size: 13px;
+  display: inline-block;
+  min-width: 70px;
+}
+
+/* If you add yearly recurring section */
+#yearlyRecurringCostsBody input[data-field="amount"] {
+  max-width: 100px;
+  padding: 6px 6px;
+  font-size: 13px;
 }
 </style>
 </head>
@@ -905,11 +1025,20 @@ function renderNextBills(bills) {
   next3.forEach(item => {
     const card = document.createElement("div");
     card.className = "next-bill-box";
+
     const left = daysUntil(item.due);
+
+    let urgencyClass = "neutral";
+    if (left !== null) {
+      if (left <= 3) urgencyClass = "risk";
+      else if (left <= 7) urgencyClass = "watch";
+      else urgencyClass = "good";
+    }
+
     card.innerHTML = `
       <div class="next-bill-title">${item.name}</div>
       <div class="subv">${dateLabel(item.due)} • £${formatMoney(item.amount)} • ${item.category}</div>
-      <div class="subv">${left == null ? "--" : `${left} days left`}</div>
+      <div class="subv ${urgencyClass}">${left == null ? "--" : `${left} days left`}</div>
     `;
     grid.appendChild(card);
   });
@@ -1015,29 +1144,62 @@ function updatePlannerTotals() {
     `${includedScheduled.length} scheduled • ${includedFuture.length} future • ${includedRecurring.length} recurring • ${includedYearlyRecurring.length} yearly recurring active`
   );
 
-  setText("releasedSurplus", formatMoney(releasedSurplus));
-  setText(
-    "releasedSurplusMeta",
-    releasedSurplus > 0
-      ? `Planned paid bills were £${formatMoney(plannedPaidScheduledTotal)} but actual paid was £${formatMoney(actualPaidScheduledTotal)}`
-      : "No surplus released from paid bills yet"
-  );
+  const releasedSurplusEl = document.getElementById("releasedSurplus");
+if (releasedSurplusEl) {
+  releasedSurplusEl.innerText = formatMoney(releasedSurplus);
+  releasedSurplusEl.classList.remove("good", "risk", "neutral");
 
-  setText("weeklyTarget", `£${formatMoney0(weeklyTarget)}`);
-  setText("weeklyTargetMeta", `Based on £${formatMoney(includedGrandTotal)} included yearly costs`);
+  if (releasedSurplus > 0) {
+    releasedSurplusEl.classList.add("good");
+  } else if (releasedSurplus < 0) {
+    releasedSurplusEl.classList.add("risk");
+  } else {
+    releasedSurplusEl.classList.add("neutral");
+  }
+}
 
-  setText("monthlyTarget", `£${formatMoney(monthlyTarget)}`);
-  setText("currentRateAnnual", `£${formatMoney(currentRateAnnual)}`);
-  setText("currentRateMeta", `From £${formatMoney0(plannerState.weeklyFunding)}/week`);
+setText(
+  "releasedSurplusMeta",
+  releasedSurplus > 0
+    ? `Planned paid bills were £${formatMoney(plannedPaidScheduledTotal)} but actual paid was £${formatMoney(actualPaidScheduledTotal)}`
+    : "No surplus released from paid bills yet"
+);
 
-  setText("surplusShortfall", `${surplusShortfall >= 0 ? "+" : "-"}£${formatMoney(Math.abs(surplusShortfall))}`);
-  setText("surplusShortfallMeta", surplusShortfall >= 0 ? "Funding ahead of target" : "Funding below target");
+setText("weeklyTarget", `£${formatMoney0(weeklyTarget)}`);
+setText("weeklyTargetMeta", `Based on £${formatMoney(includedGrandTotal)} included yearly costs`);
 
-  setText("yearlyScheduled", `£${formatMoney(scheduledIncludedTotal)}`);
-  setText("yearlyRecurring", `£${formatMoney(recurringIncludedTotal)}`);
-  setText("yearlyFuture", `£${formatMoney(futureIncludedTotal)}`);
-  setText("yearlyGrand", `£${formatMoney(includedGrandTotal)}`);
-  setText("yearlyRecurringYearly", `£${formatMoney(yearlyRecurringTotal)}`);
+setText("monthlyTarget", `£${formatMoney(monthlyTarget)}`);
+setText("currentRateAnnual", `£${formatMoney(currentRateAnnual)}`);
+setText("currentRateMeta", `From £${formatMoney0(plannerState.weeklyFunding)}/week`);
+
+const surplusEl = document.getElementById("surplusShortfall");
+
+if (surplusEl) {
+  surplusEl.innerText = `${surplusShortfall >= 0 ? "+" : "-"}£${formatMoney(Math.abs(surplusShortfall))}`;
+
+  surplusEl.classList.remove("good", "risk", "neutral");
+
+  if (surplusShortfall > 0) {
+    surplusEl.classList.add("good");
+  } else if (surplusShortfall < 0) {
+    surplusEl.classList.add("risk");
+  } else {
+    surplusEl.classList.add("neutral");
+  }
+}
+
+setText(
+  "surplusShortfallMeta",
+  surplusShortfall >= 0
+    ? "Funding ahead of target"
+    : "Funding below target"
+);
+
+setText("yearlyScheduled", `£${formatMoney(scheduledIncludedTotal)}`);
+setText("yearlyRecurring", `£${formatMoney(recurringIncludedTotal)}`);
+setText("yearlyFuture", `£${formatMoney(futureIncludedTotal)}`);
+setText("yearlyGrand", `£${formatMoney(includedGrandTotal)}`);
+setText("yearlyRecurringYearly", `£${formatMoney(yearlyRecurringTotal)}`);
 
   const yearlyRows = [
     { name: "Scheduled Bills Included", yearly: scheduledIncludedTotal, notes: `Unpaid scheduled remaining: £${formatMoney(unpaidScheduledTotal)}` },
