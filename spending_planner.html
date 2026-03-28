@@ -1,4 +1,4 @@
-o<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -555,6 +555,12 @@ thead th:nth-child(9) {
         <label for="weeklyFundingInput">Current Weekly Contribution</label>
         <input id="weeklyFundingInput" type="number" step="1" value="65" />
       </div>
+      <div class="input-box">
+  <label for="customAddInput">Custom Amount To Add</label>
+  <input id="customAddInput" type="number" step="0.01" value="" placeholder="Enter amount" />
+</div>
+
+<button class="quick-btn" id="addCustomBtn">+ Add Custom Amount</button>
 
       <div class="input-box">
         <label for="minimumBufferInput">Minimum Safe Buffer</label>
@@ -565,6 +571,7 @@ thead th:nth-child(9) {
     <div class="grid three-grid" style="margin-top:12px;">
       <button class="quick-btn" id="savePlannerBtn">Save Planner Data</button>
       <button class="quick-btn" id="resetPlannerBtn">Reset to Defaults</button>
+      <button class="add-btn" id="addWeeklyBtn">+ Add Weekly Contribution</button>
       </div>
   </section>
     <!-- ===================== SECTION: NEXT 3 BILLS ===================== -->
@@ -919,7 +926,9 @@ function renderScheduledBills() {
   plannerState.scheduledBills.forEach((bill, index) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${bill.name}</td>
+      <td>
+  <input class="table-input" type="text" value="${bill.name || ""}" data-section="scheduled" data-index="${index}" data-field="name">
+</td>
       <td><input class="table-input" type="date" value="${bill.due || ""}" data-section="scheduled" data-index="${index}" data-field="due"></td>
       <td><input class="table-input" type="number" step="0.01" value="${bill.amount}" data-section="scheduled" data-index="${index}" data-field="amount"></td>
       <td>
@@ -1168,11 +1177,16 @@ function updatePlannerTotals() {
     categoryTotals[item.category] = (categoryTotals[item.category] || 0) + Number(item.amount || 0);
   });
 
-  const weeklyTarget = includedGrandTotal / 52;
-  const monthlyTarget = includedGrandTotal / 12;
-  const currentRateAnnual = plannerState.weeklyFunding * 52;
-  const surplusShortfall = currentRateAnnual - includedGrandTotal;
-  const safeHeadroom = plannerState.holdingBalance - plannerState.minimumBuffer;
+  const deficit = Math.max(
+  0,
+  includedGrandTotal - plannerState.holdingBalance - releasedSurplus
+);
+
+const weeklyTarget = deficit / 52;
+const monthlyTarget = deficit / 12;
+const currentRateAnnual = plannerState.weeklyFunding * 52;
+const surplusShortfall = currentRateAnnual - deficit;
+const safeHeadroom = plannerState.holdingBalance - plannerState.minimumBuffer;
 
   setText("potBalance", formatMoney(plannerState.holdingBalance));
   setText("potBalanceMeta", `Minimum safe buffer: £${formatMoney0(plannerState.minimumBuffer)}`);
@@ -1479,6 +1493,31 @@ document.getElementById("addScheduledBtn")?.addEventListener("click", addSchedul
 document.getElementById("addFutureBtn")?.addEventListener("click", addFutureCost);
 document.getElementById("addRecurringBtn")?.addEventListener("click", addRecurringCost);
 document.getElementById("addYearlyRecurringBtn")?.addEventListener("click", addYearlyRecurringCost);
+document.getElementById("addWeeklyBtn")?.addEventListener("click", () => {
+  const weekly = parseNum(document.getElementById("weeklyFundingInput")?.value);
+
+  // add to balance
+  plannerState.holdingBalance += weekly;
+
+  // update input field visually
+  document.getElementById("holdingBalanceInput").value = plannerState.holdingBalance;
+
+  savePlannerData();
+  runPlanner();
+});
+document.getElementById("addCustomBtn")?.addEventListener("click", () => {
+  const customAmount = parseNum(document.getElementById("customAddInput")?.value);
+
+  if (customAmount <= 0) return;
+
+  plannerState.holdingBalance += customAmount;
+
+  document.getElementById("holdingBalanceInput").value = plannerState.holdingBalance.toFixed(2);
+  document.getElementById("customAddInput").value = "";
+
+  savePlannerData();
+  runPlanner();
+});
 
 runPlanner();
 </script>
