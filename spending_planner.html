@@ -552,8 +552,8 @@ thead th:nth-child(9) {
       </div>
 
       <div class="input-box">
-        <label for="weeklyFundingInput">Current Weekly Contribution</label>
-        <input id="weeklyFundingInput" type="number" step="1" value="65" />
+        <label for="monthlyContributionInput">Current Monthly Contribution</label>
+<input id="monthlyContributionInput" type="number" step="1" value="140" />
       </div>
       <div class="input-box">
   <label for="customAddInput">Custom Amount To Add</label>
@@ -571,7 +571,7 @@ thead th:nth-child(9) {
     <div class="grid three-grid" style="margin-top:12px;">
       <button class="quick-btn" id="savePlannerBtn">Save Planner Data</button>
       <button class="quick-btn" id="resetPlannerBtn">Reset to Defaults</button>
-      <button class="add-btn" id="addWeeklyBtn">+ Add Weekly Contribution</button>
+      <button class="add-btn" id="addWeeklyBtn">+ Add Monthly Contribution</button>
       </div>
   </section>
     <!-- ===================== SECTION: NEXT 3 BILLS ===================== -->
@@ -794,7 +794,7 @@ function getFreshDefaults() {
 
   return {
     holdingBalance: 2020,
-    weeklyFunding: 65,
+    monthlyContribution: 140,
     minimumBuffer: 1000,
     scheduledBills: freshScheduled,
     futureCosts: freshFuture,
@@ -860,6 +860,7 @@ function savePlannerData() {
 function loadPlannerData() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (!saved) return;
+
   try {
     const parsed = JSON.parse(saved);
     plannerState = {
@@ -871,9 +872,15 @@ function loadPlannerData() {
             ...bill
           }))
         : JSON.parse(JSON.stringify(defaultScheduledBills)),
-      futureCosts: Array.isArray(parsed.futureCosts) ? parsed.futureCosts : JSON.parse(JSON.stringify(defaultFutureCosts)),
-      recurringCosts: Array.isArray(parsed.recurringCosts) ? parsed.recurringCosts : JSON.parse(JSON.stringify(defaultRecurringCosts)),
-      yearlyRecurringCosts: Array.isArray(parsed.yearlyRecurringCosts) ? parsed.yearlyRecurringCosts : JSON.parse(JSON.stringify(defaultYearlyRecurringCosts))
+      futureCosts: Array.isArray(parsed.futureCosts)
+        ? parsed.futureCosts
+        : JSON.parse(JSON.stringify(defaultFutureCosts)),
+      recurringCosts: Array.isArray(parsed.recurringCosts)
+        ? parsed.recurringCosts
+        : JSON.parse(JSON.stringify(defaultRecurringCosts)),
+      yearlyRecurringCosts: Array.isArray(parsed.yearlyRecurringCosts)
+        ? parsed.yearlyRecurringCosts
+        : JSON.parse(JSON.stringify(defaultYearlyRecurringCosts))
     };
   } catch (err) {
     console.error("Could not load planner data", err);
@@ -903,12 +910,14 @@ function applyPaidScheduledDeductions() {
   plannerState.scheduledBills.forEach(bill => {
     if (bill.paid && !bill.deducted) {
       const amountToDeduct = Number(bill.actualPaid || 0);
+
       if (amountToDeduct > 0) {
         plannerState.holdingBalance = Math.max(
           0,
           Number(plannerState.holdingBalance || 0) - amountToDeduct
         );
       }
+
       bill.deducted = true;
     }
 
@@ -927,8 +936,8 @@ function renderScheduledBills() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>
-  <input class="table-input" type="text" value="${bill.name || ""}" data-section="scheduled" data-index="${index}" data-field="name">
-</td>
+        <input class="table-input" type="text" value="${bill.name || ""}" data-section="scheduled" data-index="${index}" data-field="name">
+      </td>
       <td><input class="table-input" type="date" value="${bill.due || ""}" data-section="scheduled" data-index="${index}" data-field="due"></td>
       <td><input class="table-input" type="number" step="0.01" value="${bill.amount}" data-section="scheduled" data-index="${index}" data-field="amount"></td>
       <td>
@@ -987,15 +996,10 @@ function renderRecurringCosts() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>
-        <input class="table-input" type="text" value="${cost.name}" 
-          data-section="recurring" 
-          data-index="${index}" 
-          data-field="name">
+        <input class="table-input" type="text" value="${cost.name}" data-section="recurring" data-index="${index}" data-field="name">
       </td>
       <td><input class="table-input" type="number" step="0.01" value="${cost.amount}" data-section="recurring" data-index="${index}" data-field="amount"></td>
-      <td>
-        <span class="recurring-yearly" data-yearly-index="${index}">£${formatMoney(yearly)}</span>
-      </td>
+      <td><span class="recurring-yearly" data-yearly-index="${index}">£${formatMoney(yearly)}</span></td>
       <td>
         <div class="check-wrap">
           <input type="checkbox" ${cost.included ? "checked" : ""} data-section="recurring" data-index="${index}" data-field="included">
@@ -1018,31 +1022,19 @@ function renderYearlyRecurringCosts() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>
-        <input class="table-input" type="text" value="${cost.name}" 
-          data-section="yearlyRecurring" 
-          data-index="${index}" 
-          data-field="name">
+        <input class="table-input" type="text" value="${cost.name}" data-section="yearlyRecurring" data-index="${index}" data-field="name">
       </td>
       <td>
-        <input class="table-input" type="number" step="0.01" value="${cost.amount}" 
-          data-section="yearlyRecurring" 
-          data-index="${index}" 
-          data-field="amount">
+        <input class="table-input" type="number" step="0.01" value="${cost.amount}" data-section="yearlyRecurring" data-index="${index}" data-field="amount">
       </td>
       <td>
         <div class="check-wrap">
-          <input type="checkbox" ${cost.included ? "checked" : ""} 
-            data-section="yearlyRecurring" 
-            data-index="${index}" 
-            data-field="included">
+          <input type="checkbox" ${cost.included ? "checked" : ""} data-section="yearlyRecurring" data-index="${index}" data-field="included">
           <span>${cost.included ? "Yes" : "No"}</span>
         </div>
       </td>
       <td>
-        <input class="table-input" type="text" value="${cost.category}" 
-          data-section="yearlyRecurring" 
-          data-index="${index}" 
-          data-field="category">
+        <input class="table-input" type="text" value="${cost.category}" data-section="yearlyRecurring" data-index="${index}" data-field="category">
       </td>
       <td>
         <button class="delete-btn" data-delete-section="yearlyRecurring" data-delete-index="${index}">Delete</button>
@@ -1131,7 +1123,7 @@ function renderYearlyTable(rows) {
 
 function updatePlannerTotals() {
   plannerState.holdingBalance = parseNum(document.getElementById("holdingBalanceInput")?.value);
-  plannerState.weeklyFunding = parseNum(document.getElementById("weeklyFundingInput")?.value);
+  plannerState.monthlyContribution = parseNum(document.getElementById("monthlyContributionInput")?.value);
   plannerState.minimumBuffer = parseNum(document.getElementById("minimumBufferInput")?.value);
 
   const includedScheduled = plannerState.scheduledBills.filter(x => x.included);
@@ -1177,16 +1169,15 @@ function updatePlannerTotals() {
     categoryTotals[item.category] = (categoryTotals[item.category] || 0) + Number(item.amount || 0);
   });
 
-  const deficit = Math.max(
-  0,
-  includedGrandTotal - plannerState.holdingBalance - releasedSurplus
-);
+  const deficit = Math.max(0, includedGrandTotal - plannerState.holdingBalance - releasedSurplus);
+  const monthlyTarget = deficit / 12;
+  const weeklyTarget = deficit / 52;
 
-const weeklyTarget = deficit / 52;
-const monthlyTarget = deficit / 12;
-const currentRateAnnual = plannerState.weeklyFunding * 52;
-const surplusShortfall = currentRateAnnual - deficit;
-const safeHeadroom = plannerState.holdingBalance - plannerState.minimumBuffer;
+  const currentRateMonthly = plannerState.monthlyContribution;
+  const currentRateAnnual = currentRateMonthly * 12;
+
+  const surplusShortfall = currentRateAnnual - deficit;
+  const safeHeadroom = plannerState.holdingBalance - plannerState.minimumBuffer;
 
   setText("potBalance", formatMoney(plannerState.holdingBalance));
   setText("potBalanceMeta", `Minimum safe buffer: £${formatMoney0(plannerState.minimumBuffer)}`);
@@ -1202,13 +1193,9 @@ const safeHeadroom = plannerState.holdingBalance - plannerState.minimumBuffer;
     releasedSurplusEl.innerText = formatMoney(releasedSurplus);
     releasedSurplusEl.classList.remove("good", "risk", "neutral");
 
-    if (releasedSurplus > 0) {
-      releasedSurplusEl.classList.add("good");
-    } else if (releasedSurplus < 0) {
-      releasedSurplusEl.classList.add("risk");
-    } else {
-      releasedSurplusEl.classList.add("neutral");
-    }
+    if (releasedSurplus > 0) releasedSurplusEl.classList.add("good");
+    else if (releasedSurplus < 0) releasedSurplusEl.classList.add("risk");
+    else releasedSurplusEl.classList.add("neutral");
   }
 
   setText(
@@ -1219,31 +1206,25 @@ const safeHeadroom = plannerState.holdingBalance - plannerState.minimumBuffer;
   );
 
   setText("weeklyTarget", `£${formatMoney0(weeklyTarget)}`);
-  setText("weeklyTargetMeta", `Based on £${formatMoney(includedGrandTotal)} included yearly costs`);
+  setText("weeklyTargetMeta", `Based on £${formatMoney(deficit)} remaining deficit to fund`);
 
   setText("monthlyTarget", `£${formatMoney(monthlyTarget)}`);
   setText("currentRateAnnual", `£${formatMoney(currentRateAnnual)}`);
-  setText("currentRateMeta", `From £${formatMoney0(plannerState.weeklyFunding)}/week`);
+  setText("currentRateMeta", `£${formatMoney(plannerState.monthlyContribution)}/month`);
 
   const surplusEl = document.getElementById("surplusShortfall");
   if (surplusEl) {
     surplusEl.innerText = `${surplusShortfall >= 0 ? "+" : "-"}£${formatMoney(Math.abs(surplusShortfall))}`;
     surplusEl.classList.remove("good", "risk", "neutral");
 
-    if (surplusShortfall > 0) {
-      surplusEl.classList.add("good");
-    } else if (surplusShortfall < 0) {
-      surplusEl.classList.add("risk");
-    } else {
-      surplusEl.classList.add("neutral");
-    }
+    if (surplusShortfall > 0) surplusEl.classList.add("good");
+    else if (surplusShortfall < 0) surplusEl.classList.add("risk");
+    else surplusEl.classList.add("neutral");
   }
 
   setText(
     "surplusShortfallMeta",
-    surplusShortfall >= 0
-      ? "Funding ahead of target"
-      : "Funding below target"
+    surplusShortfall >= 0 ? "Funding ahead of target" : "Funding below target"
   );
 
   setText("yearlyScheduled", `£${formatMoney(scheduledIncludedTotal)}`);
@@ -1268,10 +1249,17 @@ const safeHeadroom = plannerState.holdingBalance - plannerState.minimumBuffer;
   let igSignal = "Hold";
   let igMeta = "Keep surplus in holding pot for now.";
 
-  if (releasedSurplus > 0 && plannerState.holdingBalance - releasedSurplus >= plannerState.minimumBuffer && safeHeadroom >= unpaidScheduledTotal) {
+  if (
+    releasedSurplus > 0 &&
+    plannerState.holdingBalance - releasedSurplus >= plannerState.minimumBuffer &&
+    safeHeadroom >= unpaidScheduledTotal
+  ) {
     igSignal = "Move Surplus";
     igMeta = `Safe to move up to £${formatMoney(releasedSurplus)} to IG ISA if you want.`;
-  } else if (plannerState.holdingBalance >= (unpaidScheduledTotal + plannerState.minimumBuffer) && surplusShortfall >= 0) {
+  } else if (
+    plannerState.holdingBalance >= (unpaidScheduledTotal + plannerState.minimumBuffer) &&
+    surplusShortfall >= 0
+  ) {
     igSignal = "Balanced";
     igMeta = "Holding pot is covering unpaid bills and minimum buffer.";
   } else if (safeHeadroom < unpaidScheduledTotal || surplusShortfall < 0) {
@@ -1280,24 +1268,20 @@ const safeHeadroom = plannerState.holdingBalance - plannerState.minimumBuffer;
   }
 
   const igSignalEl = document.getElementById("igSignal");
-const igCard = document.getElementById("igCard");
+  const igCard = document.getElementById("igCard");
 
-if (igSignalEl && igCard) {
-  igSignalEl.innerText = igSignal;
-
-  // reset classes
-  igCard.classList.remove("good", "watch", "risk");
-
-  if (igSignal === "Move Surplus") {
-    igCard.classList.add("good");
-  } else if (igSignal === "Balanced") {
-    igCard.classList.add("watch");
-  } else if (igSignal === "Protect Pot") {
-    igCard.classList.add("risk");
+  if (igSignalEl) {
+    igSignalEl.innerText = igSignal;
   }
-}
 
-setText("igSignalMeta", igMeta);
+  if (igCard) {
+    igCard.classList.remove("good", "watch", "risk");
+    if (igSignal === "Move Surplus") igCard.classList.add("good");
+    else if (igSignal === "Balanced") igCard.classList.add("watch");
+    else if (igSignal === "Protect Pot") igCard.classList.add("risk");
+  }
+
+  setText("igSignalMeta", igMeta);
 
   savePlannerData();
 }
@@ -1333,7 +1317,7 @@ function handleTableEdit(e) {
   if (section === "recurring" && field === "amount") {
     const yearlyEl = document.querySelector(`[data-yearly-index="${index}"]`);
     if (yearlyEl) {
-      yearlyEl.innerText = `£${formatMoney((Number(source[index].amount || 0) * 12))}`;
+      yearlyEl.innerText = `£${formatMoney(Number(source[index].amount || 0) * 12)}`;
     }
   }
 
@@ -1435,7 +1419,7 @@ function addYearlyRecurringCost() {
 
 function runPlanner() {
   plannerState.holdingBalance = parseNum(document.getElementById("holdingBalanceInput")?.value);
-  plannerState.weeklyFunding = parseNum(document.getElementById("weeklyFundingInput")?.value);
+  plannerState.monthlyContribution = parseNum(document.getElementById("monthlyContributionInput")?.value);
   plannerState.minimumBuffer = parseNum(document.getElementById("minimumBufferInput")?.value);
 
   applyPaidScheduledDeductions();
@@ -1452,11 +1436,14 @@ function runPlanner() {
 loadPlannerData();
 
 document.getElementById("holdingBalanceInput").value = plannerState.holdingBalance;
-document.getElementById("weeklyFundingInput").value = plannerState.weeklyFunding;
+document.getElementById("monthlyContributionInput").value = plannerState.monthlyContribution || 0;
 document.getElementById("minimumBufferInput").value = plannerState.minimumBuffer;
 
 document.getElementById("holdingBalanceInput")?.addEventListener("input", updatePlannerTotals);
-document.getElementById("weeklyFundingInput")?.addEventListener("input", updatePlannerTotals);
+document.getElementById("monthlyContributionInput")?.addEventListener("input", (e) => {
+  plannerState.monthlyContribution = parseNum(e.target.value);
+  updatePlannerTotals();
+});
 document.getElementById("minimumBufferInput")?.addEventListener("input", updatePlannerTotals);
 
 document.getElementById("savePlannerBtn")?.addEventListener("click", () => {
@@ -1468,7 +1455,7 @@ document.getElementById("resetPlannerBtn")?.addEventListener("click", () => {
   resetPlannerData();
 
   document.getElementById("holdingBalanceInput").value = plannerState.holdingBalance;
-  document.getElementById("weeklyFundingInput").value = plannerState.weeklyFunding;
+  document.getElementById("monthlyContributionInput").value = plannerState.monthlyContribution;
   document.getElementById("minimumBufferInput").value = plannerState.minimumBuffer;
 
   const futureBody = document.getElementById("futureCostsBody");
@@ -1493,25 +1480,25 @@ document.getElementById("addScheduledBtn")?.addEventListener("click", addSchedul
 document.getElementById("addFutureBtn")?.addEventListener("click", addFutureCost);
 document.getElementById("addRecurringBtn")?.addEventListener("click", addRecurringCost);
 document.getElementById("addYearlyRecurringBtn")?.addEventListener("click", addYearlyRecurringCost);
-document.getElementById("addWeeklyBtn")?.addEventListener("click", () => {
-  const weekly = parseNum(document.getElementById("weeklyFundingInput")?.value);
 
-  // add to balance
-  plannerState.holdingBalance += weekly;
+document.getElementById("addMonthlyBtn")?.addEventListener("click", () => {
+  const monthlyContribution = parseNum(document.getElementById("monthlyContributionInput")?.value);
 
-  // update input field visually
-  document.getElementById("holdingBalanceInput").value = plannerState.holdingBalance;
+  if (monthlyContribution <= 0) return;
+
+  plannerState.holdingBalance += monthlyContribution;
+  document.getElementById("holdingBalanceInput").value = plannerState.holdingBalance.toFixed(2);
 
   savePlannerData();
   runPlanner();
 });
+
 document.getElementById("addCustomBtn")?.addEventListener("click", () => {
   const customAmount = parseNum(document.getElementById("customAddInput")?.value);
 
   if (customAmount <= 0) return;
 
   plannerState.holdingBalance += customAmount;
-
   document.getElementById("holdingBalanceInput").value = plannerState.holdingBalance.toFixed(2);
   document.getElementById("customAddInput").value = "";
 
