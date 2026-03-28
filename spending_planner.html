@@ -430,8 +430,7 @@ td {
     <div class="grid three-grid" style="margin-top:12px;">
       <button class="quick-btn" id="savePlannerBtn">Save Planner Data</button>
       <button class="quick-btn" id="resetPlannerBtn">Reset to Defaults</button>
-      <button class="add-btn" id="addScheduledBtn">Add Scheduled Bill</button>
-    </div>
+      </div>
   </section>
     <!-- ===================== SECTION: NEXT 3 BILLS ===================== -->
   <section class="section card">
@@ -440,27 +439,32 @@ td {
   </section>
 
   <!-- ===================== SECTION: EDITABLE SCHEDULED BILLS ===================== -->
-  <section class="section card">
-    <h2>Editable Scheduled Bills</h2>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Due Date</th>
-            <th>Planned</th>
-            <th>Paid?</th>
-            <th>Actual Paid</th>
-            <th>Included</th>
-            <th>Category</th>
-            <th>Notes</th>
-            <th>Delete</th>
-          </tr>
-        </thead>
-        <tbody id="scheduledBillsBody"></tbody>
-      </table>
-    </div>
-  </section>
+  <!-- ===================== SECTION: EDITABLE SCHEDULED BILLS ===================== -->
+<section class="section card">
+  <h2>Editable Scheduled Bills</h2>
+  <div class="grid two-grid" style="margin-bottom:12px;">
+    <button class="add-btn" id="addScheduledBtn">Add Scheduled Bill</button>
+    <div class="subv">Use this for confirmed bills with a proper due date, planned amount, and paid tracking.</div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Due Date</th>
+          <th>Planned</th>
+          <th>Paid?</th>
+          <th>Actual Paid</th>
+          <th>Included</th>
+          <th>Category</th>
+          <th>Notes</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody id="scheduledBillsBody"></tbody>
+    </table>
+  </div>
+</section>
 
   <!-- ===================== SECTION: EDITABLE FUTURE COSTS ===================== -->
   <section class="section card">
@@ -487,8 +491,32 @@ td {
       </table>
     </div>
   </section>
+  
+    <!-- ===================== SECTION: EDITABLE YEARLY RECURRING COSTS ===================== -->
+  <section class="section card">
+    <h2>Editable Yearly Recurring Costs</h2>
+    <div class="grid two-grid" style="margin-bottom:12px;">
+      <button class="add-btn" id="addYearlyRecurringBtn">Add Yearly Recurring Cost</button>
+      <div class="subv">Use this for fixed annual costs like TV subscription, PlayStation, car insurance, boiler service, or anything you know repeats yearly.</div>
+    </div>
 
-  <!-- ===================== SECTION: EDITABLE RECURRING COSTS ===================== -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Yearly Amount</th>
+            <th>Included</th>
+            <th>Category</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody id="yearlyRecurringCostsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+ <!-- ===================== SECTION: EDITABLE RECURRING COSTS ===================== -->
   <section class="section card">
     <h2>Editable Recurring Monthly Costs</h2>
     <div class="grid two-grid" style="margin-bottom:12px;">
@@ -601,10 +629,16 @@ const defaultRecurringCosts = [
   { id: "petrol", name: "Petrol", amount: 60, included: true, category: "Car" }
 ];
 
+const defaultYearlyRecurringCosts = [
+  { id: "tv_yearly", name: "TV Subscription", amount: 50, included: true, category: "Subscription" },
+  { id: "ps_yearly", name: "PlayStation Subscription", amount: 99.99, included: true, category: "Subscription" }
+];
+
 function getFreshDefaults() {
   const freshScheduled = JSON.parse(JSON.stringify(defaultScheduledBills));
   const freshFuture = JSON.parse(JSON.stringify(defaultFutureCosts));
   const freshRecurring = JSON.parse(JSON.stringify(defaultRecurringCosts));
+  const freshYearlyRecurring = JSON.parse(JSON.stringify(defaultYearlyRecurringCosts));
 
   freshFuture.forEach(item => {
     if (
@@ -622,7 +656,8 @@ function getFreshDefaults() {
     minimumBuffer: 1000,
     scheduledBills: freshScheduled,
     futureCosts: freshFuture,
-    recurringCosts: freshRecurring
+    recurringCosts: freshRecurring,
+    yearlyRecurringCosts: freshYearlyRecurring
   };
 }
 
@@ -690,7 +725,8 @@ function loadPlannerData() {
       ...parsed,
       scheduledBills: Array.isArray(parsed.scheduledBills) ? parsed.scheduledBills : JSON.parse(JSON.stringify(defaultScheduledBills)),
       futureCosts: Array.isArray(parsed.futureCosts) ? parsed.futureCosts : JSON.parse(JSON.stringify(defaultFutureCosts)),
-      recurringCosts: Array.isArray(parsed.recurringCosts) ? parsed.recurringCosts : JSON.parse(JSON.stringify(defaultRecurringCosts))
+      recurringCosts: Array.isArray(parsed.recurringCosts) ? parsed.recurringCosts : JSON.parse(JSON.stringify(defaultRecurringCosts)),
+      yearlyRecurringCosts: Array.isArray(parsed.yearlyRecurringCosts) ? parsed.yearlyRecurringCosts : JSON.parse(JSON.stringify(defaultYearlyRecurringCosts))
     };
   } catch (err) {
     console.error("Could not load planner data", err);
@@ -782,9 +818,16 @@ function renderRecurringCosts() {
     const yearly = Number(cost.amount || 0) * 12;
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${cost.name}</td>
+      <td>
+        <input class="table-input" type="text" value="${cost.name}" 
+          data-section="recurring" 
+          data-index="${index}" 
+          data-field="name">
+      </td>
       <td><input class="table-input" type="number" step="0.01" value="${cost.amount}" data-section="recurring" data-index="${index}" data-field="amount"></td>
-      <td>£${formatMoney(yearly)}</td>
+      <td>
+        <span class="recurring-yearly" data-yearly-index="${index}">£${formatMoney(yearly)}</span>
+      </td>
       <td>
         <div class="check-wrap">
           <input type="checkbox" ${cost.included ? "checked" : ""} data-section="recurring" data-index="${index}" data-field="included">
@@ -793,6 +836,49 @@ function renderRecurringCosts() {
       </td>
       <td><input class="table-input" type="text" value="${cost.category}" data-section="recurring" data-index="${index}" data-field="category"></td>
       <td><button class="delete-btn" data-delete-section="recurring" data-delete-index="${index}">Delete</button></td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function renderYearlyRecurringCosts() {
+  const body = document.getElementById("yearlyRecurringCostsBody");
+  if (!body) return;
+  body.innerHTML = "";
+
+  plannerState.yearlyRecurringCosts.forEach((cost, index) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>
+        <input class="table-input" type="text" value="${cost.name}" 
+          data-section="yearlyRecurring" 
+          data-index="${index}" 
+          data-field="name">
+      </td>
+      <td>
+        <input class="table-input" type="number" step="0.01" value="${cost.amount}" 
+          data-section="yearlyRecurring" 
+          data-index="${index}" 
+          data-field="amount">
+      </td>
+      <td>
+        <div class="check-wrap">
+          <input type="checkbox" ${cost.included ? "checked" : ""} 
+            data-section="yearlyRecurring" 
+            data-index="${index}" 
+            data-field="included">
+          <span>${cost.included ? "Yes" : "No"}</span>
+        </div>
+      </td>
+      <td>
+        <input class="table-input" type="text" value="${cost.category}" 
+          data-section="yearlyRecurring" 
+          data-index="${index}" 
+          data-field="category">
+      </td>
+      <td>
+        <button class="delete-btn" data-delete-section="yearlyRecurring" data-delete-index="${index}">Delete</button>
+      </td>
     `;
     body.appendChild(tr);
   });
@@ -874,11 +960,13 @@ function updatePlannerTotals() {
   const includedScheduled = plannerState.scheduledBills.filter(x => x.included);
   const includedFuture = plannerState.futureCosts.filter(x => x.included);
   const includedRecurring = plannerState.recurringCosts.filter(x => x.included);
+  const includedYearlyRecurring = plannerState.yearlyRecurringCosts.filter(x => x.included);
 
   const scheduledIncludedTotal = includedScheduled.reduce((sum, x) => sum + Number(x.amount || 0), 0);
   const futureIncludedTotal = includedFuture.reduce((sum, x) => sum + Number(x.amount || 0), 0);
   const recurringIncludedTotal = includedRecurring.reduce((sum, x) => sum + (Number(x.amount || 0) * 12), 0);
-  const includedGrandTotal = scheduledIncludedTotal + futureIncludedTotal + recurringIncludedTotal;
+  const yearlyRecurringTotal = includedYearlyRecurring.reduce((sum, x) => sum + Number(x.amount || 0), 0);
+  const includedGrandTotal = scheduledIncludedTotal + futureIncludedTotal + recurringIncludedTotal + yearlyRecurringTotal;
 
   const unpaidScheduledTotal = includedScheduled
     .filter(x => !x.paid)
@@ -908,6 +996,10 @@ function updatePlannerTotals() {
     categoryTotals[item.category] = (categoryTotals[item.category] || 0) + (Number(item.amount || 0) * 12);
   });
 
+  includedYearlyRecurring.forEach(item => {
+    categoryTotals[item.category] = (categoryTotals[item.category] || 0) + Number(item.amount || 0);
+  });
+
   const weeklyTarget = includedGrandTotal / 52;
   const monthlyTarget = includedGrandTotal / 12;
   const currentRateAnnual = plannerState.weeklyFunding * 52;
@@ -918,7 +1010,10 @@ function updatePlannerTotals() {
   setText("potBalanceMeta", `Minimum safe buffer: £${formatMoney0(plannerState.minimumBuffer)}`);
 
   setText("includedTotal", formatMoney(includedGrandTotal));
-  setText("includedTotalMeta", `${includedScheduled.length} scheduled • ${includedFuture.length} future • ${includedRecurring.length} recurring active`);
+  setText(
+    "includedTotalMeta",
+    `${includedScheduled.length} scheduled • ${includedFuture.length} future • ${includedRecurring.length} recurring • ${includedYearlyRecurring.length} yearly recurring active`
+  );
 
   setText("releasedSurplus", formatMoney(releasedSurplus));
   setText(
@@ -942,11 +1037,13 @@ function updatePlannerTotals() {
   setText("yearlyRecurring", `£${formatMoney(recurringIncludedTotal)}`);
   setText("yearlyFuture", `£${formatMoney(futureIncludedTotal)}`);
   setText("yearlyGrand", `£${formatMoney(includedGrandTotal)}`);
+  setText("yearlyRecurringYearly", `£${formatMoney(yearlyRecurringTotal)}`);
 
   const yearlyRows = [
     { name: "Scheduled Bills Included", yearly: scheduledIncludedTotal, notes: `Unpaid scheduled remaining: £${formatMoney(unpaidScheduledTotal)}` },
     { name: "Recurring Monthly Costs Included", yearly: recurringIncludedTotal, notes: "Monthly costs annualised" },
     { name: "Future Costs Included", yearly: futureIncludedTotal, notes: "Future items currently switched on" },
+    { name: "Recurring Yearly Costs Included", yearly: yearlyRecurringTotal, notes: "Fixed annual costs" },
     { name: "Released Surplus", yearly: releasedSurplus, notes: "From actual paid being lower than planned" },
     { name: "Full Included Total", yearly: includedGrandTotal, notes: "Active planner scenario" }
   ];
@@ -987,6 +1084,7 @@ function handleTableEdit(e) {
   if (section === "scheduled") source = plannerState.scheduledBills;
   if (section === "future") source = plannerState.futureCosts;
   if (section === "recurring") source = plannerState.recurringCosts;
+  if (section === "yearlyRecurring") source = plannerState.yearlyRecurringCosts;
   if (!source || !source[index]) return;
 
   if (field === "included" || field === "paid") {
@@ -1000,6 +1098,13 @@ function handleTableEdit(e) {
     source[index][field] = parseNum(target.value);
   } else {
     source[index][field] = target.value;
+  }
+
+  if (section === "recurring" && field === "amount") {
+    const yearlyEl = document.querySelector(`[data-yearly-index="${index}"]`);
+    if (yearlyEl) {
+      yearlyEl.innerText = `£${formatMoney((Number(source[index].amount || 0) * 12))}`;
+    }
   }
 
   savePlannerData();
@@ -1017,6 +1122,7 @@ function handleDelete(e) {
   if (section === "scheduled") plannerState.scheduledBills.splice(index, 1);
   if (section === "future") plannerState.futureCosts.splice(index, 1);
   if (section === "recurring") plannerState.recurringCosts.splice(index, 1);
+  if (section === "yearlyRecurring") plannerState.yearlyRecurringCosts.splice(index, 1);
 
   savePlannerData();
   runPlanner();
@@ -1084,6 +1190,18 @@ function addRecurringCost() {
   runPlanner();
 }
 
+function addYearlyRecurringCost() {
+  plannerState.yearlyRecurringCosts.push({
+    id: `yearlyRecurring_${Date.now()}`,
+    name: "New Yearly Cost",
+    amount: 0,
+    included: true,
+    category: "Other"
+  });
+  savePlannerData();
+  runPlanner();
+}
+
 function runPlanner() {
   plannerState.holdingBalance = parseNum(document.getElementById("holdingBalanceInput")?.value);
   plannerState.weeklyFunding = parseNum(document.getElementById("weeklyFundingInput")?.value);
@@ -1092,6 +1210,7 @@ function runPlanner() {
   renderScheduledBills();
   renderFutureCosts();
   renderRecurringCosts();
+  renderYearlyRecurringCosts();
   bindTableInputs();
   updatePlannerTotals();
 }
@@ -1139,6 +1258,7 @@ document.getElementById("resetPlannerBtn")?.addEventListener("click", () => {
 document.getElementById("addScheduledBtn")?.addEventListener("click", addScheduledBill);
 document.getElementById("addFutureBtn")?.addEventListener("click", addFutureCost);
 document.getElementById("addRecurringBtn")?.addEventListener("click", addRecurringCost);
+document.getElementById("addYearlyRecurringBtn")?.addEventListener("click", addYearlyRecurringCost);
 
 runPlanner();
 </script>
