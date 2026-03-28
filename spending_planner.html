@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Aurora Holding Pot Planner v3</title>
+
+<style>
+/* <!-- ===================== SECTION: ROOT / THEME ===================== --> */
+:root {
+  --bg: #071018;
+  --bg2: #0c1624;
+  --panel: rgba(15, 27, 43, 0.88);
+  --panel-2: rgba(10, 20, 34, 0.9);
+  --line: rgba(101, 225, 255, 0.16);
+  --cyan: #62f3ff;
+  --cyan-2: #1ad1ff;
+  --blue: #6ea8ff;
+  --green: #50ff8f;
+  --amber: #ffc857;
+  --red: #ff6b8a;
+  --text: #e9f4ff;
+  --muted: #96abc5;
+  --glow: 0 0 22px rgba(26, 209, 255, 0.22);
+  --radius: 18px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top right, rgba(26, 209, 255, 0.14), transparent 28%),
+    radial-gradient(circle at top left, rgba(110, 168, 255, 0.12), transparent 25%),
+    linear-gradient(180deg, var(--bg), #050b13 100%);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+body {
+  padding: 18px 14px 42px;
+}
+
+.wrap {
+  max-width: 1380px;
+  margin: 0 auto;
+}
+
+.hero {
+  background: linear-gradient(145deg, rgba(12, 22, 36, 0.95), rgba(6, 13, 23, 0.95));
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 18px;
+  box-shadow: var(--glow);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(98,243,255,0.08), transparent);
+  transform: translateX(-100%);
+  animation: scan 8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scan {
+  to { transform: translateX(100%); }
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.05;
+  letter-spacing: 0.3px;
+}
+
+h2, h3 {
+  margin: 0 0 10px;
+}
+
+.sub {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.section {
+  margin-top: 14px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+.hero-grid {
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  margin-top: 14px;
+}
+
+.two-grid {
+  grid-template-columns: repeat(2, minmax(0,1fr));
+}
+
+.three-grid {
+  grid-template-columns: repeat(3, minmax(0,1fr));
+}
+
+.four-grid {
+  grid-template-columns: repeat(4, minmax(0,1fr));
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.stat {
+  margin-top: 6px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.stat.small {
+  font-size: 22px;
+}
+
+.mini {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.mini .k {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.mini .v {
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.subv {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.input-box {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.input-box label {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+}
+
+.input-box input,
+.input-box select {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 15px;
+  outline: none;
+}
+
+.quick-btn,
+.delete-btn,
+.add-btn {
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.quick-btn:hover,
+.add-btn:hover {
+  border-color: rgba(98,243,255,0.45);
+  color: var(--cyan);
+}
+
+.delete-btn {
+  background: rgba(255,107,138,0.10);
+  border-color: rgba(255,107,138,0.22);
+  color: var(--red);
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 1080px;
+}
+
+th, td {
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  vertical-align: top;
+}
+
+th {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.table-input,
+.table-select {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  outline: none;
+}
+
+.check-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 80px;
+}
+
+.category-card {
+  background: linear-gradient(145deg, rgba(12, 24, 39, 0.96), rgba(7, 15, 25, 0.96));
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.category-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.good { color: var(--green); }
+.watch { color: var(--amber); }
+.risk { color: var(--red); }
+.neutral { color: var(--muted); }
+
+.next-bill-box {
+  background: linear-gradient(145deg, rgba(12, 24, 39, 0.96), rgba(7, 15, 25, 0.96));
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.next-bill-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.footer {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+@media (max-width: 920px) {
+  .hero-grid,
+  .two-grid,
+  .three-grid,
+  .four-grid {
+    grid-template-columns: 1fr;
+  }
+
+  h1 { font-size: 24px; }
+  .stat { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===================== SECTION: HERO ===================== -->
+  <section class="hero">
+    <h1>Aurora Holding Pot Planner v3</h1>
+    <div class="sub">Editable funding engine with paid tracking, actual bill values, released surplus, and IG ISA safety signal.</div>
+
+    <div class="grid hero-grid">
+      <div class="card">
+        <div class="stat-label">Holding Pot Balance</div>
+        <div class="stat">£<span id="potBalance">0.00</span></div>
+        <div class="subv" id="potBalanceMeta">Current saved amount</div>
+      </div>
+
+      <div class="card">
+        <div class="stat-label">Included Total</div>
+        <div class="stat">£<span id="includedTotal">0.00</span></div>
+        <div class="subv" id="includedTotalMeta">All active scheduled, future, recurring costs</div>
+      </div>
+
+      <div class="card">
+        <div class="stat-label">Released Surplus</div>
+        <div class="stat">£<span id="releasedSurplus">0.00</span></div>
+        <div class="subv" id="releasedSurplusMeta">From bills costing less than planned</div>
+      </div>
+
+      <div class="card">
+        <div class="stat-label">IG ISA Signal</div>
+        <div class="stat small" id="igSignal">--</div>
+        <div class="subv" id="igSignalMeta">Waiting for planner calculation</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SECTION: CONTROL STRIP ===================== -->
+  <section class="section card">
+    <h2>Funding Engine</h2>
+
+    <div class="grid four-grid">
+      <div class="mini">
+        <div class="k">Suggested Weekly Funding</div>
+        <div class="v" id="weeklyTarget">£0</div>
+        <div class="subv" id="weeklyTargetMeta">Based on active included costs</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Monthly Equivalent</div>
+        <div class="v" id="monthlyTarget">£0</div>
+        <div class="subv">Weekly target × 52 ÷ 12</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">At Current Rate</div>
+        <div class="v" id="currentRateAnnual">£0</div>
+        <div class="subv" id="currentRateMeta">Funding produced yearly from your weekly amount</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Surplus / Shortfall</div>
+        <div class="v" id="surplusShortfall">£0</div>
+        <div class="subv" id="surplusShortfallMeta">Vs active planner total</div>
+      </div>
+    </div>
+
+    <div class="grid three-grid" style="margin-top:12px;">
+      <div class="input-box">
+        <label for="holdingBalanceInput">Current Holding Pot Balance</label>
+        <input id="holdingBalanceInput" type="number" step="0.01" value="2020" />
+      </div>
+
+      <div class="input-box">
+        <label for="weeklyFundingInput">Current Weekly Contribution</label>
+        <input id="weeklyFundingInput" type="number" step="1" value="65" />
+      </div>
+
+      <div class="input-box">
+        <label for="minimumBufferInput">Minimum Safe Buffer</label>
+        <input id="minimumBufferInput" type="number" step="1" value="1000" />
+      </div>
+    </div>
+
+    <div class="grid three-grid" style="margin-top:12px;">
+      <button class="quick-btn" id="savePlannerBtn">Save Planner Data</button>
+      <button class="quick-btn" id="resetPlannerBtn">Reset to Defaults</button>
+      <button class="add-btn" id="addScheduledBtn">Add Scheduled Bill</button>
+    </div>
+  </section>
+    <!-- ===================== SECTION: NEXT 3 BILLS ===================== -->
+  <section class="section card">
+    <h2>Next 3 Bills</h2>
+    <div class="grid three-grid" id="nextBillsGrid"></div>
+  </section>
+
+  <!-- ===================== SECTION: EDITABLE SCHEDULED BILLS ===================== -->
+  <section class="section card">
+    <h2>Editable Scheduled Bills</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Due Date</th>
+            <th>Planned</th>
+            <th>Paid?</th>
+            <th>Actual Paid</th>
+            <th>Included</th>
+            <th>Category</th>
+            <th>Notes</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody id="scheduledBillsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================== SECTION: EDITABLE FUTURE COSTS ===================== -->
+  <section class="section card">
+    <h2>Editable Future Costs</h2>
+    <div class="grid two-grid" style="margin-bottom:12px;">
+      <button class="add-btn" id="addFutureBtn">Add Future Cost</button>
+      <div class="subv">Use this for things like next holiday, season ticket, or future dentist costs.</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Estimated Due</th>
+            <th>Amount</th>
+            <th>Included</th>
+            <th>Category</th>
+            <th>Notes</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody id="futureCostsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================== SECTION: EDITABLE RECURRING COSTS ===================== -->
+  <section class="section card">
+    <h2>Editable Recurring Monthly Costs</h2>
+    <div class="grid two-grid" style="margin-bottom:12px;">
+      <button class="add-btn" id="addRecurringBtn">Add Recurring Cost</button>
+      <div class="subv">Use this for monthly items like haircut, petrol, wash, or any repeat spending.</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Monthly Amount</th>
+            <th>Yearly Amount</th>
+            <th>Included</th>
+            <th>Category</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody id="recurringCostsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================== SECTION: CATEGORY BREAKDOWN ===================== -->
+  <section class="section card">
+    <h2>Category Breakdown</h2>
+    <div class="grid four-grid" id="categoryGrid"></div>
+  </section>
+
+  <!-- ===================== SECTION: YEARLY BREAKDOWN ===================== -->
+  <section class="section card">
+    <h2>Yearly Breakdown</h2>
+
+    <div class="grid four-grid">
+      <div class="mini">
+        <div class="k">Scheduled Included</div>
+        <div class="v" id="yearlyScheduled">£0</div>
+        <div class="subv">Active dated bills</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Recurring Included</div>
+        <div class="v" id="yearlyRecurring">£0</div>
+        <div class="subv">Monthly costs annualised</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Future Included</div>
+        <div class="v" id="yearlyFuture">£0</div>
+        <div class="subv">Future items switched on</div>
+      </div>
+
+      <div class="mini">
+        <div class="k">Grand Total View</div>
+        <div class="v" id="yearlyGrand">£0</div>
+        <div class="subv">Everything active in planner</div>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:12px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Section</th>
+            <th>Total</th>
+            <th>Weekly</th>
+            <th>Monthly</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="yearlyTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="footer">
+    Aurora Holding Pot Planner v3 • Paid Tracking + Actual Costs + Released Surplus + IG ISA Signal
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "aurora_holding_planner_v3";
+
+const defaultScheduledBills = [
+  { id: "liverpool", name: "Liverpool Trip", due: "2026-05-31", amount: 350, paid: false, actualPaid: 0, included: true, category: "Travel", notes: "End of May" },
+  { id: "tooth", name: "Tooth Extraction Balance", due: "2026-06-16", amount: 120, paid: false, actualPaid: 0, included: true, category: "Dentist", notes: "Confirmed" },
+  { id: "hygienist", name: "Hygienist", due: "2026-07-10", amount: 50, paid: false, actualPaid: 0, included: true, category: "Dentist", notes: "Confirmed" },
+  { id: "carrepairs", name: "Car Repairs", due: "2026-08-15", amount: 400, paid: false, actualPaid: 0, included: true, category: "Car", notes: "Editable placeholder" },
+  { id: "carservice", name: "Car Service", due: "2026-09-15", amount: 300, paid: false, actualPaid: 0, included: true, category: "Car", notes: "Editable estimate" },
+  { id: "insurance", name: "Car Insurance", due: "2026-10-01", amount: 240, paid: false, actualPaid: 0, included: true, category: "Car", notes: "Editable estimate" },
+  { id: "ps", name: "PlayStation Subscription", due: "2026-11-14", amount: 99.99, paid: false, actualPaid: 0, included: true, category: "Subscription", notes: "Annual renewal" },
+  { id: "christmas", name: "Christmas", due: "2026-12-01", amount: 500, paid: false, actualPaid: 0, included: true, category: "Seasonal", notes: "Planned target" },
+  { id: "mot", name: "MOT", due: "2027-01-31", amount: 60, paid: false, actualPaid: 0, included: true, category: "Car", notes: "Editable estimate" },
+  { id: "boiler", name: "Boiler Service", due: "2027-01-31", amount: 90, paid: false, actualPaid: 0, included: true, category: "Home", notes: "End of January / early February" },
+  { id: "tvsub", name: "TV Subscription", due: "2027-03-15", amount: 50, paid: false, actualPaid: 0, included: true, category: "Subscription", notes: "Annual subscription" }
+];
+
+const defaultFutureCosts = [
+  { id: "dent1", name: "Dentist Treatment 1", due: "", amount: 550, included: false, category: "Dentist", notes: "No due date agreed yet" },
+  { id: "dent2", name: "Dentist Treatment 2", due: "", amount: 300, included: false, category: "Dentist", notes: "No due date agreed yet" },
+  { id: "ticket", name: "Coventry Season Ticket", due: "2027-05-01", amount: 750, included: false, category: "Football", notes: "May 2027 estimate only" },
+  { id: "marchholiday", name: "March Holiday", due: "2027-03-01", amount: 400, included: false, category: "Holiday", notes: "Five-day holiday not confirmed yet" },
+  { id: "marchspend", name: "March Holiday Spending Money", due: "2027-03-01", amount: 150, included: false, category: "Holiday", notes: "Editable later if needed" }
+];
+
+const defaultRecurringCosts = [
+  { id: "haircut", name: "Haircut", amount: 21, included: true, category: "Lifestyle" },
+  { id: "carwash", name: "Car Wash", amount: 20, included: true, category: "Car" },
+  { id: "petrol", name: "Petrol", amount: 60, included: true, category: "Car" }
+];
+function getFreshDefaults() {
+  const freshScheduled = JSON.parse(JSON.stringify(defaultScheduledBills));
+  const freshFuture = JSON.parse(JSON.stringify(defaultFutureCosts));
+  const freshRecurring = JSON.parse(JSON.stringify(defaultRecurringCosts));
+
+  // Hard-force dentist future dates blank
+  freshFuture.forEach(item => {
+    if (
+      item.id === "dent1" ||
+      item.id === "dent2" ||
+      String(item.name || "").toLowerCase().includes("dentist")
+    ) {
+      item.due = "";
+    }
+  });
+
+  return {
+    holdingBalance: 2020,
+    weeklyFunding: 65,
+    minimumBuffer: 1000,
+    scheduledBills: freshScheduled,
+    futureCosts: freshFuture,
+    recurringCosts: freshRecurring
+  };
+}
+
+let plannerState = getFreshDefaults();
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.innerText = value;
+}
+
+function formatMoney(v) {
+  return Number(v || 0).toLocaleString("en-GB", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function formatMoney0(v) {
+  return Number(v || 0).toLocaleString("en-GB", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  });
+}
+
+function parseNum(v) {
+  const n = parseFloat(String(v ?? "").replace(/[^0-9.-]/g, ""));
+  return Number.isFinite(n) ? n : 0;
+}
+
+function dateLabel(dateStr) {
+  if (!dateStr) return "No date yet";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "No date yet";
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const then = new Date(dateStr);
+  if (isNaN(then.getTime())) return null;
+  return Math.ceil((then - today) / (1000 * 60 * 60 * 24));
+}
+
+function weeklyFromYearly(v) {
+  return v / 52;
+}
+
+function monthlyFromYearly(v) {
+  return v / 12;
+}
+
+function savePlannerData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(plannerState));
+}
+
+function loadPlannerData() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) return;
+  try {
+    plannerState = JSON.parse(saved);
+  } catch (err) {
+    console.error("Could not load planner data", err);
+  }
+}
+
+function resetPlannerData() {
+  localStorage.removeItem(STORAGE_KEY);
+  plannerState = getFreshDefaults();
+}
+
+function renderScheduledBills() {
+  const body = document.getElementById("scheduledBillsBody");
+  if (!body) return;
+  body.innerHTML = "";
+
+  plannerState.scheduledBills.forEach((bill, index) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${bill.name}</td>
+      <td><input class="table-input" type="date" value="${bill.due || ""}" data-section="scheduled" data-index="${index}" data-field="due"></td>
+      <td><input class="table-input" type="number" step="0.01" value="${bill.amount}" data-section="scheduled" data-index="${index}" data-field="amount"></td>
+      <td>
+        <div class="check-wrap">
+          <input type="checkbox" ${bill.paid ? "checked" : ""} data-section="scheduled" data-index="${index}" data-field="paid">
+          <span>${bill.paid ? "Yes" : "No"}</span>
+        </div>
+      </td>
+      <td><input class="table-input" type="number" step="0.01" value="${bill.actualPaid || 0}" data-section="scheduled" data-index="${index}" data-field="actualPaid"></td>
+      <td>
+        <div class="check-wrap">
+          <input type="checkbox" ${bill.included ? "checked" : ""} data-section="scheduled" data-index="${index}" data-field="included">
+          <span>${bill.included ? "Yes" : "No"}</span>
+        </div>
+      </td>
+      <td><input class="table-input" type="text" value="${bill.category}" data-section="scheduled" data-index="${index}" data-field="category"></td>
+      <td><input class="table-input" type="text" value="${bill.notes || ""}" data-section="scheduled" data-index="${index}" data-field="notes"></td>
+      <td><button class="delete-btn" data-delete-section="scheduled" data-delete-index="${index}">Delete</button></td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function renderFutureCosts() {
+  const body = document.getElementById("futureCostsBody");
+  if (!body) return;
+  body.innerHTML = "";
+
+  plannerState.futureCosts.forEach((bill, index) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><input class="table-input" type="text" value="${bill.name || ""}" data-section="future" data-index="${index}" data-field="name"></td>
+      <td><input class="table-input" type="date" value="${bill.due || ""}" data-section="future" data-index="${index}" data-field="due"></td>
+      <td><input class="table-input" type="number" step="0.01" value="${bill.amount}" data-section="future" data-index="${index}" data-field="amount"></td>
+      <td>
+        <div class="check-wrap">
+          <input type="checkbox" ${bill.included ? "checked" : ""} data-section="future" data-index="${index}" data-field="included">
+          <span>${bill.included ? "Yes" : "No"}</span>
+        </div>
+      </td>
+      <td><input class="table-input" type="text" value="${bill.category || ""}" data-section="future" data-index="${index}" data-field="category"></td>
+      <td><input class="table-input" type="text" value="${bill.notes || ""}" data-section="future" data-index="${index}" data-field="notes"></td>
+      <td><button class="delete-btn" data-delete-section="future" data-delete-index="${index}">Delete</button></td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function renderRecurringCosts() {
+  const body = document.getElementById("recurringCostsBody");
+  if (!body) return;
+  body.innerHTML = "";
+
+  plannerState.recurringCosts.forEach((cost, index) => {
+    const yearly = Number(cost.amount || 0) * 12;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${cost.name}</td>
+      <td><input class="table-input" type="number" step="0.01" value="${cost.amount}" data-section="recurring" data-index="${index}" data-field="amount"></td>
+      <td>£${formatMoney(yearly)}</td>
+      <td>
+        <div class="check-wrap">
+          <input type="checkbox" ${cost.included ? "checked" : ""} data-section="recurring" data-index="${index}" data-field="included">
+          <span>${cost.included ? "Yes" : "No"}</span>
+        </div>
+      </td>
+      <td><input class="table-input" type="text" value="${cost.category}" data-section="recurring" data-index="${index}" data-field="category"></td>
+      <td><button class="delete-btn" data-delete-section="recurring" data-delete-index="${index}">Delete</button></td>
+    `;
+    body.appendChild(tr);
+  });
+}
+function renderNextBills(bills) {
+  const grid = document.getElementById("nextBillsGrid");
+  if (!grid) return;
+  grid.innerHTML = "";
+
+  const next3 = [...bills]
+    .filter(x => x.included && !x.paid && x.due)
+    .sort((a, b) => new Date(a.due) - new Date(b.due))
+    .slice(0, 3);
+
+  if (!next3.length) {
+    const card = document.createElement("div");
+    card.className = "next-bill-box";
+    card.innerHTML = `<div class="next-bill-title">No upcoming unpaid bills</div><div class="subv">Everything currently included is either paid, undated, or switched off.</div>`;
+    grid.appendChild(card);
+    return;
+  }
+
+  next3.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "next-bill-box";
+    const left = daysUntil(item.due);
+    card.innerHTML = `
+      <div class="next-bill-title">${item.name}</div>
+      <div class="subv">${dateLabel(item.due)} • £${formatMoney(item.amount)} • ${item.category}</div>
+      <div class="subv">${left == null ? "--" : `${left} days left`}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function renderCategoryBreakdown(categoryTotals) {
+  const grid = document.getElementById("categoryGrid");
+  if (!grid) return;
+  grid.innerHTML = "";
+
+  Object.entries(categoryTotals)
+    .sort((a, b) => b[1] - a[1])
+    .forEach(([name, total]) => {
+      const card = document.createElement("div");
+      card.className = "category-card";
+      card.innerHTML = `
+        <div class="category-title">${name}</div>
+        <div class="stat small">£${formatMoney(total)}</div>
+        <div class="subv">£${formatMoney(weeklyFromYearly(total))}/week • £${formatMoney(monthlyFromYearly(total))}/month</div>
+      `;
+      grid.appendChild(card);
+    });
+}
+
+function renderYearlyTable(rows) {
+  const body = document.getElementById("yearlyTableBody");
+  if (!body) return;
+  body.innerHTML = "";
+
+  rows.forEach(row => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${row.name}</td>
+      <td>£${formatMoney(row.yearly)}</td>
+      <td>£${formatMoney(weeklyFromYearly(row.yearly))}</td>
+      <td>£${formatMoney(monthlyFromYearly(row.yearly))}</td>
+      <td>${row.notes}</td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function handleTableEdit(e) {
+  const target = e.target;
+  const section = target.dataset.section;
+  const index = Number(target.dataset.index);
+  const field = target.dataset.field;
+
+  if (!Number.isFinite(index) || !section || !field) return;
+
+  let source = null;
+  if (section === "scheduled") source = plannerState.scheduledBills;
+  if (section === "future") source = plannerState.futureCosts;
+  if (section === "recurring") source = plannerState.recurringCosts;
+  if (!source || !source[index]) return;
+
+  if (field === "included" || field === "paid") {
+    source[index][field] = target.checked;
+  } else if (field === "amount" || field === "actualPaid") {
+    source[index][field] = parseNum(target.value);
+  } else {
+    source[index][field] = target.value;
+  }
+
+  savePlannerData();
+  runPlanner();
+}
+
+function handleDelete(e) {
+  const btn = e.target.closest(".delete-btn");
+  if (!btn) return;
+
+  const section = btn.dataset.deleteSection;
+  const index = Number(btn.dataset.deleteIndex);
+  if (!Number.isFinite(index)) return;
+
+  if (section === "scheduled") plannerState.scheduledBills.splice(index, 1);
+  if (section === "future") plannerState.futureCosts.splice(index, 1);
+  if (section === "recurring") plannerState.recurringCosts.splice(index, 1);
+
+  savePlannerData();
+  runPlanner();
+}
+
+function bindTableInputs() {
+  document.querySelectorAll("[data-section]").forEach(el => {
+    el.addEventListener("input", handleTableEdit);
+    el.addEventListener("change", handleTableEdit);
+  });
+
+  document.querySelectorAll(".delete-btn").forEach(btn => {
+    btn.addEventListener("click", handleDelete);
+  });
+}
+
+function addScheduledBill() {
+  plannerState.scheduledBills.push({
+    id: `scheduled_${Date.now()}`,
+    name: "New Scheduled Bill",
+    due: "",
+    amount: 0,
+    paid: false,
+    actualPaid: 0,
+    included: true,
+    category: "Other",
+    notes: ""
+  });
+  savePlannerData();
+  runPlanner();
+}
+
+function addFutureCost() {
+  plannerState.futureCosts.push({
+    id: `future_${Date.now()}`,
+    name: "New Future Cost",
+    due: "",
+    amount: 0,
+    included: false,
+    category: "Other",
+    notes: ""
+  });
+  savePlannerData();
+  runPlanner();
+}
+
+function addRecurringCost() {
+  plannerState.recurringCosts.push({
+    id: `recurring_${Date.now()}`,
+    name: "New Recurring Cost",
+    amount: 0,
+    included: true,
+    category: "Other"
+  });
+  savePlannerData();
+  runPlanner();
+}
+
+function runPlanner() {
+  plannerState.holdingBalance = parseNum(document.getElementById("holdingBalanceInput")?.value);
+  plannerState.weeklyFunding = parseNum(document.getElementById("weeklyFundingInput")?.value);
+  plannerState.minimumBuffer = parseNum(document.getElementById("minimumBufferInput")?.value);
+
+  renderScheduledBills();
+  renderFutureCosts();
+  renderRecurringCosts();
+  bindTableInputs();
+
+  const includedScheduled = plannerState.scheduledBills.filter(x => x.included);
+  const includedFuture = plannerState.futureCosts.filter(x => x.included);
+  const includedRecurring = plannerState.recurringCosts.filter(x => x.included);
+
+  const scheduledIncludedTotal = includedScheduled.reduce((sum, x) => sum + Number(x.amount || 0), 0);
+  const futureIncludedTotal = includedFuture.reduce((sum, x) => sum + Number(x.amount || 0), 0);
+  const recurringIncludedTotal = includedRecurring.reduce((sum, x) => sum + (Number(x.amount || 0) * 12), 0);
+  const includedGrandTotal = scheduledIncludedTotal + futureIncludedTotal + recurringIncludedTotal;
+
+  const unpaidScheduledTotal = includedScheduled
+    .filter(x => !x.paid)
+    .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
+  const actualPaidScheduledTotal = includedScheduled
+    .filter(x => x.paid)
+    .reduce((sum, x) => sum + Number(x.actualPaid || 0), 0);
+
+  const plannedPaidScheduledTotal = includedScheduled
+    .filter(x => x.paid)
+    .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
+  const releasedSurplus = Math.max(0, plannedPaidScheduledTotal - actualPaidScheduledTotal);
+
+  const categoryTotals = {};
+
+  includedScheduled.forEach(item => {
+    categoryTotals[item.category] = (categoryTotals[item.category] || 0) + Number(item.amount || 0);
+  });
+
+  includedFuture.forEach(item => {
+    categoryTotals[item.category] = (categoryTotals[item.category] || 0) + Number(item.amount || 0);
+  });
+
+  includedRecurring.forEach(item => {
+    categoryTotals[item.category] = (categoryTotals[item.category] || 0) + (Number(item.amount || 0) * 12);
+  });
+
+  const weeklyTarget = includedGrandTotal / 52;
+  const monthlyTarget = includedGrandTotal / 12;
+  const currentRateAnnual = plannerState.weeklyFunding * 52;
+  const surplusShortfall = currentRateAnnual - includedGrandTotal;
+  const safeHeadroom = plannerState.holdingBalance - plannerState.minimumBuffer;
+
+  setText("potBalance", formatMoney(plannerState.holdingBalance));
+  setText("potBalanceMeta", `Minimum safe buffer: £${formatMoney0(plannerState.minimumBuffer)}`);
+
+  setText("includedTotal", formatMoney(includedGrandTotal));
+  setText("includedTotalMeta", `${includedScheduled.length} scheduled • ${includedFuture.length} future • ${includedRecurring.length} recurring active`);
+
+  setText("releasedSurplus", formatMoney(releasedSurplus));
+  setText(
+    "releasedSurplusMeta",
+    releasedSurplus > 0
+      ? `Planned paid bills were £${formatMoney(plannedPaidScheduledTotal)} but actual paid was £${formatMoney(actualPaidScheduledTotal)}`
+      : "No surplus released from paid bills yet"
+  );
+
+  setText("weeklyTarget", `£${formatMoney0(weeklyTarget)}`);
+  setText("weeklyTargetMeta", `Based on £${formatMoney(includedGrandTotal)} included yearly costs`);
+
+  setText("monthlyTarget", `£${formatMoney(monthlyTarget)}`);
+  setText("currentRateAnnual", `£${formatMoney(currentRateAnnual)}`);
+  setText("currentRateMeta", `From £${formatMoney0(plannerState.weeklyFunding)}/week`);
+
+  setText("surplusShortfall", `${surplusShortfall >= 0 ? "+" : "-"}£${formatMoney(Math.abs(surplusShortfall))}`);
+  setText("surplusShortfallMeta", surplusShortfall >= 0 ? "Funding ahead of target" : "Funding below target");
+
+  setText("yearlyScheduled", `£${formatMoney(scheduledIncludedTotal)}`);
+  setText("yearlyRecurring", `£${formatMoney(recurringIncludedTotal)}`);
+  setText("yearlyFuture", `£${formatMoney(futureIncludedTotal)}`);
+  setText("yearlyGrand", `£${formatMoney(includedGrandTotal)}`);
+
+  const yearlyRows = [
+    { name: "Scheduled Bills Included", yearly: scheduledIncludedTotal, notes: `Unpaid scheduled remaining: £${formatMoney(unpaidScheduledTotal)}` },
+    { name: "Recurring Monthly Costs Included", yearly: recurringIncludedTotal, notes: "Monthly costs annualised" },
+    { name: "Future Costs Included", yearly: futureIncludedTotal, notes: "Future items currently switched on" },
+    { name: "Released Surplus", yearly: releasedSurplus, notes: "From actual paid being lower than planned" },
+    { name: "Full Included Total", yearly: includedGrandTotal, notes: "Active planner scenario" }
+  ];
+
+  renderYearlyTable(yearlyRows);
+  renderCategoryBreakdown(categoryTotals);
+  renderNextBills(plannerState.scheduledBills);
+
+  let igSignal = "Hold";
+  let igMeta = "Keep surplus in holding pot for now.";
+
+  if (releasedSurplus > 0 && plannerState.holdingBalance - releasedSurplus >= plannerState.minimumBuffer && safeHeadroom >= unpaidScheduledTotal) {
+    igSignal = "Move Surplus";
+    igMeta = `Safe to move up to £${formatMoney(releasedSurplus)} to IG ISA if you want.`;
+  } else if (plannerState.holdingBalance >= (unpaidScheduledTotal + plannerState.minimumBuffer) && surplusShortfall >= 0) {
+    igSignal = "Balanced";
+    igMeta = "Holding pot is covering unpaid bills and minimum buffer.";
+  } else if (safeHeadroom < unpaidScheduledTotal || surplusShortfall < 0) {
+    igSignal = "Protect Pot";
+    igMeta = "Do not skim to IG yet — holding pot still needs support.";
+  }
+
+  setText("igSignal", igSignal);
+  setText("igSignalMeta", igMeta);
+
+  savePlannerData();
+}
+
+loadPlannerData();
+
+document.getElementById("holdingBalanceInput").value = plannerState.holdingBalance;
+document.getElementById("weeklyFundingInput").value = plannerState.weeklyFunding;
+document.getElementById("minimumBufferInput").value = plannerState.minimumBuffer;
+
+document.getElementById("holdingBalanceInput")?.addEventListener("input", runPlanner);
+document.getElementById("weeklyFundingInput")?.addEventListener("input", runPlanner);
+document.getElementById("minimumBufferInput")?.addEventListener("input", runPlanner);
+
+document.getElementById("savePlannerBtn")?.addEventListener("click", () => {
+  savePlannerData();
+  runPlanner();
+});
+
+document.getElementById("resetPlannerBtn")?.addEventListener("click", () => {
+  resetPlannerData();
+
+  document.getElementById("holdingBalanceInput").value = plannerState.holdingBalance;
+  document.getElementById("weeklyFundingInput").value = plannerState.weeklyFunding;
+  document.getElementById("minimumBufferInput").value = plannerState.minimumBuffer;
+
+  // force fresh save + fresh render after reset
+  savePlannerData();
+  renderFutureCosts();
+  runPlanner();
+});
+
+document.getElementById("addScheduledBtn")?.addEventListener("click", addScheduledBill);
+document.getElementById("addFutureBtn")?.addEventListener("click", addFutureCost);
+document.getElementById("addRecurringBtn")?.addEventListener("click", addRecurringCost);
+
+runPlanner();
+</script>
+</body>
+</html>
