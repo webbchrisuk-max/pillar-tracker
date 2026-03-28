@@ -310,17 +310,39 @@ th {
   h1 { font-size: 24px; }
   .stat { font-size: 24px; }
 }
-/* ===================== FIX: SCHEDULED BILL COLUMN WIDTHS ===================== */
-table {
+/* ===================== 🔥 REAL FIX: iOS DATE INPUT OVERFLOW ===================== */
+
+/* force all inputs to stay inside their cell */
+.table-input {
   width: 100%;
-  border-collapse: collapse;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* specifically fix iOS date input */
+input[type="date"] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   font-size: 13px;
-  min-width: 980px;
+  padding: 8px 6px;
+}
+
+/* force table columns to respect width */
+table {
   table-layout: fixed;
 }
 
-/* rest of the fix... */
+/* stop cells from expanding beyond limits */
+td {
+  overflow: hidden;
+}
 
+/* give planned field breathing room */
+#scheduledBillsBody td:nth-child(3) input {
+  margin-left: 6px;
+}
 </style>
 </head>
 <body>
