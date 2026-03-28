@@ -517,78 +517,93 @@ thead th:nth-child(9) {
 
   <!-- ===================== SECTION: CONTROL STRIP ===================== -->
   <section class="section card">
-    <h2>Funding Engine</h2>
+  <h2>Funding Engine</h2>
 
-    <div class="grid four-grid">
-      <div class="mini">
-        <div class="k">Suggested Weekly Funding</div>
-        <div class="v" id="weeklyTarget">£0</div>
-        <div class="subv" id="weeklyTargetMeta">Based on active included costs</div>
-      </div>
-
-      <div class="mini">
-        <div class="k">Monthly Equivalent</div>
-        <div class="v" id="monthlyTarget">£0</div>
-        <div class="subv">Weekly target × 52 ÷ 12</div>
-      </div>
-
-      <div class="mini">
-        <div class="k">At Current Rate</div>
-        <div class="v" id="currentRateAnnual">£0</div>
-        <div class="subv" id="currentRateMeta">Funding produced yearly from your weekly amount</div>
-      </div>
-
-      <div class="mini">
-        <div class="k">Surplus / Shortfall</div>
-        <div class="v" id="surplusShortfall">£0</div>
-        <div class="subv" id="surplusShortfallMeta">Vs active planner total</div>
-      </div>
+  <div class="grid four-grid">
+    <div class="mini">
+      <div class="k">Suggested Weekly Funding</div>
+      <div class="v" id="weeklyTarget">£0</div>
+      <div class="subv" id="weeklyTargetMeta">Based on active included costs</div>
     </div>
 
-    <div class="grid three-grid" style="margin-top:12px;">
+    <div class="mini">
+      <div class="k">Monthly Equivalent</div>
+      <div class="v" id="monthlyTarget">£0</div>
+      <div class="subv">Weekly target × 52 ÷ 12</div>
+    </div>
 
-  <div class="input-box">
-    <label for="holdingBalanceInput">Current Holding Pot Balance</label>
-    <input id="holdingBalanceInput" type="number" step="0.01" value="2020" />
+    <div class="mini">
+      <div class="k">At Current Rate</div>
+      <div class="v" id="currentRateAnnual">£0</div>
+      <div class="subv" id="currentRateMeta">Funding produced yearly from your weekly amount</div>
+    </div>
+
+    <div class="mini">
+      <div class="k">Surplus / Shortfall</div>
+      <div class="v" id="surplusShortfall">£0</div>
+      <div class="subv" id="surplusShortfallMeta">Vs active planner total</div>
+    </div>
   </div>
 
-  <!-- ✅ PAYDAY INPUT + BUTTON GROUPED -->
-  <div class="input-box">
-    <label for="paydayContributionInput">Current Payday Contribution</label>
-    <input id="paydayContributionInput" type="number" step="1" value="140" />
+  <div class="grid three-grid" style="margin-top:12px;">
 
-    <button class="add-btn" id="addPaydayBtn" style="margin-top:8px; width:100%;">
-      + Add Payday Contribution
-    </button>
+    <div class="input-box">
+      <label for="holdingBalanceInput">Current Holding Pot Balance</label>
+      <input id="holdingBalanceInput" type="number" step="0.01" value="2020" />
+    </div>
+
+    <div class="input-box">
+      <label for="paydayContributionInput">Current Payday Contribution</label>
+      <input id="paydayContributionInput" type="number" step="1" value="140" />
+
+      <button class="add-btn" id="addPaydayBtn" style="margin-top:8px; width:100%;">
+        + Add Payday Contribution
+      </button>
+    </div>
+
+    <div class="input-box">
+      <label for="customAddInput">Custom Amount To Add</label>
+      <input id="customAddInput" type="number" step="0.01" placeholder="Enter amount" />
+
+      <button class="quick-btn" id="addCustomBtn" style="margin-top:8px; width:100%;">
+        + Add Custom Amount
+      </button>
+    </div>
+
+    <div class="input-box">
+      <label for="minimumBufferInput">Minimum Safe Buffer</label>
+      <input id="minimumBufferInput" type="number" step="1" value="1000" />
+    </div>
+
   </div>
 
-  <!-- ✅ CUSTOM INPUT + BUTTON -->
-  <div class="input-box">
-    <label for="customAddInput">Custom Amount To Add</label>
-    <input id="customAddInput" type="number" step="0.01" placeholder="Enter amount" />
-
-    <button class="quick-btn" id="addCustomBtn" style="margin-top:8px; width:100%;">
-      + Add Custom Amount
-    </button>
+  <div class="grid two-grid" style="margin-top:12px;">
+    <button class="quick-btn" id="savePlannerBtn">Save Planner Data</button>
+    <button class="quick-btn" id="resetPlannerBtn">Reset to Defaults</button>
   </div>
 
-  <div class="input-box">
-    <label for="minimumBufferInput">Minimum Safe Buffer</label>
-    <input id="minimumBufferInput" type="number" step="1" value="1000" />
+  <div class="grid two-grid" style="margin-top:12px;">
+    <button class="quick-btn" id="exportBackupBtn">Export Backup JSON</button>
+    <button class="quick-btn" id="importBackupBtn">Import Backup JSON</button>
   </div>
 
-</div>
+  <div class="subv" id="backupStatus" style="margin-top:10px;">
+    No backup exported this session
+  </div>
 
-<!-- ✅ CLEANED BUTTON ROW -->
-<div class="grid two-grid" style="margin-top:12px;">
-  <button class="quick-btn" id="savePlannerBtn">Save Planner Data</button>
-  <button class="quick-btn" id="resetPlannerBtn">Reset to Defaults</button>
-</div>
-    <!-- ===================== SECTION: NEXT 3 BILLS ===================== -->
-  <section class="section card">
-    <h2>Next 3 Bills</h2>
-    <div class="grid three-grid" id="nextBillsGrid"></div>
-  </section>
+  <input
+    id="importBackupFile"
+    type="file"
+    accept=".json,application/json"
+    style="display:none;"
+  />
+</section>
+
+<!-- ===================== SECTION: NEXT 3 BILLS ===================== -->
+<section class="section card">
+  <h2>Next 3 Bills</h2>
+  <div class="grid three-grid" id="nextBillsGrid"></div>
+</section>
 
   <!-- ===================== SECTION: EDITABLE SCHEDULED BILLS ===================== -->
   <!-- ===================== SECTION: EDITABLE SCHEDULED BILLS ===================== -->
@@ -865,6 +880,95 @@ function monthlyFromYearly(v) {
 
 function savePlannerData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(plannerState));
+}
+function exportPlannerBackup() {
+  try {
+    const backupData = {
+      exportedAt: new Date().toISOString(),
+      version: "aurora_holding_planner_v3",
+      plannerState
+    };
+
+    const blob = new Blob(
+      [JSON.stringify(backupData, null, 2)],
+      { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+
+    a.href = url;
+    a.download = `aurora-planner-backup-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    setText("backupStatus", `Backup exported: ${new Date().toLocaleString("en-GB")}`);
+  } catch (err) {
+    console.error("Export failed", err);
+    setText("backupStatus", "Backup export failed");
+  }
+}
+
+function importPlannerBackupFromFile(file) {
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function (e) {
+    try {
+      const parsed = JSON.parse(e.target.result);
+
+      const importedState = parsed?.plannerState ? parsed.plannerState : parsed;
+
+      if (!importedState || typeof importedState !== "object") {
+        throw new Error("Invalid backup format");
+      }
+
+      plannerState = {
+        ...getFreshDefaults(),
+        ...importedState,
+        paydayContribution: Number.isFinite(Number(importedState.paydayContribution))
+          ? Number(importedState.paydayContribution)
+          : Number(importedState.monthlyContribution || getFreshDefaults().paydayContribution),
+        scheduledBills: Array.isArray(importedState.scheduledBills)
+          ? importedState.scheduledBills.map(bill => ({
+              deducted: false,
+              ...bill
+            }))
+          : JSON.parse(JSON.stringify(defaultScheduledBills)),
+        futureCosts: Array.isArray(importedState.futureCosts)
+          ? importedState.futureCosts
+          : JSON.parse(JSON.stringify(defaultFutureCosts)),
+        recurringCosts: Array.isArray(importedState.recurringCosts)
+          ? importedState.recurringCosts
+          : JSON.parse(JSON.stringify(defaultRecurringCosts)),
+        yearlyRecurringCosts: Array.isArray(importedState.yearlyRecurringCosts)
+          ? importedState.yearlyRecurringCosts
+          : JSON.parse(JSON.stringify(defaultYearlyRecurringCosts))
+      };
+
+      const holdingEl = document.getElementById("holdingBalanceInput");
+      const contributionEl = getContributionInputEl();
+      const bufferEl = document.getElementById("minimumBufferInput");
+
+      if (holdingEl) holdingEl.value = plannerState.holdingBalance;
+      if (contributionEl) contributionEl.value = plannerState.paydayContribution;
+      if (bufferEl) bufferEl.value = plannerState.minimumBuffer;
+
+      savePlannerData();
+      runPlanner();
+
+      setText("backupStatus", `Backup imported: ${new Date().toLocaleString("en-GB")}`);
+    } catch (err) {
+      console.error("Import failed", err);
+      setText("backupStatus", "Import failed - invalid backup file");
+    }
+  };
+
+  reader.readAsText(file);
 }
 
 function loadPlannerData() {
@@ -1517,6 +1621,20 @@ getContributionButton()?.addEventListener("click", () => {
 
   savePlannerData();
   runPlanner();
+});
+
+document.getElementById("exportBackupBtn")?.addEventListener("click", exportPlannerBackup);
+
+document.getElementById("importBackupBtn")?.addEventListener("click", () => {
+  document.getElementById("importBackupFile")?.click();
+});
+
+document.getElementById("importBackupFile")?.addEventListener("change", (e) => {
+  const file = e.target.files?.[0];
+  importPlannerBackupFromFile(file);
+
+  // reset input so same file can be imported again later
+  e.target.value = "";
 });
 
 document.getElementById("addCustomBtn")?.addEventListener("click", () => {
