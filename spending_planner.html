@@ -227,7 +227,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
-  min-width: 1080px;
+  min-width: 720px;
 }
 
 th, td {
@@ -442,7 +442,7 @@ th {
         <thead>
           <tr>
             <th>Name</th>
-            <th>Estimated Due</th>
+            <th>Date</th>
             <th>Amount</th>
             <th>Included</th>
             <th>Category</th>
@@ -567,12 +567,12 @@ const defaultRecurringCosts = [
   { id: "carwash", name: "Car Wash", amount: 20, included: true, category: "Car" },
   { id: "petrol", name: "Petrol", amount: 60, included: true, category: "Car" }
 ];
+
 function getFreshDefaults() {
   const freshScheduled = JSON.parse(JSON.stringify(defaultScheduledBills));
   const freshFuture = JSON.parse(JSON.stringify(defaultFutureCosts));
   const freshRecurring = JSON.parse(JSON.stringify(defaultRecurringCosts));
 
-  // Hard-force dentist future dates blank
   freshFuture.forEach(item => {
     if (
       item.id === "dent1" ||
@@ -629,7 +629,7 @@ function dateLabel(dateStr) {
 function daysUntil(dateStr) {
   if (!dateStr) return null;
   const today = new Date();
-  today.setHours(0,0,0,0);
+  today.setHours(0, 0, 0, 0);
   const then = new Date(dateStr);
   if (isNaN(then.getTime())) return null;
   return Math.ceil((then - today) / (1000 * 60 * 60 * 24));
@@ -651,7 +651,14 @@ function loadPlannerData() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (!saved) return;
   try {
-    plannerState = JSON.parse(saved);
+    const parsed = JSON.parse(saved);
+    plannerState = {
+      ...getFreshDefaults(),
+      ...parsed,
+      scheduledBills: Array.isArray(parsed.scheduledBills) ? parsed.scheduledBills : JSON.parse(JSON.stringify(defaultScheduledBills)),
+      futureCosts: Array.isArray(parsed.futureCosts) ? parsed.futureCosts : JSON.parse(JSON.stringify(defaultFutureCosts)),
+      recurringCosts: Array.isArray(parsed.recurringCosts) ? parsed.recurringCosts : JSON.parse(JSON.stringify(defaultRecurringCosts))
+    };
   } catch (err) {
     console.error("Could not load planner data", err);
   }
@@ -659,7 +666,21 @@ function loadPlannerData() {
 
 function resetPlannerData() {
   localStorage.removeItem(STORAGE_KEY);
-  plannerState = getFreshDefaults();
+
+  const fresh = getFreshDefaults();
+
+  fresh.futureCosts = fresh.futureCosts.map(item => {
+    if (
+      item.id === "dent1" ||
+      item.id === "dent2" ||
+      String(item.name || "").toLowerCase().includes("dentist")
+    ) {
+      return { ...item, due: "" };
+    }
+    return item;
+  });
+
+  plannerState = fresh;
 }
 
 function renderScheduledBills() {
@@ -743,6 +764,7 @@ function renderRecurringCosts() {
     body.appendChild(tr);
   });
 }
+
 function renderNextBills(bills) {
   const grid = document.getElementById("nextBillsGrid");
   if (!grid) return;
@@ -811,110 +833,10 @@ function renderYearlyTable(rows) {
   });
 }
 
-function handleTableEdit(e) {
-  const target = e.target;
-  const section = target.dataset.section;
-  const index = Number(target.dataset.index);
-  const field = target.dataset.field;
-
-  if (!Number.isFinite(index) || !section || !field) return;
-
-  let source = null;
-  if (section === "scheduled") source = plannerState.scheduledBills;
-  if (section === "future") source = plannerState.futureCosts;
-  if (section === "recurring") source = plannerState.recurringCosts;
-  if (!source || !source[index]) return;
-
-  if (field === "included" || field === "paid") {
-    source[index][field] = target.checked;
-  } else if (field === "amount" || field === "actualPaid") {
-    source[index][field] = parseNum(target.value);
-  } else {
-    source[index][field] = target.value;
-  }
-
-  savePlannerData();
-  runPlanner();
-}
-
-function handleDelete(e) {
-  const btn = e.target.closest(".delete-btn");
-  if (!btn) return;
-
-  const section = btn.dataset.deleteSection;
-  const index = Number(btn.dataset.deleteIndex);
-  if (!Number.isFinite(index)) return;
-
-  if (section === "scheduled") plannerState.scheduledBills.splice(index, 1);
-  if (section === "future") plannerState.futureCosts.splice(index, 1);
-  if (section === "recurring") plannerState.recurringCosts.splice(index, 1);
-
-  savePlannerData();
-  runPlanner();
-}
-
-function bindTableInputs() {
-  document.querySelectorAll("[data-section]").forEach(el => {
-    el.addEventListener("input", handleTableEdit);
-    el.addEventListener("change", handleTableEdit);
-  });
-
-  document.querySelectorAll(".delete-btn").forEach(btn => {
-    btn.addEventListener("click", handleDelete);
-  });
-}
-
-function addScheduledBill() {
-  plannerState.scheduledBills.push({
-    id: `scheduled_${Date.now()}`,
-    name: "New Scheduled Bill",
-    due: "",
-    amount: 0,
-    paid: false,
-    actualPaid: 0,
-    included: true,
-    category: "Other",
-    notes: ""
-  });
-  savePlannerData();
-  runPlanner();
-}
-
-function addFutureCost() {
-  plannerState.futureCosts.push({
-    id: `future_${Date.now()}`,
-    name: "New Future Cost",
-    due: "",
-    amount: 0,
-    included: false,
-    category: "Other",
-    notes: ""
-  });
-  savePlannerData();
-  runPlanner();
-}
-
-function addRecurringCost() {
-  plannerState.recurringCosts.push({
-    id: `recurring_${Date.now()}`,
-    name: "New Recurring Cost",
-    amount: 0,
-    included: true,
-    category: "Other"
-  });
-  savePlannerData();
-  runPlanner();
-}
-
-function runPlanner() {
+function updatePlannerTotals() {
   plannerState.holdingBalance = parseNum(document.getElementById("holdingBalanceInput")?.value);
   plannerState.weeklyFunding = parseNum(document.getElementById("weeklyFundingInput")?.value);
   plannerState.minimumBuffer = parseNum(document.getElementById("minimumBufferInput")?.value);
-
-  renderScheduledBills();
-  renderFutureCosts();
-  renderRecurringCosts();
-  bindTableInputs();
 
   const includedScheduled = plannerState.scheduledBills.filter(x => x.included);
   const includedFuture = plannerState.futureCosts.filter(x => x.included);
@@ -1020,15 +942,136 @@ function runPlanner() {
   savePlannerData();
 }
 
+function handleTableEdit(e) {
+  const target = e.target;
+  const section = target.dataset.section;
+  const index = Number(target.dataset.index);
+  const field = target.dataset.field;
+
+  if (!Number.isFinite(index) || !section || !field) return;
+
+  let source = null;
+  if (section === "scheduled") source = plannerState.scheduledBills;
+  if (section === "future") source = plannerState.futureCosts;
+  if (section === "recurring") source = plannerState.recurringCosts;
+  if (!source || !source[index]) return;
+
+  if (field === "included" || field === "paid") {
+    source[index][field] = target.checked;
+    savePlannerData();
+    runPlanner();
+    return;
+  }
+
+  if (field === "amount" || field === "actualPaid") {
+    source[index][field] = parseNum(target.value);
+  } else {
+    source[index][field] = target.value;
+  }
+
+  savePlannerData();
+  updatePlannerTotals();
+}
+
+function handleDelete(e) {
+  const btn = e.target.closest(".delete-btn");
+  if (!btn) return;
+
+  const section = btn.dataset.deleteSection;
+  const index = Number(btn.dataset.deleteIndex);
+  if (!Number.isFinite(index)) return;
+
+  if (section === "scheduled") plannerState.scheduledBills.splice(index, 1);
+  if (section === "future") plannerState.futureCosts.splice(index, 1);
+  if (section === "recurring") plannerState.recurringCosts.splice(index, 1);
+
+  savePlannerData();
+  runPlanner();
+}
+
+function bindTableInputs() {
+  document.querySelectorAll("[data-section]").forEach(el => {
+    const field = el.dataset.field;
+
+    el.oninput = null;
+    el.onchange = null;
+
+    if (field === "included" || field === "paid") {
+      el.onchange = handleTableEdit;
+    } else {
+      el.oninput = handleTableEdit;
+      el.onchange = handleTableEdit;
+    }
+  });
+
+  document.querySelectorAll(".delete-btn").forEach(btn => {
+    btn.onclick = handleDelete;
+  });
+}
+
+function addScheduledBill() {
+  plannerState.scheduledBills.push({
+    id: `scheduled_${Date.now()}`,
+    name: "New Scheduled Bill",
+    due: "",
+    amount: 0,
+    paid: false,
+    actualPaid: 0,
+    included: true,
+    category: "Other",
+    notes: ""
+  });
+  savePlannerData();
+  runPlanner();
+}
+
+function addFutureCost() {
+  plannerState.futureCosts.push({
+    id: `future_${Date.now()}`,
+    name: "New Future Cost",
+    due: "",
+    amount: 0,
+    included: false,
+    category: "Other",
+    notes: ""
+  });
+  savePlannerData();
+  runPlanner();
+}
+
+function addRecurringCost() {
+  plannerState.recurringCosts.push({
+    id: `recurring_${Date.now()}`,
+    name: "New Recurring Cost",
+    amount: 0,
+    included: true,
+    category: "Other"
+  });
+  savePlannerData();
+  runPlanner();
+}
+
+function runPlanner() {
+  plannerState.holdingBalance = parseNum(document.getElementById("holdingBalanceInput")?.value);
+  plannerState.weeklyFunding = parseNum(document.getElementById("weeklyFundingInput")?.value);
+  plannerState.minimumBuffer = parseNum(document.getElementById("minimumBufferInput")?.value);
+
+  renderScheduledBills();
+  renderFutureCosts();
+  renderRecurringCosts();
+  bindTableInputs();
+  updatePlannerTotals();
+}
+
 loadPlannerData();
 
 document.getElementById("holdingBalanceInput").value = plannerState.holdingBalance;
 document.getElementById("weeklyFundingInput").value = plannerState.weeklyFunding;
 document.getElementById("minimumBufferInput").value = plannerState.minimumBuffer;
 
-document.getElementById("holdingBalanceInput")?.addEventListener("input", runPlanner);
-document.getElementById("weeklyFundingInput")?.addEventListener("input", runPlanner);
-document.getElementById("minimumBufferInput")?.addEventListener("input", runPlanner);
+document.getElementById("holdingBalanceInput")?.addEventListener("input", updatePlannerTotals);
+document.getElementById("weeklyFundingInput")?.addEventListener("input", updatePlannerTotals);
+document.getElementById("minimumBufferInput")?.addEventListener("input", updatePlannerTotals);
 
 document.getElementById("savePlannerBtn")?.addEventListener("click", () => {
   savePlannerData();
@@ -1042,9 +1085,21 @@ document.getElementById("resetPlannerBtn")?.addEventListener("click", () => {
   document.getElementById("weeklyFundingInput").value = plannerState.weeklyFunding;
   document.getElementById("minimumBufferInput").value = plannerState.minimumBuffer;
 
-  // force fresh save + fresh render after reset
+  const futureBody = document.getElementById("futureCostsBody");
+  if (futureBody) futureBody.innerHTML = "";
+
+  plannerState.futureCosts = plannerState.futureCosts.map(item => {
+    if (
+      item.id === "dent1" ||
+      item.id === "dent2" ||
+      String(item.name || "").toLowerCase().includes("dentist")
+    ) {
+      return { ...item, due: "" };
+    }
+    return item;
+  });
+
   savePlannerData();
-  renderFutureCosts();
   runPlanner();
 });
 
