@@ -523,6 +523,12 @@ thead th:nth-child(9) {
   <div class="subv">Safe to move to IG ISA now</div>
 </div>
 
+<div class="card" id="safeMoveCard">
+  <div class="stat-label">Safe To Move Now</div>
+  <div class="stat">£<span id="safeToMoveNow">0.00</span></div>
+  <div class="subv" id="safeToMoveNowMeta">After protecting upcoming bills</div>
+</div>
+
       <div class="card">
         <div class="stat-label">Included Total</div>
         <div class="stat">£<span id="includedTotal">0.00</span></div>
@@ -1665,6 +1671,23 @@ function updatePlannerTotals() {
     - unpaidScheduledTotal
     + releasedSurplus
   );
+  const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const next30DaysBills = includedScheduled
+  .filter(x => x.included && !x.paid && x.due)
+  .filter(x => {
+    const due = new Date(x.due);
+    due.setHours(0, 0, 0, 0);
+    const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+    return diffDays >= 0 && diffDays <= 30;
+  })
+  .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
+const safeToMoveNow = Math.max(
+  0,
+  availableToInvest - next30DaysBills
+);
 
   const categoryTotals = {};
 
@@ -1704,6 +1727,14 @@ function updatePlannerTotals() {
   );
 
   setText("availableToInvest", formatMoney(availableToInvest));
+  
+  setText("safeToMoveNow", formatMoney(safeToMoveNow));
+setText(
+  "safeToMoveNowMeta",
+  next30DaysBills > 0
+    ? `After protecting £${formatMoney(next30DaysBills)} due in the next 30 days`
+    : "No scheduled bills due in the next 30 days"
+);
 
   const releasedSurplusEl = document.getElementById("releasedSurplus");
   if (releasedSurplusEl) {
@@ -1815,6 +1846,20 @@ function updatePlannerTotals() {
   }
 
   setText("igSignalMeta", igMeta);
+  
+  const safeMoveCard = document.getElementById("safeMoveCard");
+
+if (safeMoveCard) {
+  safeMoveCard.classList.remove("good", "watch", "risk");
+
+  if (safeToMoveNow > 0) {
+    safeMoveCard.classList.add("good");
+  } else if (availableToInvest > 0 && next30DaysBills > 0) {
+    safeMoveCard.classList.add("watch");
+  } else {
+    safeMoveCard.classList.add("risk");
+  }
+}
 
   savePlannerData();
 }
