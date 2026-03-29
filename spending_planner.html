@@ -1570,9 +1570,19 @@ function calculateMonthlyAdjustments() {
       })
       .reduce((sum, b) => sum + Number(b.amount || 0), 0);
 
-    const recurringMonthlyTotal = plannerState.recurringCosts
-      .filter(c => c.included)
-      .reduce((sum, c) => sum + Number(c.amount || 0), 0);
+    let recurringIncludedTotal = 0;
+let recurringReleased = 0;
+
+includedRecurring.forEach(x => {
+  const original = Number(x.originalAmount || x.amount || 0);
+  const current = Number(x.amount || 0);
+
+  recurringIncludedTotal += current * 12;
+
+  if (current < original) {
+    recurringReleased += (original - current);
+  }
+});
 
     const yearlyRecurringMonthlyShare = plannerState.yearlyRecurringCosts
       .filter(c => c.included)
