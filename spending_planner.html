@@ -1678,7 +1678,21 @@ function updatePlannerTotals() {
     .filter(x => x.paid)
     .reduce((sum, x) => sum + Number(x.amount || 0), 0);
 
-  const releasedSurplus = Math.max(0, plannedPaidScheduledTotal - actualPaidScheduledTotal);
+  // ===================== RECURRING RELEASE TRACKING =====================
+let recurringReleased = 0;
+
+includedRecurring.forEach(x => {
+  const original = Number(x.originalAmount || x.amount || 0);
+  const current = Number(x.amount || 0);
+
+  if (current < original) {
+    recurringReleased += (original - current);
+  }
+});
+  
+  const releasedSurplus =
+  Math.max(0, plannedPaidScheduledTotal - actualPaidScheduledTotal)
+  + recurringReleased;
   
   const availableToInvest = Math.max(
     0,
