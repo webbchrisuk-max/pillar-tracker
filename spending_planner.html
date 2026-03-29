@@ -564,6 +564,16 @@ thead th:nth-child(9) {
     <div class="input-box">
       <label for="customAddInput">Custom Amount To Add</label>
       <input id="customAddInput" type="number" step="0.01" placeholder="Enter amount" />
+      
+      <!-- ===================== SECTION: REMOVE MONEY ===================== -->
+<div class="input-box">
+  <label for="customRemoveInput">Remove / Transfer Out</label>
+  <input id="customRemoveInput" type="number" step="0.01" placeholder="Enter amount" />
+
+  <button class="delete-btn" id="removeCustomBtn" style="margin-top:8px; width:100%;">
+    - Remove From Pot
+  </button>
+</div>
 
       <button class="quick-btn" id="addCustomBtn" style="margin-top:8px; width:100%;">
         + Add Custom Amount
@@ -1768,6 +1778,25 @@ document.getElementById("addCustomBtn")?.addEventListener("click", () => {
   if (customAmount <= 0) return;
 
   plannerState.holdingBalance += customAmount;
+  
+  document.getElementById("removeCustomBtn")?.addEventListener("click", () => {
+  const removeAmount = parseNum(document.getElementById("customRemoveInput")?.value);
+
+  if (removeAmount <= 0) return;
+
+  plannerState.holdingBalance = Math.max(
+    0,
+    plannerState.holdingBalance - removeAmount
+  );
+
+  document.getElementById("holdingBalanceInput").value =
+    plannerState.holdingBalance.toFixed(2);
+
+  document.getElementById("customRemoveInput").value = "";
+
+  savePlannerData();
+  runPlanner();
+});
   document.getElementById("holdingBalanceInput").value = plannerState.holdingBalance.toFixed(2);
   document.getElementById("customAddInput").value = "";
 
