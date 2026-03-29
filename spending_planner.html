@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Aurora Holding Pot Planner v3</title>
+<title>Aurora Wealth Centre</title>
 
 <style>
  :root {
@@ -501,7 +501,7 @@ thead th:nth-child(9) {
 
   <!-- ===================== SECTION: HERO ===================== -->
   <section class="hero">
-    <h1>Aurora Holding Pot Planner v3</h1>
+    <h1>Aurora Wealth Centre</h1>
     <div class="sub">Editable funding engine with paid tracking, actual bill values, released surplus, and IG ISA safety signal.</div>
 
     <div class="grid hero-grid">
@@ -856,12 +856,12 @@ thead th:nth-child(9) {
 </section>
 
   <div class="footer">
-    Aurora Holding Pot Planner v3 • Paid Tracking + Actual Costs + Released Surplus + IG ISA Signal
+    Aurora Wealth Centre • Paid Tracking + Actual Costs + Released Surplus + IG ISA Signal
   </div>
 </div>
 
 <script>
-const STORAGE_KEY = "aurora_holding_planner_v3";
+const STORAGE_KEY = "aurora_wealth_centre";
 const FIRST_PAYDAY = "2026-04-24";
 
 const defaultScheduledBills = [
@@ -980,7 +980,7 @@ function savePlannerData() {
 }
 
 function savePotHistory() {
-  const historyKey = "aurora_holding_pot_history_v1";
+  const historyKey = "aurora_wealth_centre_history_v1";
   const existing = JSON.parse(localStorage.getItem(historyKey) || "[]");
 
   const today = new Date();
@@ -1003,7 +1003,7 @@ function renderPotTrendChart() {
   const canvas = document.getElementById("potTrendChart");
   if (!canvas || typeof Chart === "undefined") return;
 
-  const historyKey = "aurora_holding_pot_history_v1";
+  const historyKey = "aurora_wealth_centre_history_v1";
   let history = JSON.parse(localStorage.getItem(historyKey) || "[]");
 
   if (!Array.isArray(history) || history.length === 0) {
@@ -1090,7 +1090,7 @@ function exportPlannerBackup() {
   try {
     const backupData = {
       exportedAt: new Date().toISOString(),
-      version: "aurora_holding_planner_v3",
+      version: "aurora_wealth_centre",
       plannerState
     };
 
@@ -1104,7 +1104,7 @@ function exportPlannerBackup() {
     const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
 
     a.href = url;
-    a.download = `aurora-planner-backup-${stamp}.json`;
+    a.download = `aurora-wealth-centre-backup-${stamp}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
