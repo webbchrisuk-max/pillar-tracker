@@ -970,11 +970,12 @@ function getFreshDefaults() {
     futureCosts: freshFuture,
     recurringCosts: freshRecurring,
     yearlyRecurringCosts: freshYearlyRecurring,
-    archivedBills: []
+    archivedBills: [],
     canteen: {
-    budget: 80,
-    lastSpend: 0,
-    lastReleased: 0
+      budget: 80,
+      lastSpend: 0,
+      lastReleased: 0
+    }
   };
 }
 
@@ -989,7 +990,7 @@ function handleCanteenSubmit() {
   const input = document.getElementById("canteenSpendInput");
   const spend = parseNum(input.value);
 
-  if (spend <= 0) return;
+  if (spend < 0) return;
 
   const budget = Number(plannerState.canteen?.budget || 80);
 
@@ -1232,6 +1233,11 @@ function importPlannerBackupFromFile(file) {
         archivedBills: Array.isArray(importedState.archivedBills)
           ? importedState.archivedBills
           : []
+          canteen: importedState.canteen || {
+    budget: 80,
+    lastSpend: 0,
+    lastReleased: 0
+      }
       };
 
       const holdingEl = document.getElementById("holdingBalanceInput");
@@ -1303,17 +1309,6 @@ function loadPlannerData() {
       }
     };
 
-    plannerState.recurringCosts = plannerState.recurringCosts.map(item => ({
-      ...item,
-      originalAmount: Number(item.originalAmount ?? item.amount ?? 0)
-    }));
-
-  } catch (err) {
-    console.error("Could not load planner data", err);
-  }
-}
-
-    // ===================== PATCH EXISTING RECURRING ITEMS =====================
     plannerState.recurringCosts = plannerState.recurringCosts.map(item => ({
       ...item,
       originalAmount: Number(item.originalAmount ?? item.amount ?? 0)
@@ -1849,6 +1844,12 @@ const safeToMoveNow = Math.max(
   setText("canteenBudget", formatMoney(plannerState.canteen?.budget || 80));
 setText("canteenLastSpend", formatMoney(plannerState.canteen?.lastSpend || 0));
 setText("canteenLastReleased", formatMoney(plannerState.canteen?.lastReleased || 0));
+setText(
+  "canteenMeta",
+  (plannerState.canteen?.lastReleased || 0) > 0
+    ? `Last month spend £${formatMoney(plannerState.canteen.lastSpend)} • released £${formatMoney(plannerState.canteen.lastReleased)} back to pot`
+    : "Enter once per month — system handles the rest"
+);
   
   setText("safeToMoveNow", formatMoney(safeToMoveNow));
 setText(
