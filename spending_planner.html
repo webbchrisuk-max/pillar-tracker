@@ -529,6 +529,12 @@ thead th:nth-child(9) {
   <div class="subv" id="safeToMoveNowMeta">After protecting upcoming bills</div>
 </div>
 
+<div class="card" id="pressureCard">
+  <div class="stat-label">Upcoming Pressure</div>
+  <div class="stat small" id="pressureLevel">--</div>
+  <div class="subv" id="pressureMeta">Calculating upcoming bills...</div>
+</div>
+
       <div class="card">
         <div class="stat-label">Included Total</div>
         <div class="stat">£<span id="includedTotal">0.00</span></div>
@@ -1735,6 +1741,42 @@ setText(
     ? `After protecting £${formatMoney(next30DaysBills)} due in the next 30 days`
     : "No scheduled bills due in the next 30 days"
 );
+
+// ===================== UPCOMING PRESSURE =====================
+const next7DaysBills = includedScheduled
+  .filter(x => x.included && !x.paid && x.due)
+  .filter(x => {
+    const due = new Date(x.due);
+    due.setHours(0, 0, 0, 0);
+    const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+    return diffDays >= 0 && diffDays <= 7;
+  })
+  .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
+// Determine pressure level
+let pressureLevel = "Low";
+let pressureClass = "good";
+
+if (next30DaysBills > 400) {
+  pressureLevel = "High";
+  pressureClass = "risk";
+} else if (next30DaysBills > 150) {
+  pressureLevel = "Medium";
+  pressureClass = "watch";
+}
+
+// Update UI
+setText("pressureLevel", pressureLevel);
+setText(
+  "pressureMeta",
+  `£${formatMoney(next7DaysBills)} in 7 days • £${formatMoney(next30DaysBills)} in 30 days`
+);
+
+const pressureCard = document.getElementById("pressureCard");
+if (pressureCard) {
+  pressureCard.classList.remove("good", "watch", "risk");
+  pressureCard.classList.add(pressureClass);
+}
 
   const releasedSurplusEl = document.getElementById("releasedSurplus");
   if (releasedSurplusEl) {
