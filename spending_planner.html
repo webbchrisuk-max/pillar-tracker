@@ -1444,12 +1444,12 @@ function calculateMonthlyAdjustments() {
     let status = "OK";
 
     if (runningBalance < minRequired) {
-      adjustment = Math.ceil(minRequired - runningBalance);
-      status = "Increase";
-    } else if (runningBalance > minRequired + 300) {
-      adjustment = Math.floor(runningBalance - (minRequired + 300));
-      status = "Reduce";
-    }
+  adjustment = Math.ceil((minRequired - runningBalance) / 3);
+  status = "Increase";
+} else if (runningBalance > minRequired + 300) {
+  adjustment = Math.floor((runningBalance - (minRequired + 300)) / 3);
+  status = "Reduce";
+}
 
     rows.push({
       month: monthLabel,
