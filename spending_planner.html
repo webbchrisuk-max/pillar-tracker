@@ -741,6 +741,48 @@ thead th:nth-child(9) {
     </div>
   </section>
   
+  <!-- ===================== SECTION: WORK CANTEEN TRACKER ===================== -->
+<section class="section card">
+  <h2>Work Canteen – Monthly Capture</h2>
+
+  <div class="grid three-grid">
+
+    <div class="mini">
+      <div class="k">Monthly Budget</div>
+      <div class="v">£<span id="canteenBudget">80</span></div>
+    </div>
+
+    <div class="mini">
+      <div class="k">Last Entered Spend</div>
+      <div class="v">£<span id="canteenLastSpend">0</span></div>
+    </div>
+
+    <div class="mini">
+      <div class="k">Last Released</div>
+      <div class="v">£<span id="canteenLastReleased">0</span></div>
+    </div>
+
+  </div>
+
+  <div class="grid two-grid" style="margin-top:12px;">
+    <div class="input-box">
+      <label>Enter Total Spent This Month</label>
+      <input id="canteenSpendInput" type="number" step="0.01" placeholder="e.g. 65" />
+    </div>
+
+    <div class="input-box">
+      <label>&nbsp;</label>
+      <button class="add-btn" id="canteenSubmitBtn">
+        Calculate & Release
+      </button>
+    </div>
+  </div>
+
+  <div class="subv" id="canteenMeta" style="margin-top:10px;">
+    Enter once per month — system handles the rest
+  </div>
+</section>
+  
     <!-- ===================== SECTION: EDITABLE YEARLY RECURRING COSTS ===================== -->
   <section class="section card">
     <h2>Editable Yearly Recurring Costs</h2>
@@ -898,6 +940,7 @@ const defaultRecurringCosts = [
   { id: "petrol", name: "Petrol", amount: 60, originalAmount: 60, included: true, category: "Car" }
 ];
 
+
 const defaultYearlyRecurringCosts = [
   { id: "tv_yearly", name: "TV Subscription", amount: 50, included: true, category: "Subscription" },
   { id: "ps_yearly", name: "PlayStation Subscription", amount: 99.99, included: true, category: "Subscription" }
@@ -928,6 +971,10 @@ function getFreshDefaults() {
     recurringCosts: freshRecurring,
     yearlyRecurringCosts: freshYearlyRecurring,
     archivedBills: []
+    canteen: {
+    budget: 80,
+    lastSpend: 0,
+    lastReleased: 0
   };
 }
 
@@ -936,6 +983,30 @@ let plannerState = getFreshDefaults();
 function setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.innerText = value;
+}
+
+function handleCanteenSubmit() {
+  const input = document.getElementById("canteenSpendInput");
+  const spend = parseNum(input.value);
+
+  if (spend <= 0) return;
+
+  const budget = Number(plannerState.canteen?.budget || 80);
+
+  const released = Math.max(0, budget - spend);
+
+  // Save state
+  plannerState.canteen.lastSpend = spend;
+  plannerState.canteen.lastReleased = released;
+
+  // Add to holding pot immediately
+  plannerState.holdingBalance += released;
+
+  // Reset input
+  input.value = "";
+
+  savePlannerData();
+  runPlanner();
 }
 
 function formatMoney(v) {
@@ -1201,25 +1272,46 @@ function loadPlannerData() {
       ...getFreshDefaults(),
       ...parsed,
       paydayContribution: parseNum(parsed.paydayContribution ?? parsed.monthlyContribution ?? 140),
+
       scheduledBills: Array.isArray(parsed.scheduledBills)
         ? parsed.scheduledBills.map(bill => ({
             deducted: false,
             ...bill
           }))
         : JSON.parse(JSON.stringify(defaultScheduledBills)),
+
       futureCosts: Array.isArray(parsed.futureCosts)
         ? parsed.futureCosts
         : JSON.parse(JSON.stringify(defaultFutureCosts)),
+
       recurringCosts: Array.isArray(parsed.recurringCosts)
         ? parsed.recurringCosts
         : JSON.parse(JSON.stringify(defaultRecurringCosts)),
+
       yearlyRecurringCosts: Array.isArray(parsed.yearlyRecurringCosts)
         ? parsed.yearlyRecurringCosts
         : JSON.parse(JSON.stringify(defaultYearlyRecurringCosts)),
+
       archivedBills: Array.isArray(parsed.archivedBills)
         ? parsed.archivedBills
-        : []
+        : [],
+
+      canteen: parsed.canteen || {
+        budget: 80,
+        lastSpend: 0,
+        lastReleased: 0
+      }
     };
+
+    plannerState.recurringCosts = plannerState.recurringCosts.map(item => ({
+      ...item,
+      originalAmount: Number(item.originalAmount ?? item.amount ?? 0)
+    }));
+
+  } catch (err) {
+    console.error("Could not load planner data", err);
+  }
+}
 
     // ===================== PATCH EXISTING RECURRING ITEMS =====================
     plannerState.recurringCosts = plannerState.recurringCosts.map(item => ({
@@ -1754,6 +1846,10 @@ const safeToMoveNow = Math.max(
 
   setText("availableToInvest", formatMoney(availableToInvest));
   
+  setText("canteenBudget", formatMoney(plannerState.canteen?.budget || 80));
+setText("canteenLastSpend", formatMoney(plannerState.canteen?.lastSpend || 0));
+setText("canteenLastReleased", formatMoney(plannerState.canteen?.lastReleased || 0));
+  
   setText("safeToMoveNow", formatMoney(safeToMoveNow));
 setText(
   "safeToMoveNowMeta",
@@ -1761,6 +1857,7 @@ setText(
     ? `After protecting £${formatMoney(next30DaysBills)} due in the next 30 days`
     : "No scheduled bills due in the next 30 days"
 );
+
 
 // ===================== UPCOMING PRESSURE =====================
 const next7DaysBills = includedScheduled
@@ -2215,6 +2312,8 @@ getContributionButton()?.addEventListener("click", () => {
 });
 
 document.getElementById("exportBackupBtn")?.addEventListener("click", exportPlannerBackup);
+
+document.getElementById("canteenSubmitBtn")?.addEventListener("click", handleCanteenSubmit);
 
 document.getElementById("importBackupBtn")?.addEventListener("click", () => {
   document.getElementById("importBackupFile")?.click();
