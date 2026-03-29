@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+l<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -1086,8 +1086,8 @@ function getContributionButton() {
 
 function applyPaidScheduledDeductions() {
   plannerState.scheduledBills.forEach(bill => {
-    if (bill.paid && !bill.deducted) {
-      const amountToDeduct = Number(bill.actualPaid || 0);
+    if (bill.paid && !bill.deducted && Number(bill.actualPaid || 0) > 0) {
+  const amountToDeduct = Number(bill.actualPaid || 0);
 
       if (amountToDeduct > 0) {
         plannerState.holdingBalance = Math.max(
