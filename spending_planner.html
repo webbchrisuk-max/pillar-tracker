@@ -1894,7 +1894,9 @@ document.getElementById("holdingBalanceInput")?.addEventListener("input", update
 
 getContributionInput()?.addEventListener("input", (e) => {
   plannerState.paydayContribution = parseNum(e.target.value);
+
   updatePlannerTotals();
+  renderContributionTable(); // 👈 THIS is the missing piece
 });
 
 document.getElementById("minimumBufferInput")?.addEventListener("input", updatePlannerTotals);
