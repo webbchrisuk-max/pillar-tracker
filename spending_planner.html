@@ -1232,7 +1232,7 @@ function importPlannerBackupFromFile(file) {
           : JSON.parse(JSON.stringify(defaultYearlyRecurringCosts)),
         archivedBills: Array.isArray(importedState.archivedBills)
           ? importedState.archivedBills
-          : []
+          : [],
           canteen: importedState.canteen || {
     budget: 80,
     lastSpend: 0,
