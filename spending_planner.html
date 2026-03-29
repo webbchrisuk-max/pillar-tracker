@@ -479,6 +479,7 @@ thead th:nth-child(9) {
   font-size: 13px;
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -494,6 +495,12 @@ thead th:nth-child(9) {
         <div class="stat">£<span id="potBalance">0.00</span></div>
         <div class="subv" id="potBalanceMeta">Current saved amount</div>
       </div>
+      
+      <div class="card">
+  <div class="stat-label">Pot Trend</div>
+  <canvas id="potTrendChart" height="70"></canvas>
+  <div class="subv" id="potTrendMeta">Last 8 snapshots of your holding pot</div>
+</div>
       
       <div class="card">
   <div class="stat-label">Available to Invest</div>
@@ -949,6 +956,113 @@ function monthlyFromYearly(v) {
 
 function savePlannerData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(plannerState));
+}
+
+function savePotHistory() {
+  const historyKey = "aurora_holding_pot_history_v1";
+  const existing = JSON.parse(localStorage.getItem(historyKey) || "[]");
+
+  const today = new Date();
+  const stamp = today.toISOString().slice(0, 10);
+
+  const last = existing[existing.length - 1];
+
+  if (!last || last.date !== stamp || Number(last.balance) !== Number(plannerState.holdingBalance || 0)) {
+    existing.push({
+      date: stamp,
+      balance: Number(plannerState.holdingBalance || 0)
+    });
+  }
+
+  const trimmed = existing.slice(-8);
+  localStorage.setItem(historyKey, JSON.stringify(trimmed));
+}
+
+function renderPotTrendChart() {
+  const canvas = document.getElementById("potTrendChart");
+  if (!canvas || typeof Chart === "undefined") return;
+
+  const historyKey = "aurora_holding_pot_history_v1";
+  let history = JSON.parse(localStorage.getItem(historyKey) || "[]");
+
+  if (!Array.isArray(history) || history.length === 0) {
+    history = [{
+      date: new Date().toISOString().slice(0, 10),
+      balance: Number(plannerState.holdingBalance || 0)
+    }];
+  }
+
+  const labels = history.map(item => {
+    const d = new Date(item.date);
+    return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+  });
+
+  const data = history.map(item => Number(item.balance || 0));
+
+  if (window.potTrendChartInstance) {
+    window.potTrendChartInstance.destroy();
+  }
+
+  const ctx = canvas.getContext("2d");
+  const gradient = ctx.createLinearGradient(0, 0, 0, 120);
+  gradient.addColorStop(0, "rgba(98,243,255,0.35)");
+  gradient.addColorStop(1, "rgba(98,243,255,0.02)");
+
+  window.potTrendChartInstance = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: "#62f3ff",
+        backgroundColor: gradient,
+        fill: true,
+        tension: 0.35,
+        borderWidth: 2,
+        pointRadius: 2,
+        pointHoverRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `£${formatMoney(context.parsed.y)}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: "#96abc5",
+            maxRotation: 0,
+            autoSkip: true
+          },
+          grid: {
+            display: false
+          }
+        },
+        y: {
+          ticks: {
+            color: "#96abc5",
+            callback: function(value) {
+              return `£${formatMoney0(value)}`;
+            }
+          },
+          grid: {
+            color: "rgba(255,255,255,0.06)"
+          }
+        }
+      }
+    }
+  });
+
+  setText("potTrendMeta", `${history.length} saved snapshots of your holding pot`);
 }
 
 function exportPlannerBackup() {
@@ -1889,6 +2003,8 @@ function runPlanner() {
     holdingInput.value = plannerState.holdingBalance.toFixed(2);
   }
 
+  savePotHistory();
+
   renderScheduledBills();
   renderArchivedBills();
   renderFutureCosts();
@@ -1897,6 +2013,7 @@ function runPlanner() {
   bindTableInputs();
   updatePlannerTotals();
   renderContributionTable();
+  renderPotTrendChart();
 }
 
 loadPlannerData();
@@ -1916,7 +2033,8 @@ getContributionInput()?.addEventListener("input", (e) => {
   plannerState.paydayContribution = parseNum(e.target.value);
 
   updatePlannerTotals();
-  renderContributionTable(); // 👈 THIS is the missing piece
+  renderContributionTable();
+  renderPotTrendChart();
 });
 
 document.getElementById("minimumBufferInput")?.addEventListener("input", () => {
