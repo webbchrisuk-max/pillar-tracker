@@ -1,4 +1,4 @@
-l<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -800,6 +800,25 @@ thead th:nth-child(9) {
       </table>
     </div>
   </section>
+  
+  <!-- ===================== SECTION: CONTRIBUTION ADJUSTMENTS ===================== -->
+<section class="section card">
+  <h2>Contribution Adjustments (Autopilot)</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>Projected Balance</th>
+          <th>Min Required</th>
+          <th>Adjustment</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="contributionTableBody"></tbody>
+    </table>
+  </div>
+</section>
 
   <div class="footer">
     Aurora Holding Pot Planner v3 • Paid Tracking + Actual Costs + Released Surplus + IG ISA Signal
@@ -1345,6 +1364,84 @@ function renderYearlyTable(rows) {
   });
 }
 
+function calculateMonthlyAdjustments() {
+  const rows = [];
+  const today = new Date();
+  let runningBalance = plannerState.holdingBalance;
+
+  const monthlyContribution = plannerState.paydayContribution * 13 / 12;
+
+  for (let i = 0; i < 12; i++) {
+    const monthDate = new Date(today.getFullYear(), today.getMonth() + i, 1);
+    const monthLabel = monthDate.toLocaleString("en-GB", { month: "short", year: "numeric" });
+
+    // Add contribution for the month
+    runningBalance += monthlyContribution;
+
+    // Get bills for that month
+    const monthBills = plannerState.scheduledBills.filter(b => {
+      if (!b.included || !b.due) return false;
+      const d = new Date(b.due);
+      return d.getMonth() === monthDate.getMonth() && d.getFullYear() === monthDate.getFullYear();
+    });
+
+    const monthTotal = monthBills.reduce((sum, b) => sum + Number(b.amount || 0), 0);
+
+    runningBalance -= monthTotal;
+
+    const minRequired = plannerState.minimumBuffer;
+
+    let adjustment = 0;
+    let status = "OK";
+
+    if (runningBalance < minRequired) {
+      adjustment = Math.ceil((minRequired - runningBalance) / 12);
+      status = "Increase";
+    } else if (runningBalance > minRequired + 300) {
+      adjustment = Math.floor((runningBalance - (minRequired + 300)) / 12);
+      status = "Reduce";
+    }
+
+    rows.push({
+      month: monthLabel,
+      balance: runningBalance,
+      min: minRequired,
+      adjustment,
+      status
+    });
+  }
+
+  return rows;
+}
+function renderContributionTable() {
+  const body = document.getElementById("contributionTableBody");
+  if (!body) return;
+
+  body.innerHTML = "";
+
+  const rows = calculateMonthlyAdjustments();
+
+  rows.forEach(r => {
+    const tr = document.createElement("tr");
+
+    const adjText = r.adjustment > 0
+      ? (r.status === "Increase" ? `+£${r.adjustment}` : `-£${r.adjustment}`)
+      : "—";
+
+    tr.innerHTML = `
+      <td>${r.month}</td>
+      <td>£${formatMoney(r.balance)}</td>
+      <td>£${formatMoney(r.min)}</td>
+      <td>${adjText}</td>
+      <td class="${r.status === "Increase" ? "risk" : r.status === "Reduce" ? "good" : "neutral"}">
+        ${r.status}
+      </td>
+    `;
+
+    body.appendChild(tr);
+  });
+}
+
 function updatePlannerTotals() {
   plannerState.holdingBalance = parseNum(document.getElementById("holdingBalanceInput")?.value);
   plannerState.paydayContribution = parseNum(getContributionInput()?.value);
@@ -1732,6 +1829,7 @@ function runPlanner() {
   renderYearlyRecurringCosts();
   bindTableInputs();
   updatePlannerTotals();
+  renderContributionTable();
 }
 
 loadPlannerData();
