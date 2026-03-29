@@ -920,7 +920,6 @@ function importPlannerBackupFromFile(file) {
   reader.onload = function (e) {
     try {
       const parsed = JSON.parse(e.target.result);
-
       const importedState = parsed?.plannerState ? parsed.plannerState : parsed;
 
       if (!importedState || typeof importedState !== "object") {
@@ -951,15 +950,21 @@ function importPlannerBackupFromFile(file) {
       };
 
       const holdingEl = document.getElementById("holdingBalanceInput");
-      const contributionEl = getContributionInputEl();
+      const contributionEl = getContributionInput();
       const bufferEl = document.getElementById("minimumBufferInput");
 
-      if (holdingEl) holdingEl.value = plannerState.holdingBalance;
-      if (contributionEl) contributionEl.value = plannerState.paydayContribution;
-      if (bufferEl) bufferEl.value = plannerState.minimumBuffer;
+      if (holdingEl) holdingEl.value = Number(plannerState.holdingBalance || 0).toFixed(2);
+      if (contributionEl) contributionEl.value = Number(plannerState.paydayContribution || 0);
+      if (bufferEl) bufferEl.value = Number(plannerState.minimumBuffer || 0);
 
       savePlannerData();
-      runPlanner();
+
+      renderScheduledBills();
+      renderFutureCosts();
+      renderRecurringCosts();
+      renderYearlyRecurringCosts();
+      bindTableInputs();
+      updatePlannerTotals();
 
       setText("backupStatus", `Backup imported: ${new Date().toLocaleString("en-GB")}`);
     } catch (err) {
@@ -1642,10 +1647,10 @@ document.getElementById("importBackupBtn")?.addEventListener("click", () => {
 });
 
 document.getElementById("importBackupFile")?.addEventListener("change", (e) => {
-  const file = e.target.files?.[0];
-  importPlannerBackupFromFile(file);
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
 
-  // reset input so same file can be imported again later
+  importPlannerBackupFromFile(file);
   e.target.value = "";
 });
 
