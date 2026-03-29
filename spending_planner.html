@@ -827,6 +827,7 @@ thead th:nth-child(9) {
 
 <script>
 const STORAGE_KEY = "aurora_holding_planner_v3";
+const FIRST_PAYDAY = "2026-04-24";
 
 const defaultScheduledBills = [
   { id: "Spain", name: "Spain Holiday", due: "2026-05-31", amount: 350, paid: false, actualPaid: 0, deducted: false, included: true, category: "Travel", notes: "End of May" },
@@ -1367,38 +1368,86 @@ function renderYearlyTable(rows) {
 function calculateMonthlyAdjustments() {
   const rows = [];
   const today = new Date();
-  let runningBalance = plannerState.holdingBalance;
+  today.setHours(0, 0, 0, 0);
 
-  const monthlyContribution = plannerState.paydayContribution * 13 / 12;
+  let runningBalance = Number(plannerState.holdingBalance || 0);
+
+  function countPaydaysInMonth(year, month) {
+    let count = 0;
+    const checkDate = new Date(FIRST_PAYDAY);
+    checkDate.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < 24; i++) {
+      if (
+        checkDate.getFullYear() === year &&
+        checkDate.getMonth() === month
+      ) {
+        count++;
+      }
+
+      checkDate.setDate(checkDate.getDate() + 28);
+    }
+
+    return count;
+  }
 
   for (let i = 0; i < 12; i++) {
     const monthDate = new Date(today.getFullYear(), today.getMonth() + i, 1);
-    const monthLabel = monthDate.toLocaleString("en-GB", { month: "short", year: "numeric" });
+    const year = monthDate.getFullYear();
+    const month = monthDate.getMonth();
 
-    // Add contribution for the month
-    runningBalance += monthlyContribution;
-
-    // Get bills for that month
-    const monthBills = plannerState.scheduledBills.filter(b => {
-      if (!b.included || !b.due) return false;
-      const d = new Date(b.due);
-      return d.getMonth() === monthDate.getMonth() && d.getFullYear() === monthDate.getFullYear();
+    const monthLabel = monthDate.toLocaleString("en-GB", {
+      month: "short",
+      year: "numeric"
     });
 
-    const monthTotal = monthBills.reduce((sum, b) => sum + Number(b.amount || 0), 0);
+    const paydaysThisMonth = countPaydaysInMonth(year, month);
+    const monthContribution = paydaysThisMonth * Number(plannerState.paydayContribution || 0);
+
+    runningBalance += monthContribution;
+
+    const scheduledTotal = plannerState.scheduledBills
+      .filter(b => {
+        if (!b.included || !b.due || b.paid) return false;
+        const d = new Date(b.due);
+        return d.getFullYear() === year && d.getMonth() === month;
+      })
+      .reduce((sum, b) => sum + Number(b.amount || 0), 0);
+
+    const futureTotal = plannerState.futureCosts
+      .filter(b => {
+        if (!b.included || !b.due) return false;
+        const d = new Date(b.due);
+        return d.getFullYear() === year && d.getMonth() === month;
+      })
+      .reduce((sum, b) => sum + Number(b.amount || 0), 0);
+
+    const recurringMonthlyTotal = plannerState.recurringCosts
+      .filter(c => c.included)
+      .reduce((sum, c) => sum + Number(c.amount || 0), 0);
+
+    const yearlyRecurringMonthlyShare = plannerState.yearlyRecurringCosts
+      .filter(c => c.included)
+      .reduce((sum, c) => sum + (Number(c.amount || 0) / 12), 0);
+
+    const monthTotal =
+      scheduledTotal +
+      futureTotal +
+      recurringMonthlyTotal +
+      yearlyRecurringMonthlyShare;
 
     runningBalance -= monthTotal;
 
-    const minRequired = plannerState.minimumBuffer;
+    const minRequired = Number(plannerState.minimumBuffer || 0);
 
     let adjustment = 0;
     let status = "OK";
 
     if (runningBalance < minRequired) {
-      adjustment = Math.ceil((minRequired - runningBalance) / 12);
+      adjustment = Math.ceil(minRequired - runningBalance);
       status = "Increase";
     } else if (runningBalance > minRequired + 300) {
-      adjustment = Math.floor((runningBalance - (minRequired + 300)) / 12);
+      adjustment = Math.floor(runningBalance - (minRequired + 300));
       status = "Reduce";
     }
 
@@ -1407,7 +1456,8 @@ function calculateMonthlyAdjustments() {
       balance: runningBalance,
       min: minRequired,
       adjustment,
-      status
+      status,
+      paydays: paydaysThisMonth
     });
   }
 
