@@ -632,6 +632,7 @@ thead th:nth-child(9) {
           <th>Included</th>
           <th>Category</th>
           <th>Notes</th>
+          <th>Roll</th>
           <th>Archive</th>
           <th>Delete</th>
         </tr>
@@ -1133,16 +1134,30 @@ function renderScheduledBills() {
       <td><input class="table-input" type="text" value="${bill.category}" data-section="scheduled" data-index="${index}" data-field="category"></td>
       <td><input class="table-input" type="text" value="${bill.notes || ""}" data-section="scheduled" data-index="${index}" data-field="notes"></td>
       <td>
-        <button class="quick-btn" data-archive-section="scheduled" data-archive-index="${index}" ${bill.paid ? "" : "disabled"}>
+        <button class="quick-btn"
+          data-roll-section="scheduled"
+          data-roll-index="${index}"
+          ${bill.paid ? "" : "disabled"}>
+          Roll →
+        </button>
+      </td>
+      <td>
+        <button class="quick-btn"
+          data-archive-section="scheduled"
+          data-archive-index="${index}"
+          ${bill.paid ? "" : "disabled"}>
           Archive
         </button>
       </td>
-      <td><button class="delete-btn" data-delete-section="scheduled" data-delete-index="${index}">Delete</button></td>
+      <td>
+        <button class="delete-btn" data-delete-section="scheduled" data-delete-index="${index}">
+          Delete
+        </button>
+      </td>
     `;
     body.appendChild(tr);
   });
 }
-
 function renderArchivedBills() {
   const body = document.getElementById("archivedBillsBody");
   const countEl = document.getElementById("archivedBillsCount");
@@ -1591,6 +1606,30 @@ function handleArchive(e) {
   runPlanner();
 }
 
+function handleRollForward(e) {
+  const btn = e.target.closest("[data-roll-section]");
+  if (!btn) return;
+
+  const index = Number(btn.dataset.rollIndex);
+  if (!Number.isFinite(index)) return;
+
+  const bill = plannerState.scheduledBills[index];
+  if (!bill || !bill.paid) return;
+
+  if (bill.due) {
+    const d = new Date(bill.due);
+    d.setMonth(d.getMonth() + 1);
+    bill.due = d.toISOString().split("T")[0];
+  }
+
+  bill.paid = false;
+  bill.actualPaid = 0;
+  bill.deducted = false;
+
+  savePlannerData();
+  runPlanner();
+}
+
 function bindTableInputs() {
   document.querySelectorAll("[data-section]").forEach(el => {
     const field = el.dataset.field;
@@ -1613,6 +1652,10 @@ function bindTableInputs() {
   document.querySelectorAll("[data-archive-section]").forEach(btn => {
     btn.onclick = handleArchive;
   });
+  
+  document.querySelectorAll("[data-roll-section]").forEach(btn => {
+  btn.onclick = handleRollForward;
+});
 }
 
 function addScheduledBill() {
