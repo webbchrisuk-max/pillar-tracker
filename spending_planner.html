@@ -633,26 +633,37 @@ thead th:nth-child(9) {
     </table>
   </div>
 </section>
+
+<!-- ============Archive Section =========== -->
 <section class="section card">
-  <h2>Archived Bills</h2>
-  <div class="subv" style="margin-bottom:12px;">Completed items moved out of the live planner but kept for history.</div>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Due Date</th>
-          <th>Planned</th>
-          <th>Actual Paid</th>
-          <th>Category</th>
-          <th>Notes</th>
-          <th>Archived On</th>
-          <th>Delete</th>
-        </tr>
-      </thead>
-      <tbody id="archivedBillsBody"></tbody>
-    </table>
-  </div>
+  <details id="archivedBillsPanel">
+    <summary style="cursor:pointer; font-weight:700; font-size:18px; list-style:none;">
+      Archived Bills
+      <span class="subv" id="archivedBillsCount" style="display:inline-block; margin-left:8px;">(0)</span>
+    </summary>
+
+    <div class="subv" style="margin:12px 0 12px;">
+      Completed items moved out of the live planner but kept for history.
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Due Date</th>
+            <th>Planned</th>
+            <th>Actual Paid</th>
+            <th>Category</th>
+            <th>Notes</th>
+            <th>Archived On</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody id="archivedBillsBody"></tbody>
+      </table>
+    </div>
+  </details>
 </section>
 
   <!-- ===================== SECTION: EDITABLE FUTURE COSTS ===================== -->
@@ -1127,8 +1138,14 @@ function renderScheduledBills() {
 
 function renderArchivedBills() {
   const body = document.getElementById("archivedBillsBody");
+  const countEl = document.getElementById("archivedBillsCount");
   if (!body) return;
+
   body.innerHTML = "";
+
+  if (countEl) {
+    countEl.innerText = `(${plannerState.archivedBills.length})`;
+  }
 
   plannerState.archivedBills.forEach((bill, index) => {
     const tr = document.createElement("tr");
