@@ -1700,10 +1700,12 @@ if (getContributionInput()) {
 document.getElementById("minimumBufferInput").value = plannerState.minimumBuffer;
 
 document.getElementById("holdingBalanceInput")?.addEventListener("input", updatePlannerTotals);
+
 getContributionInput()?.addEventListener("input", (e) => {
   plannerState.paydayContribution = parseNum(e.target.value);
   updatePlannerTotals();
 });
+
 document.getElementById("minimumBufferInput")?.addEventListener("input", updatePlannerTotals);
 
 document.getElementById("savePlannerBtn")?.addEventListener("click", () => {
@@ -1775,27 +1777,25 @@ document.getElementById("addCustomBtn")?.addEventListener("click", () => {
   if (customAmount <= 0) return;
 
   plannerState.holdingBalance += customAmount;
-  
-  document.getElementById("removeCustomBtn")?.addEventListener("click", () => {
+  document.getElementById("holdingBalanceInput").value = plannerState.holdingBalance.toFixed(2);
+  document.getElementById("customAddInput").value = "";
+
+  savePlannerData();
+  runPlanner();
+});
+
+document.getElementById("removeCustomBtn")?.addEventListener("click", () => {
   const removeAmount = parseNum(document.getElementById("customRemoveInput")?.value);
 
   if (removeAmount <= 0) return;
 
   plannerState.holdingBalance = Math.max(
     0,
-    plannerState.holdingBalance - removeAmount
+    Number(plannerState.holdingBalance || 0) - removeAmount
   );
 
-  document.getElementById("holdingBalanceInput").value =
-    plannerState.holdingBalance.toFixed(2);
-
-  document.getElementById("customRemoveInput").value = "";
-
-  savePlannerData();
-  runPlanner();
-});
   document.getElementById("holdingBalanceInput").value = plannerState.holdingBalance.toFixed(2);
-  document.getElementById("customAddInput").value = "";
+  document.getElementById("customRemoveInput").value = "";
 
   savePlannerData();
   runPlanner();
