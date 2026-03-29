@@ -494,6 +494,12 @@ thead th:nth-child(9) {
         <div class="stat">£<span id="potBalance">0.00</span></div>
         <div class="subv" id="potBalanceMeta">Current saved amount</div>
       </div>
+      
+      <div class="card">
+  <div class="stat-label">Available to Invest</div>
+  <div class="stat">£<span id="availableToInvest">0.00</span></div>
+  <div class="subv">Safe to move to IG ISA now</div>
+</div>
 
       <div class="card">
         <div class="stat-label">Included Total</div>
@@ -514,6 +520,7 @@ thead th:nth-child(9) {
       </div>
     </div>
   </section>
+  
 
   <!-- ===================== SECTION: CONTROL STRIP ===================== -->
   <section class="section card">
@@ -1521,6 +1528,14 @@ function updatePlannerTotals() {
     .reduce((sum, x) => sum + Number(x.amount || 0), 0);
 
   const releasedSurplus = Math.max(0, plannedPaidScheduledTotal - actualPaidScheduledTotal);
+  
+  const availableToInvest = Math.max(
+    0,
+    plannerState.holdingBalance
+    - plannerState.minimumBuffer
+    - unpaidScheduledTotal
+    + releasedSurplus
+  );
 
   const categoryTotals = {};
 
@@ -1558,6 +1573,8 @@ function updatePlannerTotals() {
     "includedTotalMeta",
     `${includedScheduled.length} scheduled • ${includedFuture.length} future • ${includedRecurring.length} recurring • ${includedYearlyRecurring.length} yearly recurring active`
   );
+
+  setText("availableToInvest", formatMoney(availableToInvest));
 
   const releasedSurplusEl = document.getElementById("releasedSurplus");
   if (releasedSurplusEl) {
@@ -1890,7 +1907,10 @@ if (getContributionInput()) {
 }
 document.getElementById("minimumBufferInput").value = plannerState.minimumBuffer;
 
-document.getElementById("holdingBalanceInput")?.addEventListener("input", updatePlannerTotals);
+document.getElementById("holdingBalanceInput")?.addEventListener("input", () => {
+  updatePlannerTotals();
+  renderContributionTable();
+});
 
 getContributionInput()?.addEventListener("input", (e) => {
   plannerState.paydayContribution = parseNum(e.target.value);
@@ -1899,7 +1919,10 @@ getContributionInput()?.addEventListener("input", (e) => {
   renderContributionTable(); // 👈 THIS is the missing piece
 });
 
-document.getElementById("minimumBufferInput")?.addEventListener("input", updatePlannerTotals);
+document.getElementById("minimumBufferInput")?.addEventListener("input", () => {
+  updatePlannerTotals();
+  renderContributionTable();
+});
 
 document.getElementById("savePlannerBtn")?.addEventListener("click", () => {
   savePlannerData();
