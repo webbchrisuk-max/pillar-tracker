@@ -1792,15 +1792,14 @@ const next30DaysBills = includedScheduled
   .filter(x => {
     const due = new Date(x.due);
     due.setHours(0, 0, 0, 0);
+
     const now = new Date();
-const target = new Date(dueDate);
+    now.setHours(0, 0, 0, 0);
 
-// Reset both to midnight (IMPORTANT for accuracy)
-now.setHours(0,0,0,0);
-target.setHours(0,0,0,0);
+    const diffMs = due - now;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-const diffMs = target - now;
-const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    return diffDays >= 0 && diffDays <= 30;
   })
   .reduce((sum, x) => sum + Number(x.amount || 0), 0);
 
