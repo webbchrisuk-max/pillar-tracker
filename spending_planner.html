@@ -911,12 +911,16 @@ thead th:nth-child(9) {
 <script>
 // ===================== UTILITIES =====================
 
+// ===================== UTILITIES =====================
+
 function parseLocalDate(dateStr) {
   const [year, month, day] = String(dateStr).split('-').map(Number);
   return new Date(year, month - 1, day);
 }
 
 function getDaysLeft(dateStr) {
+  if (!dateStr) return null;
+
   const due = parseLocalDate(dateStr);
   due.setHours(0, 0, 0, 0);
 
@@ -924,6 +928,7 @@ function getDaysLeft(dateStr) {
   now.setHours(0, 0, 0, 0);
 
   return Math.round((due.getTime() - now.getTime()) / 86400000);
+}
 
 const STORAGE_KEY = "aurora_wealth_centre";
 const FIRST_PAYDAY = "2026-04-24";
@@ -1053,12 +1058,7 @@ function dateLabel(dateStr) {
 }
 
 function daysUntil(dateStr) {
-  if (!dateStr) return null;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const then = new Date(dateStr);
-  if (isNaN(then.getTime())) return null;
-  return Math.round((then - today) / (1000 * 60 * 60 * 24));
+  return getDaysLeft(dateStr);
 }
 
 function weeklyFromYearly(v) {
@@ -1806,7 +1806,7 @@ today.setHours(0, 0, 0, 0);
 const next30DaysBills = includedScheduled
   .filter(x => x.included && !x.paid && x.due)
   .filter(x => {
-    const due = parseLocalDate(x.due);;
+    const due = parseLocalDate(x.due);
     due.setHours(0, 0, 0, 0);
 
     const now = new Date();
@@ -1886,9 +1886,7 @@ setText(
 const next7DaysBills = includedScheduled
   .filter(x => x.included && !x.paid && x.due)
   .filter(x => {
-    const due = new Date(x.due);
-    due.setHours(0, 0, 0, 0);
-    const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+    const diffDays = getDaysLeft(x.due);
     return diffDays >= 0 && diffDays <= 7;
   })
   .reduce((sum, x) => sum + Number(x.amount || 0), 0);
