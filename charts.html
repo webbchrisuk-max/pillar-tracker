@@ -383,7 +383,7 @@
         <div class="card-head">
           <div>
             <h2 class="card-title">Four Pillar Allocation</h2>
-            <p class="card-sub">Live from Holdings using LGEN, MNG, PHNX, SUPR.</p>
+            <p class="card-sub">Live from Holdings using LGEN, MNG, SDLF, SUPR.</p>
           </div>
         </div>
         <div class="chart-shell short">
@@ -601,8 +601,8 @@
     }
 
     function pillarAllocation(holdings){
-      const targets = ["LGEN", "MNG", "PHNX", "SUPR"];
-      const totals = { LGEN:0, MNG:0, PHNX:0, SUPR:0 };
+      const targets = ["LGEN", "MNG", "SDLF", "SUPR"];
+      const totals = { LGEN:0, MNG:0, SDLF:0, SUPR:0 };
 
       holdings.forEach(row => {
         const ticker = String(row.ticker || "").toUpperCase().replace("LON:","").replace(".GB","");
