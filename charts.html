@@ -802,7 +802,7 @@ function createGoalGauge(id, annualIncome){
 }
 
 async function fetchJson(url){
-  const res = await fetch(`${url}?nocache=${Date.now()}`, { cache:"no-store" });
+  const res = await fetch(url, { cache:"no-store" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
