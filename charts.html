@@ -664,7 +664,21 @@ function dividendForecastSeries(rows){
 }
 
 function annualIncomeFromHoldings(holdings){
-  return holdings.reduce((sum, row) => sum + num(row.annual_dividend_total), 0);
+  const seen = new Set();
+
+  return holdings.reduce((sum, row) => {
+    const ticker = String(row.ticker || "").toUpperCase();
+    const shares = num(row.shares);
+
+    const key = ticker + "_" + shares;
+
+    // prevent duplicate rows
+    if (seen.has(key)) return sum;
+
+    seen.add(key);
+
+    return sum + num(row.annual_dividend_total);
+  }, 0);
 }
 
 function renderDepositTable(deposits){
