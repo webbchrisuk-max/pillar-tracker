@@ -1891,23 +1891,26 @@ const next7DaysBills = includedScheduled
   })
   .reduce((sum, x) => sum + Number(x.amount || 0), 0);
 
-// Determine pressure level
+const recurringPressure = includedRecurring
+  .reduce((sum, x) => sum + Number(x.amount || 0), 0);
+
+const totalNext7DaysPressure = next7DaysBills + recurringPressure;
+
 let pressureLevel = "Low";
 let pressureClass = "good";
 
-if (next30DaysBills > 400) {
+if (totalNext7DaysPressure > 400) {
   pressureLevel = "High";
   pressureClass = "risk";
-} else if (next30DaysBills > 150) {
+} else if (totalNext7DaysPressure > 150) {
   pressureLevel = "Medium";
   pressureClass = "watch";
 }
 
-// Update UI
 setText("pressureLevel", pressureLevel);
 setText(
   "pressureMeta",
-  `£${formatMoney(next7DaysBills)} in 7 days • £${formatMoney(next30DaysBills)} in 30 days`
+  `£${formatMoney(totalNext7DaysPressure)} in 7 days • £${formatMoney(next30DaysBills)} in 30 days`
 );
 
 const pressureCard = document.getElementById("pressureCard");
