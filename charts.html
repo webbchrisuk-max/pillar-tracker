@@ -492,8 +492,315 @@
     </div>
   </div>
 
-  <!-- ===================== SECTION: SCRIPT ===================== -->
-  <script>
+<script>
+const SHEET_ID = "10MdgQKc4tParno7pNkz40eBGz308wxHu1u3gvJe_WsE";
+
+const URLS = {
+  holdings: `https://opensheet.elk.sh/${SHEET_ID}/Holdings`,
+  incomeLog: `https://opensheet.elk.sh/${SHEET_ID}/IncomeLog`,
+  dividends: `https://opensheet.elk.sh/${SHEET_ID}/Dividends`
+};
+
+const CONFIG = {
+  targetAnnualIncome: 24000,
+  manualDeposits: [
+    { account: "Trade212", date: "2026-01-01", amount: 281.55 },
+    { account: "Trade212", date: "2026-01-28", amount: 1500 },
+    { account: "Trade212", date: "2026-02-22", amount: 250 },
+    { account: "IG ISA",   date: "2026-02-26", amount: 545 },
+    { account: "IG ISA",   date: "2026-03-20", amount: 1000 },
+    { account: "IG ISA",   date: "2026-03-25", amount: 1000 },
+    { account: "IG ISA",   date: "2026-03-26", amount: 800 }
+  ],
+  colors: {
+    cyan: "#46d7ff",
+    coral: "#ff7f6e",
+    green: "#46ffb3",
+    amber: "#ffd166",
+    violet: "#8d86ff",
+    blue: "#7aa4ff",
+    text: "#e8f2ff",
+    muted: "#9ab0c9",
+    grid: "rgba(255,255,255,.08)"
+  }
+};
+
+let chartRefs = {};
+
+const fmtGBP = value => new Intl.NumberFormat("en-GB", {
+  style: "currency",
+  currency: "GBP",
+  maximumFractionDigits: 2
+}).format(Number(value || 0));
+
+const fmtPct = value => `${Number(value || 0).toFixed(1)}%`;
+
+function setText(id, value){
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+function updateHeaderTime(){
+  const now = new Date();
+  setText("lastUpdatedBadge", `Last updated: ${now.toLocaleDateString("en-GB")} ${now.toLocaleTimeString("en-GB", {hour:"2-digit", minute:"2-digit"})}`);
+}
+
+function toDate(value){
+  if (!value) return null;
+  const str = String(value).trim();
+
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) return new Date(str + "T12:00:00");
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) {
+    const [dd, mm, yyyy] = str.split("/");
+    return new Date(`${yyyy}-${mm}-${dd}T12:00:00`);
+  }
+
+  const parsed = new Date(str);
+  return isNaN(parsed) ? null : parsed;
+}
+
+function monthKeyFromDate(date){
+  if (!date) return null;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2,"0")}`;
+}
+
+function monthLabelFromKey(key){
+  const [y, m] = key.split("-");
+  return new Date(`${y}-${m}-01T12:00:00`).toLocaleDateString("en-GB", { month:"short", year:"2-digit" });
+}
+
+function num(value){
+  const cleaned = String(value ?? "").replace(/,/g, "").replace(/£/g, "").trim();
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function destroyCharts(){
+  Object.values(chartRefs).forEach(c => {
+    try { c.destroy(); } catch(e) {}
+  });
+  chartRefs = {};
+}
+
+function safeTopHoldings(holdings, limit = 8){
+  return [...holdings]
+    .map(row => ({
+      name: row.name || row.ticker || "Unknown",
+      value: num(row.live_price) * num(row.shares)
+    }))
+    .filter(x => x.value > 0)
+    .sort((a,b) => b.value - a.value)
+    .slice(0, limit);
+}
+
+function pillarAllocation(holdings){
+  const targets = ["LGEN", "MNG", "SDLF", "SUPR"];
+  const totals = { LGEN:0, MNG:0, SDLF:0, SUPR:0 };
+
+  holdings.forEach(row => {
+    const ticker = String(row.ticker || "").toUpperCase().replace("LON:","").replace(".GB","");
+    if (targets.includes(ticker)) {
+      totals[ticker] += num(row.live_price) * num(row.shares);
+    }
+  });
+
+  return targets.map(t => ({ name:t, value:totals[t] })).filter(x => x.value > 0);
+}
+
+function depositsCumulativeSeries(deposits){
+  const sorted = [...deposits].sort((a,b) => toDate(a.date) - toDate(b.date));
+  let ig = 0;
+  let t212 = 0;
+
+  return sorted.map(d => {
+    if (d.account === "IG ISA") ig += num(d.amount);
+    if (d.account === "Trade212") t212 += num(d.amount);
+
+    return {
+      label: toDate(d.date).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"2-digit" }),
+      ig,
+      t212,
+      combined: ig + t212
+    };
+  });
+}
+
+function incomeMonthlySeries(rows){
+  const bucket = {};
+  rows.forEach(r => {
+    const dt = toDate(r.date);
+    if (!dt) return;
+    const key = monthKeyFromDate(dt);
+    if (!bucket[key]) bucket[key] = 0;
+    bucket[key] += num(r.income_added || r.amount);
+  });
+
+  return Object.keys(bucket)
+    .sort()
+    .map(key => ({ key, label: monthLabelFromKey(key), value: bucket[key] }));
+}
+
+function incomeCumulativeSeries(monthly){
+  let running = 0;
+  return monthly.map(m => {
+    running += m.value;
+    return { label: m.label, value: running };
+  });
+}
+
+function dividendForecastSeries(rows){
+  const bucket = {};
+  rows.forEach(r => {
+    const dt = toDate(r.pay_date);
+    if (!dt) return;
+    const key = monthKeyFromDate(dt);
+    if (!bucket[key]) bucket[key] = 0;
+    bucket[key] += num(r.total_dividend || r.dividend_received);
+  });
+
+  return Object.keys(bucket)
+    .sort()
+    .map(key => ({ key, label: monthLabelFromKey(key), value: bucket[key] }));
+}
+
+function annualIncomeFromHoldings(holdings){
+  return holdings.reduce((sum, row) => sum + num(row.annual_dividend_total), 0);
+}
+
+function renderDepositTable(deposits){
+  const sorted = [...deposits].sort((a,b) => toDate(a.date) - toDate(b.date));
+  let running = 0;
+
+  document.getElementById("depositTableBody").innerHTML = sorted.map(d => {
+    running += num(d.amount);
+    return `
+      <tr>
+        <td>${toDate(d.date).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" })}</td>
+        <td>${d.account}</td>
+        <td>${fmtGBP(d.amount)}</td>
+        <td>${fmtGBP(running)}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+Chart.defaults.color = CONFIG.colors.text;
+Chart.defaults.font.family = "Inter, system-ui, sans-serif";
+Chart.defaults.borderColor = CONFIG.colors.grid;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.pointStyle = "circle";
+
+function createLineChart(id, labels, datasets){
+  chartRefs[id] = new Chart(document.getElementById(id), {
+    type: "line",
+    data: { labels, datasets },
+    options: {
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{ mode:"index", intersect:false },
+      plugins:{
+        legend:{ position:"top" },
+        tooltip:{ callbacks:{ label:(ctx)=> `${ctx.dataset.label}: ${fmtGBP(ctx.parsed.y)}` } }
+      },
+      scales:{
+        x:{ ticks:{ color:CONFIG.colors.muted, maxRotation:0 }, grid:{ display:false } },
+        y:{ beginAtZero:true, ticks:{ color:CONFIG.colors.muted, callback:(value)=> fmtGBP(value) } }
+      },
+      elements:{ line:{ tension:.34, borderWidth:3 }, point:{ radius:3, hoverRadius:5 } }
+    }
+  });
+}
+
+function createBarChart(id, labels, datasets, stacked = false){
+  chartRefs[id] = new Chart(document.getElementById(id), {
+    type: "bar",
+    data: { labels, datasets },
+    options: {
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:"top" },
+        tooltip:{ callbacks:{ label:(ctx)=> `${ctx.dataset.label}: ${fmtGBP(ctx.parsed.y)}` } }
+      },
+      scales:{
+        x:{ stacked, ticks:{ color:CONFIG.colors.muted, maxRotation:0 }, grid:{ display:false } },
+        y:{ stacked, beginAtZero:true, ticks:{ color:CONFIG.colors.muted, callback:(value)=> fmtGBP(value) } }
+      }
+    }
+  });
+}
+
+function createDoughnutChart(id, labels, data, colors){
+  chartRefs[id] = new Chart(document.getElementById(id), {
+    type: "doughnut",
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors,
+        borderColor: "rgba(6,12,20,1)",
+        borderWidth: 4,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive:true,
+      maintainAspectRatio:false,
+      cutout:"64%",
+      plugins:{
+        legend:{ position:"bottom" },
+        tooltip:{ callbacks:{ label:(ctx)=> `${ctx.label}: ${fmtGBP(ctx.parsed)}` } }
+      }
+    }
+  });
+}
+
+function createGoalGauge(id, annualIncome){
+  const remaining = Math.max(CONFIG.targetAnnualIncome - annualIncome, 0);
+
+  chartRefs[id] = new Chart(document.getElementById(id), {
+    type: "doughnut",
+    data: {
+      labels: ["Progress", "Remaining"],
+      datasets: [{
+        data: [annualIncome, remaining],
+        backgroundColor: [CONFIG.colors.green, "rgba(255,255,255,.08)"],
+        borderWidth: 0,
+        circumference: 180,
+        rotation: 270,
+        cutout: "74%"
+      }]
+    },
+    options: {
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{ display:false },
+        tooltip:{ callbacks:{ label:(ctx)=> `${ctx.label}: ${fmtGBP(ctx.parsed)}` } }
+      }
+    },
+    plugins: [{
+      id: "centerText",
+      afterDraw(chart){
+        const {ctx} = chart;
+        const x = chart.width / 2;
+        const y = chart.height / 1.32;
+        const pct = CONFIG.targetAnnualIncome ? (annualIncome / CONFIG.targetAnnualIncome) * 100 : 0;
+
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.fillStyle = CONFIG.colors.text;
+        ctx.font = "700 26px Orbitron";
+        ctx.fillText(fmtPct(pct), x, y - 8);
+        ctx.fillStyle = CONFIG.colors.muted;
+        ctx.font = "600 13px Inter";
+        ctx.fillText(`${fmtGBP(annualIncome)} / ${fmtGBP(CONFIG.targetAnnualIncome)}`, x, y + 18);
+        ctx.restore();
+      }
+    }]
+  });
+}
+
 async function fetchJson(url){
   const res = await fetch(`${url}?nocache=${Date.now()}`, { cache:"no-store" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -501,155 +808,91 @@ async function fetchJson(url){
 }
 
 async function boot(){
-  destroyCharts();
-  updateHeaderTime();
-
-  let holdings = [];
-  let incomeLog = [];
-  let dividends = [];
-  const errors = [];
-
   try {
-    holdings = await fetchJson(URLS.holdings);
-  } catch (e) {
-    errors.push(`Holdings failed: ${e.message}`);
-  }
+    destroyCharts();
+    updateHeaderTime();
+    setText("statusText", "Loading live sheets...");
+    setText("sourceText", "Source: Connecting...");
 
-  try {
-    incomeLog = await fetchJson(URLS.incomeLog);
-  } catch (e) {
-    errors.push(`IncomeLog failed: ${e.message}`);
-  }
+    const [holdings, incomeLog, dividends] = await Promise.all([
+      fetchJson(URLS.holdings),
+      fetchJson(URLS.incomeLog),
+      fetchJson(URLS.dividends)
+    ]);
 
-  try {
-    dividends = await fetchJson(URLS.dividends);
-  } catch (e) {
-    errors.push(`Dividends failed: ${e.message}`);
-  }
-
-  if (errors.length) {
-    setText("statusText", "Live sheet fetch failed");
-    setText("sourceText", errors.join(" | "));
-  } else {
     setText("statusText", "Live sheets connected");
     setText("sourceText", "Source: Holdings + IncomeLog + Dividends");
+
+    const deposits = [...CONFIG.manualDeposits];
+    const igTotal = deposits.filter(d => d.account === "IG ISA").reduce((a,b)=>a+num(b.amount),0);
+    const t212Total = deposits.filter(d => d.account === "Trade212").reduce((a,b)=>a+num(b.amount),0);
+    const combinedDeposits = igTotal + t212Total;
+
+    const annualIncome = annualIncomeFromHoldings(holdings);
+    const goalPct = CONFIG.targetAnnualIncome ? (annualIncome / CONFIG.targetAnnualIncome) * 100 : 0;
+
+    setText("igDepositsValue", fmtGBP(igTotal));
+    setText("t212DepositsValue", fmtGBP(t212Total));
+    setText("combinedDepositsValue", fmtGBP(combinedDeposits));
+    setText("annualIncomeValue", fmtGBP(annualIncome));
+    setText("goalProgressValue", fmtPct(goalPct));
+
+    const cumulative = depositsCumulativeSeries(deposits);
+    createLineChart("cumulativeChart",
+      cumulative.map(x => x.label),
+      [
+        { label:"IG ISA", data:cumulative.map(x => x.ig), borderColor:CONFIG.colors.cyan, backgroundColor:"rgba(70,215,255,.12)", fill:false },
+        { label:"Trade212", data:cumulative.map(x => x.t212), borderColor:CONFIG.colors.coral, backgroundColor:"rgba(255,127,110,.12)", fill:false },
+        { label:"Combined", data:cumulative.map(x => x.combined), borderColor:CONFIG.colors.green, backgroundColor:"rgba(70,255,179,.10)", fill:false }
+      ]
+    );
+
+    createDoughnutChart("accountSplitChart", ["IG ISA", "Trade212"], [igTotal, t212Total], [CONFIG.colors.cyan, CONFIG.colors.coral]);
+
+    const pillars = pillarAllocation(holdings);
+    createDoughnutChart(
+      "pillarChart",
+      pillars.length ? pillars.map(x => x.name) : ["No live pillar data"],
+      pillars.length ? pillars.map(x => x.value) : [1],
+      pillars.length ? [CONFIG.colors.cyan, CONFIG.colors.coral, CONFIG.colors.violet, CONFIG.colors.amber] : ["rgba(255,255,255,.12)"]
+    );
+
+    const topHoldings = safeTopHoldings(holdings, 8);
+    createBarChart(
+      "holdingValueChart",
+      topHoldings.length ? topHoldings.map(x => x.name) : ["No live holding data"],
+      [{ label:"Holding Value", data: topHoldings.length ? topHoldings.map(x => x.value) : [0], backgroundColor:"rgba(122,164,255,.78)", borderRadius:10 }]
+    );
+
+    const incomeMonthly = incomeMonthlySeries(incomeLog);
+    createBarChart(
+      "incomeMonthlyChart",
+      incomeMonthly.length ? incomeMonthly.map(x => x.label) : ["No live income data"],
+      [{ label:"Income Received", data: incomeMonthly.length ? incomeMonthly.map(x => x.value) : [0], backgroundColor:"rgba(255,209,102,.76)", borderRadius:10 }]
+    );
+
+    const incomeCumulative = incomeCumulativeSeries(incomeMonthly);
+    createLineChart(
+      "incomeCumulativeChart",
+      incomeCumulative.length ? incomeCumulative.map(x => x.label) : ["No live income data"],
+      [{ label:"Cumulative Income", data: incomeCumulative.length ? incomeCumulative.map(x => x.value) : [0], borderColor:CONFIG.colors.green, backgroundColor:"rgba(70,255,179,.10)", fill:false }]
+    );
+
+    const dividendForecast = dividendForecastSeries(dividends);
+    createBarChart(
+      "dividendForecastChart",
+      dividendForecast.length ? dividendForecast.map(x => x.label) : ["No live dividend data"],
+      [{ label:"Dividend Forecast", data: dividendForecast.length ? dividendForecast.map(x => x.value) : [0], backgroundColor:"rgba(141,134,255,.76)", borderRadius:10 }]
+    );
+
+    createGoalGauge("goalGaugeChart", annualIncome);
+    renderDepositTable(deposits);
+
+  } catch (err) {
+    console.error(err);
+    setText("statusText", "Live load failed");
+    setText("sourceText", String(err.message || err));
   }
-
-  const deposits = [...CONFIG.manualDeposits];
-  const igTotal = deposits.filter(d => d.account === "IG ISA").reduce((a,b)=>a+num(b.amount),0);
-  const t212Total = deposits.filter(d => d.account === "Trade212").reduce((a,b)=>a+num(b.amount),0);
-  const combinedDeposits = igTotal + t212Total;
-
-  const annualIncome = annualIncomeFromHoldings(holdings);
-  const goalPct = CONFIG.targetAnnualIncome ? (annualIncome / CONFIG.targetAnnualIncome) * 100 : 0;
-
-  setText("igDepositsValue", fmtGBP(igTotal));
-  setText("t212DepositsValue", fmtGBP(t212Total));
-  setText("combinedDepositsValue", fmtGBP(combinedDeposits));
-  setText("annualIncomeValue", fmtGBP(annualIncome));
-  setText("goalProgressValue", fmtPct(goalPct));
-
-  const cumulative = depositsCumulativeSeries(deposits);
-  createLineChart("cumulativeChart",
-    cumulative.map(x => x.label),
-    [
-      {
-        label:"IG ISA",
-        data:cumulative.map(x => x.ig),
-        borderColor:CONFIG.colors.cyan,
-        backgroundColor:"rgba(70,215,255,.12)",
-        fill:false
-      },
-      {
-        label:"Trade212",
-        data:cumulative.map(x => x.t212),
-        borderColor:CONFIG.colors.coral,
-        backgroundColor:"rgba(255,127,110,.12)",
-        fill:false
-      },
-      {
-        label:"Combined",
-        data:cumulative.map(x => x.combined),
-        borderColor:CONFIG.colors.green,
-        backgroundColor:"rgba(70,255,179,.10)",
-        fill:false
-      }
-    ]
-  );
-
-  createDoughnutChart(
-    "accountSplitChart",
-    ["IG ISA", "Trade212"],
-    [igTotal, t212Total],
-    [CONFIG.colors.cyan, CONFIG.colors.coral]
-  );
-
-  const pillars = pillarAllocation(holdings);
-  createDoughnutChart(
-    "pillarChart",
-    pillars.length ? pillars.map(x => x.name) : ["No live pillar data"],
-    pillars.length ? pillars.map(x => x.value) : [1],
-    pillars.length
-      ? [CONFIG.colors.cyan, CONFIG.colors.coral, CONFIG.colors.violet, CONFIG.colors.amber]
-      : ["rgba(255,255,255,.12)"]
-  );
-
-  const topHoldings = safeTopHoldings(holdings, 8);
-  createBarChart(
-    "holdingValueChart",
-    topHoldings.length ? topHoldings.map(x => x.name) : ["No live holding data"],
-    [{
-      label:"Holding Value",
-      data: topHoldings.length ? topHoldings.map(x => x.value) : [0],
-      backgroundColor:"rgba(122,164,255,.78)",
-      borderRadius:10
-    }]
-  );
-
-  const incomeMonthly = incomeMonthlySeries(incomeLog);
-  createBarChart(
-    "incomeMonthlyChart",
-    incomeMonthly.length ? incomeMonthly.map(x => x.label) : ["No live income data"],
-    [{
-      label:"Income Received",
-      data: incomeMonthly.length ? incomeMonthly.map(x => x.value) : [0],
-      backgroundColor:"rgba(255,209,102,.76)",
-      borderRadius:10
-    }]
-  );
-
-  const incomeCumulative = incomeCumulativeSeries(incomeMonthly);
-  createLineChart(
-    "incomeCumulativeChart",
-    incomeCumulative.length ? incomeCumulative.map(x => x.label) : ["No live income data"],
-    [{
-      label:"Cumulative Income",
-      data: incomeCumulative.length ? incomeCumulative.map(x => x.value) : [0],
-      borderColor:CONFIG.colors.green,
-      backgroundColor:"rgba(70,255,179,.10)",
-      fill:false
-    }]
-  );
-
-  const dividendForecast = dividendForecastSeries(dividends);
-  createBarChart(
-    "dividendForecastChart",
-    dividendForecast.length ? dividendForecast.map(x => x.label) : ["No live dividend data"],
-    [{
-      label:"Dividend Forecast",
-      data: dividendForecast.length ? dividendForecast.map(x => x.value) : [0],
-      backgroundColor:"rgba(141,134,255,.76)",
-      borderRadius:10
-    }]
-  );
-
-  createGoalGauge("goalGaugeChart", annualIncome);
-  renderDepositTable(deposits);
-
-  console.log("Holdings rows:", holdings.length);
-  console.log("IncomeLog rows:", incomeLog.length);
-  console.log("Dividends rows:", dividends.length);
-  console.log("Errors:", errors);
 }
 
 boot();
